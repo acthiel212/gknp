@@ -1,0 +1,25 @@
+#ifndef OPENMM_CUDAGKNPKERNELSOURCES_H_
+#define OPENMM_CUDAGKNPKERNELSOURCES_H_
+
+/* -------------------------------------------------------------------------- *
+ *                                   OpenMM-GKNP                            *
+ * -------------------------------------------------------------------------- */
+
+#include <string>
+
+namespace GKNPPlugin {
+
+/**
+ * This class is a central holding place for the source code of Cuda kernels.
+ * The CMake build script inserts declarations into it based on the .cl files in the
+ * kernels subfolder.
+ */
+
+class CudaGKNPKernelSources {
+public:
+@CL_FILE_DECLARATIONS@
+};
+
+} // namespace GKNPPlugin
+
+#endif /*OPENMM_CUDAGKNPKERNELSOURCES_H_*/

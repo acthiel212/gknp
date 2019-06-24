@@ -1,0 +1,9 @@
+/* -------------------------------------------------------------------------- *
+ *                                   OpenMM-AGBNP                            *
+ * -------------------------------------------------------------------------- */
+
+#include "CudaGKNPKernelSources.h"
+
+using namespace GKNPPlugin;
+using namespace std;
+
