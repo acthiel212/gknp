@@ -734,6 +734,7 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
       
       map<string, string> replacements;
       string file, kernel_name;
+      CUfunction kernel;
       CUmodule module;
       int index;
 
@@ -741,7 +742,6 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
       if(!hasCreatedKernels){
 	if(verbose) cout << "compiling " << kernel_name << " ... ";
 	file = cu.replaceStrings(CudaGKNPKernelSources::GVolResetTree, replacements);
-	//TODO: No Cuda analog
 	module = cu.createModule(file, defines);
 	//reset tree kernel
 	resetTreeKernel = cu.getKernel(module, kernel_name.c_str());
@@ -750,7 +750,7 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
       kernel = resetTreeKernel;
       index = 0;
       kernel.setArg<int>(index++, gtree->num_sections);
-      //TODO: cu.hpp classes?
+      //TODO: cl.hpp classes?
       kernel.setArg<cl::Buffer>(index++, gtree->ovTreePointer->getDeviceBuffer());
       kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreePointer->getDeviceBuffer());
       kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreeSize->getDeviceBuffer());
@@ -778,7 +778,7 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
       kernel_name = "resetBuffer";
       if(!hasCreatedKernels){
 	if(verbose) cout << "compiling " << kernel_name << " ... ";
-	resetBufferKernel = cl::Kernel(program, kernel_name.c_str());
+	resetBufferKernel = cu.getKernel(program, kernel_name.c_str());
 	if(verbose) cout << " done. " << endl;
       }
       index = 0;
@@ -796,7 +796,7 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
       kernel_name = "resetSelfVolumes";
       if(!hasCreatedKernels){
 	if(verbose) cout << "compiling " << kernel_name << " ... ";
-	resetSelfVolumesKernel = cl::Kernel(program, kernel_name.c_str());
+	resetSelfVolumesKernel = cu.getKernel(program, kernel_name.c_str());
 	if(verbose) cout << " done. " << endl;
       }
       index = 0;
@@ -822,7 +822,6 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
     {
       //Tree construction 
       CUmodule module;
-      cl::Kernel kernel;
       string kernel_name;
       int index;
 
@@ -1116,12 +1115,11 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
 	replacements["KERNEL_NAME"] = kernel_name;
 
 	if(verbose) cout << "compiling GVolOverlapTree ..." ;
-	//TODO: No Cuda analog
-	program = cu.createProgram(InitOverlapTreeSrc, pairValueDefines);
+	program = cu.createModule(InitOverlapTreeSrc, pairValueDefines);
 	if(verbose) cout << " done. " << endl;
 	
 	if(verbose) cout << "compiling " << kernel_name << " ... ";
-	InitOverlapTreeKernel_1body_1 = cl::Kernel(program, kernel_name.c_str());
+	InitOverlapTreeKernel_1body_1 = cu.getKernel(program, kernel_name.c_str());
 	if(verbose) cout << " done. " << endl;
       }
       reset_tree_size = 1;
@@ -1161,10 +1159,9 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
 
       if(!hasCreatedKernels){
 	if(verbose) cout << "compiling " << kernel_name << " ... ";
-	//TODO: No Cuda analog
-	program = cu.createProgram(InitOverlapTreeSrc, pairValueDefines);
+	program = cu.createModule(InitOverlapTreeSrc, pairValueDefines);
 	if(verbose) cout << " done. " << endl;
-	InitOverlapTreeKernel_1body_2 = cl::Kernel(program, kernel_name.c_str());
+	InitOverlapTreeKernel_1body_2 = cu.getKernel(program, kernel_name.c_str());
       }
       reset_tree_size = 0;
       index = 0;
@@ -1208,7 +1205,7 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
       
       if(!hasCreatedKernels){
 	if(verbose) cout << "compiling " << kernel_name << " ... ";
-	InitOverlapTreeCountKernel = cl::Kernel(program, kernel_name.c_str());
+	InitOverlapTreeCountKernel = cu.getKernel(program, kernel_name.c_str());
 	if(verbose) cout << " done. " << endl;
       }
       index = 0;
@@ -1236,7 +1233,7 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
 	kernel_name = "reduceovCountBuffer";
 	replacements["KERNEL_NAME"] = kernel_name;
 	if(verbose) cout << "compiling " << kernel_name << " ... ";
-	reduceovCountBufferKernel = cl::Kernel(program, kernel_name.c_str());
+	reduceovCountBufferKernel = cu.getKernel(program, kernel_name.c_str());
 	if(verbose) cout << " done. " << endl;
       }
       index = 0;
@@ -1262,7 +1259,7 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
 	}
 	replacements["KERNEL_NAME"] = kernel_name;
 	if(verbose) cout << "compiling " << kernel_name << " ... ";
-	InitOverlapTreeKernel = cl::Kernel(program, kernel_name.c_str());
+	InitOverlapTreeKernel = cu.getKernel(program, kernel_name.c_str());
 	if(verbose) cout << " done. " << endl;
       }
       index = 0;
@@ -1304,9 +1301,8 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
       if(!hasCreatedKernels){
 	kernel_name = "resetComputeOverlapTree";
 	if(verbose) cout << "compiling " << kernel_name << " ... ";
-    //TODO: No Cuda analog
-	program = cu.createProgram(InitOverlapTreeSrc, pairValueDefines);
-	resetComputeOverlapTreeKernel = cl::Kernel(program, kernel_name.c_str());
+	program = cu.createModule(InitOverlapTreeSrc, pairValueDefines);
+	resetComputeOverlapTreeKernel = cu.getKernel(program, kernel_name.c_str());
 	if(verbose) cout << " done. " << endl;
       }
       index = 0;
@@ -1325,7 +1321,7 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
 	kernel_name = "ComputeOverlapTree_1pass";
 	replacements["KERNEL_NAME"] = kernel_name;
 	if(verbose) cout << "compiling " << kernel_name << " ... ";
-	ComputeOverlapTree_1passKernel = cl::Kernel(program, kernel_name.c_str());
+	ComputeOverlapTree_1passKernel = cu.getKernel(program, kernel_name.c_str());
 	if(verbose) cout << " done. " << endl;
       }
       index = 0;
@@ -1372,7 +1368,7 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
 	kernel_name = "SortOverlapTree2body";
 	replacements["KERNEL_NAME"] = kernel_name;
 	if(verbose) cout << "compiling " << kernel_name << " ... ";
-	SortOverlapTree2bodyKernel = cl::Kernel(program, kernel_name.c_str());
+	SortOverlapTree2bodyKernel = cu.getKernel(program, kernel_name.c_str());
 	if(verbose) cout << " done. " << endl;
       }
       index = 0;
@@ -1396,7 +1392,7 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
 	kernel_name = "ResetRescanOverlapTree";
 	replacements["KERNEL_NAME"] = kernel_name;
 	if(verbose) cout << "compiling " << kernel_name << " ... ";
-	ResetRescanOverlapTreeKernel = cl::Kernel(program, kernel_name.c_str());
+	ResetRescanOverlapTreeKernel = cu.getKernel(program, kernel_name.c_str());
 	if(verbose) cout << " done. " << endl;
       }
       index = 0;
@@ -1413,7 +1409,7 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
 	kernel_name = "InitRescanOverlapTree";
 	replacements["KERNEL_NAME"] = kernel_name;
 	if(verbose) cout << "compiling " << kernel_name << " ... ";
-	InitRescanOverlapTreeKernel = cl::Kernel(program, kernel_name.c_str());
+	InitRescanOverlapTreeKernel = cu.getKernel(program, kernel_name.c_str());
 	if(verbose) cout << " done. " << endl;
       }
       index = 0;
@@ -1431,7 +1427,7 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
 	kernel_name = "RescanOverlapTree";
 	replacements["KERNEL_NAME"] = kernel_name;
 	if(verbose) cout << "compiling " << kernel_name << " ... ";
-	RescanOverlapTreeKernel = cl::Kernel(program, kernel_name.c_str());
+	RescanOverlapTreeKernel = cu.getKernel(program, kernel_name.c_str());
 	if(verbose) cout << " done. " << endl;
       }
       index = 0;
@@ -1467,7 +1463,7 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
       if(!hasCreatedKernels){
 	kernel_name = "InitOverlapTreeGammas_1body";
 	if(verbose) cout << "compiling " << kernel_name << " ... ";
-	InitOverlapTreeGammasKernel_1body_W = cl::Kernel(program, kernel_name.c_str());
+	InitOverlapTreeGammasKernel_1body_W = cu.getKernel(program, kernel_name.c_str());
 	if(verbose) cout << " done. " << endl;
       }
       index = 0;
@@ -1492,7 +1488,7 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
 	kernel_name = "RescanOverlapTreeGammas";
 	replacements["KERNEL_NAME"] = kernel_name;
 	if(verbose) cout << "compiling " << kernel_name << "... ";
-	RescanOverlapTreeGammasKernel_W = cl::Kernel(program, kernel_name.c_str());
+	RescanOverlapTreeGammasKernel_W = cu.getKernel(program, kernel_name.c_str());
 	if(verbose) cout << " done. " << endl;
       }
       index = 0;
@@ -1532,7 +1528,7 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
       map<string, string> replacements;
       CUmodule module;
       string kernel_name;
-      cl::Kernel kernel;
+      CUfunction kernel;
       string file;
       
       kernel_name = "computeSelfVolumes";
@@ -1540,12 +1536,12 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
 	file = cu.replaceStrings(CudaGKNPKernelSources::GVolSelfVolume, replacements);
 	if(verbose) cout << "compiling file GVolSelfVolume.cu ... ";
 	defines["DO_SELF_VOLUMES"] = "1";
-    //TODO: No Cuda analog
-	program = cu.createProgram(file, defines);
+
+	program = cu.createModule(file, defines);
 	//accumulates self volumes and volume energy function (and forces)
 	//with the energy-per-unit-volume parameters (Gamma1i) currently loaded into tree
 	if(verbose) cout << "compiling kernel " << kernel_name << " ... ";
-	computeSelfVolumesKernel = cl::Kernel(program, kernel_name.c_str());
+	computeSelfVolumesKernel = cu.getKernel(program, kernel_name.c_str());
 	if(verbose) cout << " done. " << endl;
       }
       kernel = computeSelfVolumesKernel;
@@ -1606,15 +1602,15 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
       if(!hasCreatedKernels){
 	file = CudaGKNPKernelSources::GVolReduceTree;
 	if(verbose) cout << "compiling file GVolReduceTree.cu ... ";
-    //TODO: No Cuda analog
-	program = cu.createProgram(file, defines);
+
+	program = cu.createModule(file, defines);
       
 	if(verbose) cout << "compiling " << kernel_name << " ... ";
-	reduceSelfVolumesKernel_buffer = cl::Kernel(program, kernel_name.c_str());
+	reduceSelfVolumesKernel_buffer = cu.getKernel(program, kernel_name.c_str());
 	if(verbose) cout << " done. " << endl;
       }
       if(verbose) cout << "setting arguments for kernel" << kernel_name << " ... " << endl;
-      cl::Kernel kernel = reduceSelfVolumesKernel_buffer;
+      CUfunction kernel = reduceSelfVolumesKernel_buffer;
       int index = 0;
       kernel.setArg<int>(index++, cu.getNumAtoms());
       kernel.setArg<int>(index++, cu.getPaddedNumAtoms());
@@ -1633,7 +1629,7 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
       kernel_name = "updateSelfVolumesForces";
       if(!hasCreatedKernels){
 	if(verbose) cout << "compiling " << kernel_name << " ... ";
-	updateSelfVolumesForcesKernel = cl::Kernel(program, kernel_name.c_str());
+	updateSelfVolumesForcesKernel = cu.getKernel(program, kernel_name.c_str());
 	if(verbose) cout << " done. " << endl;
       }
       if(verbose) cout << "setting arguments for kernel" << kernel_name << " ... " << endl;
@@ -1685,13 +1681,13 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
       string file, kernel_name;
       CUmodule module;
       int index;
-      cl::Kernel kernel;
+      CUfunction kernel;
 
       if(!hasCreatedKernels){
 	if(verbose) cout << "compiling file GKNPBornRadii.cl" << " ... ";
 	file = cu.replaceStrings(CudaGKNPKernelSources::GKNPBornRadii, replacements);
-    //TODO: No Cuda analog
-	program = cu.createProgram(file, defines);
+
+	program = cu.createModule(file, defines);
       }
       int itable = 21;
       int num_values = 4*i4_table_size;
@@ -1702,7 +1698,7 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
       kernel_name = "testLookup";
       // testLookup kernel
       if(!hasCreatedKernels){
-	testLookupKernel = cl::Kernel(program, kernel_name.c_str());
+	testLookupKernel = cu.getKernel(program, kernel_name.c_str());
 	if(verbose) cout << " done. " << endl;
       }
       index = 0;
@@ -1724,7 +1720,7 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
       if(!hasCreatedKernels){
 	kernel_name = "initBornRadii";
 	if(verbose) cout << "compiling " << kernel_name << " ... ";
-	initBornRadiiKernel = cl::Kernel(program, kernel_name.c_str());
+	initBornRadiiKernel = cu.getKernel(program, kernel_name.c_str());
 	if(verbose) cout << " done. " << endl;
       }
       index = 0;
@@ -1748,7 +1744,7 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
       if(!hasCreatedKernels){
 	if(verbose) cout << "compiling " << kernel_name << " ... ";
 	//inverseBornRadii kernel
-	inverseBornRadiiKernel = cl::Kernel(program, kernel_name.c_str());
+	inverseBornRadiiKernel = cu.getKernel(program, kernel_name.c_str());
 	if(verbose) cout << " done. " << endl;
       }
       index = 0;
@@ -1785,7 +1781,7 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
 	kernel_name = "reduceBornRadii";
 	if(verbose) cout << "compiling " << kernel_name << " ... ";
 	//reduceBornRadii kernel
-	reduceBornRadiiKernel = cl::Kernel(program, kernel_name.c_str());
+	reduceBornRadiiKernel = cu.getKernel(program, kernel_name.c_str());
 	if(verbose) cout << " done. " << endl;
       }
       index = 0;
@@ -1803,7 +1799,7 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
 	kernel_name = "VdWEnergy";
 	if(verbose) cout << "compiling " << kernel_name << " ... ";
 	//reduceBornRadii kernel
-	VdWEnergyKernel = cl::Kernel(program, kernel_name.c_str());
+	VdWEnergyKernel = cu.getKernel(program, kernel_name.c_str());
 	if(verbose) cout << " done. " << endl;
       }
       index = 0;
@@ -1819,7 +1815,7 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
 	kernel_name = "initVdWGBDerBorn";
 	if(verbose) cout << "compiling " << kernel_name << " ... ";
 	//initVdWGBDerBorn kernel
-	initVdWGBDerBornKernel = cl::Kernel(program, kernel_name.c_str());
+	initVdWGBDerBornKernel = cu.getKernel(program, kernel_name.c_str());
 	if(verbose) cout << " done. " << endl;
       }
       index = 0;
@@ -1843,7 +1839,7 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
       if(!hasCreatedKernels){
 	if(verbose) cout << "compiling " << kernel_name << " ... ";
 	// VdWGBDerBorn kernel
-	VdWGBDerBornKernel = cl::Kernel(program, kernel_name.c_str());
+	VdWGBDerBornKernel = cu.getKernel(program, kernel_name.c_str());
 	if(verbose) cout << " done. " << endl;
       }
       index = 0;
@@ -1887,7 +1883,7 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
 	kernel_name = "reduceVdWGBDerBorn";
 	if(verbose) cout << "compiling " << kernel_name << " ... ";
 	//reduceVdWGBDerBorn kernel
-	reduceVdWGBDerBornKernel = cl::Kernel(program, kernel_name.c_str());
+	reduceVdWGBDerBornKernel = cu.getKernel(program, kernel_name.c_str());
 	if(verbose) cout << " done. " << endl;
       }
       index = 0;
@@ -1941,19 +1937,19 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
       string file, kernel_name;
       CUmodule module;
       int index;
-      cl::Kernel kernel;
+      CUfunction kernel;
 
       kernel_name = "initGBEnergy";
       if(!hasCreatedKernels){
 	if(verbose) cout << "compiling GKNPGBEnergy.cu ... ";
 	file = cu.replaceStrings(CudaGKNPKernelSources::GKNPGBEnergy, replacements);
-    //TODO: No Cuda analog
-	program = cu.createProgram(file, defines);
+
+	program = cu.createModule(file, defines);
 	if(verbose) cout << " done. " << endl;
 
 	//initGBEnergy kernel
 	if(verbose) cout << "compiling kernel " << kernel_name << " ... " ;
-	initGBEnergyKernel = cl::Kernel(program, kernel_name.c_str());
+	initGBEnergyKernel = cu.getKernel(program, kernel_name.c_str());
       }
       index = 0;
       if(verbose) cout << "setting arguments for kernel" << kernel_name << " ... " << endl;
@@ -1975,7 +1971,7 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
       }
       if(!hasCreatedKernels){
 	if(verbose) cout << "compiling kernel " << kernel_name << " ... " ;
-	GBPairEnergyKernel = cl::Kernel(program, kernel_name.c_str());
+	GBPairEnergyKernel = cu.getKernel(program, kernel_name.c_str());
       }
       index = 0;
       kernel = GBPairEnergyKernel;
@@ -2007,7 +2003,7 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
       if(!hasCreatedKernels){
 	kernel_name = "reduceGBEnergy";
 	if(verbose) cout << "compiling kernel " << kernel_name << " ... " ;
-	reduceGBEnergyKernel = cl::Kernel(program, kernel_name.c_str());
+	reduceGBEnergyKernel = cu.getKernel(program, kernel_name.c_str());
       }
       index = 0;
       kernel = reduceGBEnergyKernel;
@@ -2067,7 +2063,7 @@ double CudaCalcGKNPForceKernel::executeGVolSA(ContextImpl& context, bool include
   if(verbose_level > 1) cout << "Executing InitOverlapTreeCountKernel" << endl;
   if(nb_reassign){
     int index = InitOverlapTreeCountKernel_first_nbarg;
-    cl::Kernel kernel = InitOverlapTreeCountKernel;
+    CUfunction kernel = InitOverlapTreeCountKernel;
     kernel.setArg<cl::Buffer>(index++, nb.getInteractingTiles().getDeviceBuffer());
     kernel.setArg<cl::Buffer>(index++, nb.getInteractionCount().getDeviceBuffer());
     kernel.setArg<cl::Buffer>(index++, nb.getInteractingAtoms().getDeviceBuffer());
@@ -2144,7 +2140,7 @@ double CudaCalcGKNPForceKernel::executeGVolSA(ContextImpl& context, bool include
   if(verbose_level > 1) cout << "Executing InitOverlapTreeKernel" << endl;
   if(nb_reassign){
     int index = InitOverlapTreeKernel_first_nbarg;
-    cl::Kernel kernel = InitOverlapTreeKernel;
+    CUfunction kernel = InitOverlapTreeKernel;
     kernel.setArg<cl::Buffer>(index++, nb.getInteractingTiles().getDeviceBuffer());
     kernel.setArg<cl::Buffer>(index++, nb.getInteractionCount().getDeviceBuffer());
     kernel.setArg<cl::Buffer>(index++, nb.getInteractingAtoms().getDeviceBuffer());
