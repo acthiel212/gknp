@@ -15,21 +15,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e26fc5f2-7adc-418c-acb9-ef4df5ff509c" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/../CMakeLists.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../gaussvol/gaussvol.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../gaussvol/gaussvol.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../openmmapi/include/GKNPForce.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../openmmapi/include/GKNPKernels.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../openmmapi/include/internal/GKNPForceImpl.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../openmmapi/include/internal/windowsExportGKNP.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../openmmapi/src/GKNPForce.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../openmmapi/src/GKNPForceImpl.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../platforms/reference/CMakeLists.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../platforms/reference/include/ReferenceGKNPKernelFactory.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../platforms/reference/include/ReferenceGKNPKernels.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../platforms/reference/src/ReferenceGKNPKernelFactory.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../platforms/reference/src/ReferenceGKNPKernels.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/platforms/cuda/src/CudaGKNPKernels.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/platforms/cuda/src/CudaGKNPKernels.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/platforms/cuda/src/kernels/GVolOverlapTree.cl" beforeDir="false" afterPath="$PROJECT_DIR$/platforms/cuda/src/kernels/GVolOverlapTree.cl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/platforms/cuda/src/kernels/GVolReduceTree.cl" beforeDir="false" afterPath="$PROJECT_DIR$/platforms/cuda/src/kernels/GVolReduceTree.cl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/platforms/cuda/src/kernels/GVolResetTree.cl" beforeDir="false" afterPath="$PROJECT_DIR$/platforms/cuda/src/kernels/GVolResetTree.cl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/platforms/cuda/src/kernels/GVolSelfVolume.cl" beforeDir="false" afterPath="$PROJECT_DIR$/platforms/cuda/src/kernels/GVolSelfVolume.cl" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
     <ignored path="$PROJECT_DIR$/CMakeFiles/" />
@@ -45,44 +37,39 @@
   <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/platforms/cuda/src/CudaGKNPKernels.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="15">
-              <caret line="2289" selection-start-line="2289" selection-end-line="2289" />
+            <state relative-caret-position="1559">
+              <caret line="1658" column="37" selection-start-line="1658" selection-start-column="37" selection-end-line="1658" selection-end-column="37" />
               <folding>
                 <element signature="e#1122#1655#1" />
                 <element signature="e#1658#1877#0" />
                 <element signature="e#1906#6114#0" />
+                <element signature="e#6116#7629#0" />
                 <element signature="e#7633#13934#0" />
                 <element signature="e#13937#14808#0" />
                 <element signature="e#14963#20657#0" />
                 <element signature="e#20660#21056#0" />
+                <element signature="e#150322#163177#0" />
+                <element signature="e#163179#164501#0" />
+                <marker date="1561498403000" expanded="false" signature="20879:29436" ph="{...}" />
+                <marker date="1561498403000" expanded="false" signature="29691:34778" ph="{...}" />
+                <marker date="1561498403000" expanded="false" signature="35031:71941" ph="{...}" />
+                <marker date="1561498403000" expanded="false" signature="72196:76156" ph="{...}" />
+                <marker date="1561498403000" expanded="false" signature="76430:79772" ph="{...}" />
+                <marker date="1561498403000" expanded="false" signature="80096:93323" ph="{...}" />
+                <marker date="1561498403000" expanded="false" signature="93611:100094" ph="{...}" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/platforms/cuda/src/CudaGKNPKernels.h">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="151">
-              <caret line="22" column="62" selection-start-line="22" selection-start-column="62" selection-end-line="22" selection-end-column="62" />
-              <folding>
-                <element signature="e#1855#2039#0" />
-                <element signature="e#2119#2462#0" />
-                <element signature="e#2557#2751#0" />
-                <element signature="e#2845#8220#1" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/platforms/cuda/src/kernels/GVolOverlapTree.cl">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-5921">
-              <caret line="82" column="1" lean-forward="true" selection-start-line="82" selection-start-column="1" selection-end-line="82" selection-end-column="1" />
+            <state relative-caret-position="281">
+              <caret line="320" selection-start-line="320" selection-end-line="320" selection-end-column="23" />
               <folding>
                 <element signature="e#301#686#0" />
                 <element signature="e#687#779#0" />
@@ -93,44 +80,77 @@
           </provider>
         </entry>
       </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/platforms/cuda/src/kernels/GVolReduceTree.cl">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="124">
+              <caret line="65" column="2" selection-start-line="65" selection-start-column="2" selection-end-line="65" selection-end-column="63" />
+              <folding>
+                <element signature="e#2509#3300#0" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/platforms/cuda/src/kernels/GVolResetTree.cl">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="180">
+              <caret line="12" selection-start-line="12" selection-end-line="12" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/platforms/cuda/src/kernels/GVolSelfVolume.cl">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="150">
+              <caret line="10" column="11" selection-start-line="10" selection-start-column="8" selection-end-line="10" selection-end-column="11" />
+              <folding>
+                <element signature="e#7522#13778#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
     </leaf>
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>cl.hpp</find>
-      <find>cl::</find>
-      <find>cl::Program</find>
-      <find>cl::Kernel kernel;</find>
-      <find>cl</find>
-      <find>float4</find>
-      <find>cl_</find>
-      <find>mm_</find>
-      <find>MS</find>
-      <find>MS particle</find>
-      <find>TODO</find>
-      <find>cl[^a-zA-z\d]</find>
-      <find>cl.</find>
-      <find>Energy</find>
+      <find>createPr</find>
+      <find>resettreekernel</find>
+      <find>createProgram</find>
+      <find>cl::kernel</find>
       <find>cl::buffer</find>
-      <find>class buffer</find>
-      <find>kernel.setArg</find>
-      <find>cl[^a-zA-Z\d]</find>
-      <find>Born</find>
-      <find>GVOLOVER</find>
-      <find>posq1</find>
-      <find>uint</find>
-      <find>__attr</find>
-      <find>void</find>
-      <find>__device__</find>
-      <find>barrier</find>
-      <find>mem_</find>
+      <find>execute</find>
+      <find>setArg</find>
+      <find>resetBufferKernel</find>
+      <find>executeKernel</find>
+      <find>cl[^a-zA-z\d]</find>
+      <find>todo</find>
+      <find>CL</find>
+      <find>__syncthreads(CLK_LOCAL_MEM_FENCE</find>
+      <find>__syncthreads(</find>
+      <find>CLK_GLOBAL_MEM_FENCE</find>
+      <find>CLK_LOCAL_MEM_FENCE</find>
+      <find>__kernel</find>
+      <find>__</find>
+      <find>__local</find>
+      <find>syncthr</find>
+      <find>cl:</find>
+      <find>CLK</find>
+      <find>E | C</find>
       <find>real4</find>
-      <find>mem_fe</find>
-      <find>get_</find>
+      <find>(</find>
+      <find>barrier</find>
+      <find>uint</find>
+      <find>barr</find>
+      <find>|</find>
+      <find>__a</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
@@ -144,15 +164,15 @@
         <option value="$PROJECT_DIR$/platforms/cuda/src/CudaGKNPKernelSources.cpp.in" />
         <option value="$PROJECT_DIR$/platforms/cuda/src/CudaGKNPKernels.h" />
         <option value="$PROJECT_DIR$/platforms/cuda/src/kernels/GVolReduceTree.cl" />
+        <option value="$PROJECT_DIR$/platforms/cuda/src/kernels/GVolOverlapTree.cl" />
+        <option value="$PROJECT_DIR$/platforms/cuda/src/CudaGKNPKernels.cpp" />
         <option value="$PROJECT_DIR$/platforms/cuda/src/kernels/GVolResetTree.cl" />
         <option value="$PROJECT_DIR$/platforms/cuda/src/kernels/GVolSelfVolume.cl" />
-        <option value="$PROJECT_DIR$/platforms/cuda/src/CudaGKNPKernels.cpp" />
-        <option value="$PROJECT_DIR$/platforms/cuda/src/kernels/GVolOverlapTree.cl" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="5" />
+    <option name="x" value="18" />
     <option name="y" value="23" />
     <option name="width" value="1843" />
     <option name="height" value="1053" />
@@ -179,7 +199,22 @@
               <item name="gknp" type="b2602c69:ProjectViewProjectNode" />
               <item name="gknp" type="462c0819:PsiDirectoryNode" />
               <item name="platforms" type="462c0819:PsiDirectoryNode" />
-              <item name="reference" type="462c0819:PsiDirectoryNode" />
+              <item name="cuda" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="gknp" type="b2602c69:ProjectViewProjectNode" />
+              <item name="gknp" type="462c0819:PsiDirectoryNode" />
+              <item name="platforms" type="462c0819:PsiDirectoryNode" />
+              <item name="cuda" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="gknp" type="b2602c69:ProjectViewProjectNode" />
+              <item name="gknp" type="462c0819:PsiDirectoryNode" />
+              <item name="platforms" type="462c0819:PsiDirectoryNode" />
+              <item name="cuda" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="kernels" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -189,6 +224,7 @@
     </panes>
   </component>
   <component name="PropertiesComponent">
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="node.js.detected.package.eslint" value="true" />
@@ -196,7 +232,7 @@
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
-    <property name="settings.editor.selected.configurable" value="Errors" />
+    <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -251,15 +287,15 @@
       <workItem from="1560369009354" duration="4110000" />
       <workItem from="1560376762097" duration="112000" />
       <workItem from="1560456086701" duration="1821000" />
-      <workItem from="1560461301044" duration="29177000" />
+      <workItem from="1560461301044" duration="46635000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="35220000" />
+    <option name="totallyTimeSpent" value="52678000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="5" y="23" width="1843" height="1053" extended-state="0" />
+    <frame x="18" y="23" width="1843" height="1053" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.49895614" visible="true" weight="0.21543586" />
@@ -422,56 +458,6 @@
         <state relative-caret-position="-187" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/platforms/cuda/src/kernels/GVolSelfVolume.cl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="44" selection-start-column="44" selection-end-column="44" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/platforms/cuda/src/kernels/GVolResetTree.cl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="286">
-          <caret line="76" column="26" selection-start-line="76" selection-start-column="21" selection-end-line="76" selection-end-column="26" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/platforms/cuda/src/kernels/GVolReduceTree.cl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-971">
-          <caret column="44" selection-start-column="44" selection-end-column="44" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/platforms/cuda/src/CudaGKNPKernels.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="151">
-          <caret line="22" column="62" selection-start-line="22" selection-start-column="62" selection-end-line="22" selection-end-column="62" />
-          <folding>
-            <element signature="e#1855#2039#0" />
-            <element signature="e#2119#2462#0" />
-            <element signature="e#2557#2751#0" />
-            <element signature="e#2845#8220#1" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/platforms/cuda/src/CudaGKNPKernels.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="15">
-          <caret line="2289" selection-start-line="2289" selection-end-line="2289" />
-          <folding>
-            <element signature="e#1122#1655#1" />
-            <element signature="e#1658#1877#0" />
-            <element signature="e#1906#6114#0" />
-            <element signature="e#7633#13934#0" />
-            <element signature="e#13937#14808#0" />
-            <element signature="e#14963#20657#0" />
-            <element signature="e#20660#21056#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/platforms/reference/CMakeLists.txt">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
@@ -482,15 +468,82 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/platforms/cuda/src/CudaGKNPKernels.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="286">
+          <caret line="336" column="10" selection-start-line="336" selection-start-column="10" selection-end-line="336" selection-end-column="10" />
+          <folding>
+            <element signature="e#698#1817#0" />
+            <element signature="e#1855#2039#0" />
+            <element signature="e#2119#2462#0" />
+            <element signature="e#2557#2751#0" />
+            <element signature="e#2845#8220#1" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/platforms/cuda/src/kernels/GVolReduceTree.cl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="124">
+          <caret line="65" column="2" selection-start-line="65" selection-start-column="2" selection-end-line="65" selection-end-column="63" />
+          <folding>
+            <element signature="e#2509#3300#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/platforms/cuda/src/kernels/GVolResetTree.cl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="12" selection-start-line="12" selection-end-line="12" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/platforms/cuda/src/kernels/GVolOverlapTree.cl">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-5921">
-          <caret line="82" column="1" lean-forward="true" selection-start-line="82" selection-start-column="1" selection-end-line="82" selection-end-column="1" />
+        <state relative-caret-position="281">
+          <caret line="320" selection-start-line="320" selection-end-line="320" selection-end-column="23" />
           <folding>
             <element signature="e#301#686#0" />
             <element signature="e#687#779#0" />
             <element signature="e#790#854#0" />
             <element signature="e#875#966#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/platforms/cuda/src/kernels/GVolSelfVolume.cl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="150">
+          <caret line="10" column="11" selection-start-line="10" selection-start-column="8" selection-end-line="10" selection-end-column="11" />
+          <folding>
+            <element signature="e#7522#13778#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/platforms/cuda/src/CudaGKNPKernels.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1559">
+          <caret line="1658" column="37" selection-start-line="1658" selection-start-column="37" selection-end-line="1658" selection-end-column="37" />
+          <folding>
+            <element signature="e#1122#1655#1" />
+            <element signature="e#1658#1877#0" />
+            <element signature="e#1906#6114#0" />
+            <element signature="e#6116#7629#0" />
+            <element signature="e#7633#13934#0" />
+            <element signature="e#13937#14808#0" />
+            <element signature="e#14963#20657#0" />
+            <element signature="e#20660#21056#0" />
+            <element signature="e#150322#163177#0" />
+            <element signature="e#163179#164501#0" />
+            <marker date="1561498403000" expanded="false" signature="20879:29436" ph="{...}" />
+            <marker date="1561498403000" expanded="false" signature="29691:34778" ph="{...}" />
+            <marker date="1561498403000" expanded="false" signature="35031:71941" ph="{...}" />
+            <marker date="1561498403000" expanded="false" signature="72196:76156" ph="{...}" />
+            <marker date="1561498403000" expanded="false" signature="76430:79772" ph="{...}" />
+            <marker date="1561498403000" expanded="false" signature="80096:93323" ph="{...}" />
+            <marker date="1561498403000" expanded="false" signature="93611:100094" ph="{...}" />
           </folding>
         </state>
       </provider>

@@ -5,66 +5,68 @@
 #endif
 
 #define PI (3.14159265359f)
+//TODO: Replace OpenCL get_ functions with Cuda thread variables
 //TODO: Convert all real4 types to real3
 //computes volume energy and self-volumes
-__kernel __attribute__((reqd_work_group_size(OV_WORK_GROUP_SIZE,1,1)))
+//TODO: __attribute__ ?
+__global__ __attribute__((reqd_work_group_size(OV_WORK_GROUP_SIZE,1,1)))
 void computeSelfVolumes(const int ntrees,
-  __global const int* restrict ovTreePointer,
-  __global const int* restrict ovAtomTreePointer,
-  __global const int* restrict ovAtomTreeSize,
-  __global       int* restrict NIterations,
-  __global const int* restrict ovAtomTreePaddedSize,
+  __device__ const int* restrict ovTreePointer,
+  __device__ const int* restrict ovAtomTreePointer,
+  __device__ const int* restrict ovAtomTreeSize,
+  __device__       int* restrict NIterations,
+  __device__ const int* restrict ovAtomTreePaddedSize,
   
-  __global const real* restrict global_gaussian_exponent, //atomic Gaussian exponent
+  __device__ const real* restrict global_gaussian_exponent, //atomic Gaussian exponent
 
   const int padded_num_atoms,
 
-  __global const int*   restrict ovLevel,
-  __global const real*  restrict ovVolume,
-  __global const real*  restrict ovVsp,
-  __global const real*  restrict ovVSfp,
-  __global const real*  restrict ovGamma1i,
-  __global const real4* restrict ovG,
-  __global       real*  restrict ovSelfVolume,
-  __global       real*  restrict ovVolEnergy,
+  __device__ const int*   restrict ovLevel,
+  __device__ const real*  restrict ovVolume,
+  __device__ const real*  restrict ovVsp,
+  __device__ const real*  restrict ovVSfp,
+  __device__ const real*  restrict ovGamma1i,
+  __device__ const real4* restrict ovG,
+  __device__       real*  restrict ovSelfVolume,
+  __device__       real*  restrict ovVolEnergy,
 
-  __global const real4* restrict ovDV1,
-  __global       real4* restrict ovDV2,
-  __global       real4* restrict ovPF,
+  __device__ const real4* restrict ovDV1,
+  __device__       real4* restrict ovDV2,
+  __device__       real4* restrict ovPF,
   
-  __global const int*  restrict ovLastAtom,
-  __global const int*  restrict ovRootIndex,
-  __global const int*  restrict ovChildrenStartIndex,
-  __global const int*  restrict ovChildrenCount,
-  __global       int*  restrict ovProcessedFlag,
-  __global       int*  restrict ovOKtoProcessFlag,
-  __global       int*  restrict ovChildrenReported,
-  __global     real4*  restrict ovAtomBuffer,
+  __device__ const int*  restrict ovLastAtom,
+  __device__ const int*  restrict ovRootIndex,
+  __device__ const int*  restrict ovChildrenStartIndex,
+  __device__ const int*  restrict ovChildrenCount,
+  __device__       int*  restrict ovProcessedFlag,
+  __device__       int*  restrict ovOKtoProcessFlag,
+  __device__       int*  restrict ovChildrenReported,
+  __device__     real4*  restrict ovAtomBuffer,
 #ifdef SUPPORTS_64_BIT_ATOMICS
-  __global      long*   restrict gradBuffers_long,
-  __global      long*   restrict selfVolumeBuffer_long,
+  __device__      long*   restrict gradBuffers_long,
+  __device__      long*   restrict selfVolumeBuffer_long,
 #endif
-   __global      real*   restrict selfVolumeBuffer
+   __device__      real*   restrict selfVolumeBuffer
 ){
-  const uint id = get_local_id(0);
-  const uint gsize = get_local_size(0);
-  __local volatile uint nprocessed;
-  __local volatile uint niterations;
+  const unsigned int id = get_local_id(0);
+  const unsigned int gsize = get_local_size(0);
+  __local volatile unsigned int nprocessed;
+  __local volatile unsigned int niterations;
 
-  uint tree = get_group_id(0);      //index of initial tree
+  unsigned int tree = get_group_id(0);      //index of initial tree
   while(tree < ntrees){
-    uint offset = ovTreePointer[tree]; //offset into tree
-    uint buffer_offset = tree*padded_num_atoms; // offset into buffer arrays
+    unsigned int offset = ovTreePointer[tree]; //offset into tree
+    unsigned int buffer_offset = tree*padded_num_atoms; // offset into buffer arrays
 
-    uint tree_size = ovAtomTreeSize[tree];
-    uint padded_tree_size = ovAtomTreePaddedSize[tree];    
-    uint nsections = padded_tree_size/gsize;    
-    uint ov_count = 0;
+    unsigned int tree_size = ovAtomTreeSize[tree];
+    unsigned int padded_tree_size = ovAtomTreePaddedSize[tree];
+    unsigned int nsections = padded_tree_size/gsize;
+    unsigned int ov_count = 0;
 
     // The tree for this atom is divided into sections each the size of a workgroup
     // The tree is walked bottom up one section at a time
     for(int isection=nsections-1;isection >= 0; isection--){
-      uint slot = offset + isection*gsize + id; //the slot to work on
+      unsigned int slot = offset + isection*gsize + id; //the slot to work on
 
       //reset accumulators
       ovVolEnergy[slot] = 0;
@@ -72,25 +74,29 @@ void computeSelfVolumes(const int ntrees,
       ovDV2[slot] = 0;
       int atom = ovLastAtom[slot];
       int level = ovLevel[slot];
-      if(id == 0) niterations = 0; 
-      barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
+      if(id == 0) niterations = 0;
+//TODO: Global memory fence needed or syncthreads sufficient?
+      __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
       //
       // process section
       //
       do{
-	barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
+//TODO: Global memory fence needed or syncthreads sufficient?
+	__syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
 	if(id == 0) nprocessed = 0;
-	barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
+//TODO: Global memory fence needed or syncthreads sufficient?
+	__syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
 	int processed = ovProcessedFlag[slot];
 	int ok2process = ovOKtoProcessFlag[slot];
-	barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
+	__syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
 	if(processed == 0 && ok2process == 0 && atom >= 0){
 	  if(ovChildrenReported[slot] == ovChildrenCount[slot]){
 	    ok2process = 1;
 	    ovOKtoProcessFlag[slot] = 1;
 	  }
 	}
-	barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
+//TODO: Global memory fence needed or syncthreads sufficient?
+	__syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
 	
 	if(processed == 0 && ok2process > 0 && atom >= 0) {
 	  atomic_inc(&(nprocessed));
@@ -148,7 +154,7 @@ void computeSelfVolumes(const int ntrees,
 	  ovOKtoProcessFlag[slot] = 0; //prevent more processing
 	}
 	if(id==0) niterations += 1;
-	barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
+	__syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
       }while( nprocessed > 0 && niterations < gsize); // loop until no more work is done
       //
       // End of processing for section
@@ -158,7 +164,8 @@ void computeSelfVolumes(const int ntrees,
       }
 
       // Updates energy and derivative buffer for this section
-      barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
+      //TODO: Global memory fence needed or syncthreads sufficient?
+      __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
 #ifdef SUPPORTS_64_BIT_ATOMICS
       if(atom >= 0){
 	real4 dv2 = ovDV2[slot];
@@ -181,8 +188,8 @@ void computeSelfVolumes(const int ntrees,
       //without atomics can not accumulate in parallel due to "atom" collisions
       //
       if(id==0){
-	uint tree_offset =  offset + isection*gsize;
-	for(uint is = tree_offset ; is < tree_offset + gsize ; is++){ //loop over slots in section
+	unsigned int tree_offset =  offset + isection*gsize;
+	for(unsigned int is = tree_offset ; is < tree_offset + gsize ; is++){ //loop over slots in section
 	  int at = ovLastAtom[is];
 	  if(at >= 0){
 	    // nothing to do here for the volume energy,
@@ -193,96 +200,104 @@ void computeSelfVolumes(const int ntrees,
 	}
       }
 #endif
-      barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
+//TODO: Global memory fence needed or syncthreads sufficient?
+      __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
     }
 
     // moves to next tree
     tree += get_num_groups(0);
-    barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
+//TODO: Global memory fence needed or syncthreads sufficient?
+    __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
   }
 }
 
 #ifdef NOTNOW
 //same as self-volume kernel above but does not update self volumes
-__kernel __attribute__((reqd_work_group_size(OV_WORK_GROUP_SIZE,1,1)))
+//TODO: __attribute__ ?
+__global__ __attribute__((reqd_work_group_size(OV_WORK_GROUP_SIZE,1,1)))
 void computeVolumeEnergy(const int ntrees,
-  __global const int* restrict ovTreePointer,
-  __global const int* restrict ovAtomTreePointer,
-  __global const int* restrict ovAtomTreeSize,
-  __global       int* restrict NIterations,
-  __global const int* restrict ovAtomTreePaddedSize,
+  __device__ const int* restrict ovTreePointer,
+  __device__ const int* restrict ovAtomTreePointer,
+  __device__ const int* restrict ovAtomTreeSize,
+  __device__       int* restrict NIterations,
+  __device__ const int* restrict ovAtomTreePaddedSize,
   
-  __global const real* restrict global_gaussian_exponent, //atomic Gaussian exponent
+  __device__ const real* restrict global_gaussian_exponent, //atomic Gaussian exponent
   
   
-  __global const int*   restrict ovLevel,
-  __global const real*  restrict ovVolume,
-  __global const real*  restrict ovVsp,
-  __global const real*  restrict ovVSfp,
-  __global const real*  restrict ovGamma1i,
-  __global const real4* restrict ovG,
-  __global       real*  restrict ovVolEnergy,
+  __device__ const int*   restrict ovLevel,
+  __device__ const real*  restrict ovVolume,
+  __device__ const real*  restrict ovVsp,
+  __device__ const real*  restrict ovVSfp,
+  __device__ const real*  restrict ovGamma1i,
+  __device__ const real4* restrict ovG,
+  __device__       real*  restrict ovVolEnergy,
 
-  __global const real4* restrict ovDV1,
-  __global       real4* restrict ovDV2,
-  __global       real4* restrict ovPF,
+  __device__ const real4* restrict ovDV1,
+  __device__       real4* restrict ovDV2,
+  __device__       real4* restrict ovPF,
 			 
-  __global const int*  restrict ovLastAtom,
-  __global const int*  restrict ovRootIndex,
-  __global const int*  restrict ovChildrenStartIndex,
-  __global const int*  restrict ovChildrenCount,
-  __global       int*  restrict ovProcessedFlag,
-  __global       int*  restrict ovOKtoProcessFlag,
-  __global       int*  restrict ovChildrenReported,
-  __global     real4*  restrict ovAtomBuffer
+  __device__ const int*  restrict ovLastAtom,
+  __device__ const int*  restrict ovRootIndex,
+  __device__ const int*  restrict ovChildrenStartIndex,
+  __device__ const int*  restrict ovChildrenCount,
+  __device__       int*  restrict ovProcessedFlag,
+  __device__       int*  restrict ovOKtoProcessFlag,
+  __device__       int*  restrict ovChildrenReported,
+  __device__     real4*  restrict ovAtomBuffer
 #ifdef SUPPORTS_64_BIT_ATOMICS
-   , __global      long*   restrict forceBuffers
+   , __device__      long*   restrict forceBuffers
 #endif
 ){
-  const uint id = get_local_id(0);
-  const uint gsize = get_local_size(0);
-  __local volatile uint nprocessed;
-  __local volatile uint niterations;
+  const unsigned int id = get_local_id(0);
+  const unsigned int gsize = get_local_size(0);
+  __local volatile unsigned int nprocessed;
+  __local volatile unsigned int niterations;
 
-  uint tree = get_group_id(0);      //index of initial tree
+  unsigned int tree = get_group_id(0);      //index of initial tree
   while(tree < ntrees){
-    uint offset = ovTreePointer[tree]; //offset into tree
-    uint buffer_offset = tree*PADDED_NUM_ATOMS; // offset into buffer arrays
+    unsigned int offset = ovTreePointer[tree]; //offset into tree
+    unsigned int buffer_offset = tree*PADDED_NUM_ATOMS; // offset into buffer arrays
 
-    uint tree_size = ovAtomTreeSize[tree];
-    uint padded_tree_size = ovAtomTreePaddedSize[tree];    
-    uint nsections = padded_tree_size/gsize;    
-    uint ov_count = 0;
+    unsigned int tree_size = ovAtomTreeSize[tree];
+    unsigned int padded_tree_size = ovAtomTreePaddedSize[tree];
+    unsigned int nsections = padded_tree_size/gsize;
+    unsigned int ov_count = 0;
 
     // The tree for this atom is divided into sections each the size of a workgroup
     // The tree is walked bottom up one section at a time
     for(int isection=nsections-1;isection >= 0; isection--){
-      uint slot = offset + isection*gsize + id; //the slot to work on
+      unsigned int slot = offset + isection*gsize + id; //the slot to work on
 
       //reset accumulators
       ovVolEnergy[slot] = 0;
       ovDV2[slot] = 0;
       int atom = ovLastAtom[slot];
       int level = ovLevel[slot];
-      if(id == 0) niterations = 0; 
-      barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
+      if(id == 0) niterations = 0;
+      //TODO: Global memory fence needed or syncthreads sufficient?
+      __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
       //
       // process section
       //
       do{
-	barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
+    //TODO: Global memory fence needed or syncthreads sufficient?
+	__syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
 	if(id == 0) nprocessed = 0;
-	barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
+	//TODO: Global memory fence needed or syncthreads sufficient?
+	__syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
 	int processed = ovProcessedFlag[slot];
 	int ok2process = ovOKtoProcessFlag[slot];
-	barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
+	//TODO: Global memory fence needed or syncthreads sufficient?
+	__syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
 	if(processed == 0 && ok2process == 0 && atom >= 0){
 	  if(ovChildrenReported[slot] == ovChildrenCount[slot]){
 	    ok2process = 1;
 	    ovOKtoProcessFlag[slot] = 1;
 	  }
 	}
-	barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
+	//TODO: Global memory fence needed or syncthreads sufficient?
+	__syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
 	
 	if(processed == 0 && ok2process > 0 && atom >= 0) {
 	  atomic_inc(&(nprocessed));
@@ -331,7 +346,7 @@ void computeVolumeEnergy(const int ntrees,
 	  ovOKtoProcessFlag[slot] = 0; //prevent more processing
 	}
 	if(id==0) niterations += 1;
-	barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
+	__syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
       }while( nprocessed > 0 && niterations < gsize); // loop until no more work is done
       //
       // End of processing for section
@@ -341,7 +356,8 @@ void computeVolumeEnergy(const int ntrees,
       }
 
       // Updates energy and derivative buffer for this section
-      barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
+      //TODO: Global memory fence needed or syncthreads sufficient?
+      __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
 #ifdef SUPPORTS_64_BIT_ATOMICS
       if(atom >= 0 && atom < NUM_ATOMS_TREE){
 	real4 dv2 = -ovDV2[slot];
@@ -356,8 +372,8 @@ void computeVolumeEnergy(const int ntrees,
       //without atomics can not accumulate in parallel due to "atom" collisions
       //
       if(id==0){
-	uint tree_offset =  offset + isection*gsize;
-	for(uint is = tree_offset ; is < tree_offset + gsize ; is++){ //loop over slots in section
+	unsigned int tree_offset =  offset + isection*gsize;
+	for(unsigned int is = tree_offset ; is < tree_offset + gsize ; is++){ //loop over slots in section
 	  int at = ovLastAtom[is];
 	  if(at >= 0 && atom < NUM_ATOMS_TREE){
 	    // nothing to do here for the volume energy,
@@ -367,12 +383,14 @@ void computeVolumeEnergy(const int ntrees,
 	}
       }
 #endif
-      barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
+      //TODO: Global memory fence needed or syncthreads sufficient?
+      __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
     }
 
     // moves to next tree
     tree += get_num_groups(0);
-    barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
+    //TODO: Global memory fence needed or syncthreads sufficient?
+    __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
   }
 }
 #endif

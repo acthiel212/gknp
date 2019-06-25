@@ -119,7 +119,7 @@ __global__ void InitOverlapTree_1body(
     }
 
     section += get_num_groups(0);
-    //TODO: CLK_LOCAL_MEM_FENCE analogs in Cuda?
+    //TODO: Global memory fence needed or syncthreads sufficient?
     __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
   }
 }
@@ -939,6 +939,7 @@ __global__ void resetComputeOverlapTree(const int ntrees,
       slot += get_local_size(0);
     }
     tree += get_num_groups(0);
+      //TODO: Global memory fence needed or syncthreads sufficient?
     __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
   }
 }
@@ -968,16 +969,16 @@ inline unsigned int scan1Inclusive(unsigned int idata, __shared__ unsigned int *
   l_Data[pos] = 0;
   pos += size;
   l_Data[pos] = idata;
-  __syncthreads(CLK_LOCAL_MEM_FENCE);
+  __syncthreads();
 
   for(unsigned int offset = 1; offset < size; offset <<= 1){
-    __syncthreads(CLK_LOCAL_MEM_FENCE);
+    __syncthreads();
     int t = l_Data[pos] + l_Data[pos - offset];
-    __syncthreads(CLK_LOCAL_MEM_FENCE);
+    __syncthreads();
     l_Data[pos] = t;
   }
 
-  __syncthreads(CLK_LOCAL_MEM_FENCE);
+  __syncthreads();
   return l_Data[pos];
 }
 inline unsigned int scan1Exclusive(unsigned int idata, __shared__ unsigned int *l_Data, unsigned int size){
@@ -998,14 +999,16 @@ __device__ inline void scangExclusive(__device__ unsigned int * buffer, __shared
   unsigned int sum = scan1Exclusive(buffer[i], l_Data, gsize);
   if(id == gsize-1) psum = sum + buffer[i];
   buffer[i] = sum;
+//TODO: Global memory fence needed or syncthreads sufficient?
   __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
   i += gsize;
 
   while(i<size){
     unsigned int sum = scan1Exclusive(buffer[i], l_Data, gsize) + psum;
-    __syncthreads(CLK_LOCAL_MEM_FENCE);
+    __syncthreads();
     if(id == gsize-1) psum = sum + buffer[i];
     buffer[i] = sum;
+//TODO: Global memory fence needed or syncthreads sufficient?
     __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
     i += gsize;
   }
@@ -1050,7 +1053,7 @@ __device__ void reduceovCountBuffer(const int ntrees,
 	children_count = ovChildrenCount[atom_ptr];
       }
       unsigned int sum = scan1Exclusive(children_count, temp, gsize);
-      __syncthreads(CLK_LOCAL_MEM_FENCE);
+      __syncthreads();
       if(local_id < tree_size) {
 	ovChildrenStartIndex[atom_ptr] = tree_ptr + tree_size + sum;
 	// resets to top and bottom counters
@@ -1071,12 +1074,15 @@ __device__ void reduceovCountBuffer(const int ntrees,
 	unsigned int atom_ptr = tree_ptr + i;
 	ovChildrenStartIndex[atom_ptr] = (i < tree_size) ? ovChildrenCount[atom_ptr] : 0;
       }
+        //TODO: Global memory fence needed or syncthreads sufficient?
       __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
       scangExclusive(&(ovChildrenStartIndex[tree_ptr]), temp, padded_tree_size);
+        //TODO: Global memory fence needed or syncthreads sufficient?
       __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
       if(local_id == 0){
 	ovAtomTreeSize[tree] += ovChildrenStartIndex[tree_ptr + tree_size-1] + ovChildrenCount[tree_ptr + tree_size-1];
       }
+        //TODO: Global memory fence needed or syncthreads sufficient?
       __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
       for(unsigned int i = local_id; i < padded_tree_size ; i += gsize){
 	if(i < tree_size){
@@ -1097,6 +1103,7 @@ __device__ void reduceovCountBuffer(const int ntrees,
     }
     //next tree
     tree += get_num_groups(0);
+      //TODO: Global memory fence needed or syncthreads sufficient?
     __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
   }
 
@@ -1180,6 +1187,7 @@ __global__ void SortOverlapTree2body(
     }
     atom += get_global_size(0);
   }
+//TODO: Global memory fence needed or syncthreads sufficient?
   __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
 }
 
@@ -1249,7 +1257,7 @@ __global__ __attribute__((reqd_work_group_size(OV_WORK_GROUP_SIZE,1,1)))
   __shared__ volatile int children_count[OV_WORK_GROUP_SIZE]; //number of children
 
   if(local_id == 0) panic = PanicButton[0];
-  __syncthreads(CLK_LOCAL_MEM_FENCE);
+  __syncthreads();
   
   unsigned int tree = get_group_id(0);
   while(tree < ntrees && panic == 0){
@@ -1258,7 +1266,7 @@ __global__ __attribute__((reqd_work_group_size(OV_WORK_GROUP_SIZE,1,1)))
       
     //initializes local working copy of tree size;
     if(local_id == OV_WORK_GROUP_SIZE-1) tree_size = ovAtomTreeSize[tree];
-    __syncthreads(CLK_LOCAL_MEM_FENCE);
+    __syncthreads();
 
     //this is the number of translations of the calculations window
     //to cover the tree section
@@ -1271,6 +1279,7 @@ __global__ __attribute__((reqd_work_group_size(OV_WORK_GROUP_SIZE,1,1)))
       if(local_id == OV_WORK_GROUP_SIZE-1) niterations = 0;
       
       do{
+//TODO: Global memory fence needed or syncthreads sufficient?
 	__syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
 	if(local_id == OV_WORK_GROUP_SIZE-1) nprocessed = 0;
 	
@@ -1319,7 +1328,7 @@ __global__ __attribute__((reqd_work_group_size(OV_WORK_GROUP_SIZE,1,1)))
 	    atomic_inc(&PanicButton[1]);
 	  }
 	}
-	__syncthreads(CLK_LOCAL_MEM_FENCE);
+	__syncthreads();
 	
 	if(n_buffer > 0 && panic == 0){ //something to process
 	  
@@ -1333,6 +1342,7 @@ __global__ __attribute__((reqd_work_group_size(OV_WORK_GROUP_SIZE,1,1)))
 	      atomj_buffer[pos] = ovLastAtom[i];
 	    }
 	  }
+//TODO: Global memory fence needed or syncthreads sufficient?
 	  __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
 	  
 	  //
@@ -1364,6 +1374,7 @@ __global__ __attribute__((reqd_work_group_size(OV_WORK_GROUP_SIZE,1,1)))
 	    gvol_buffer[pos] = vij;
 	    pos += gsize;
 	  }
+//TODO: Global memory fence needed or syncthreads sufficient?
 	  __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
 	  
 	  //step 2: prefix sum over "fij" flag buffer to compute number of non-zero overlaps and 
@@ -1372,11 +1383,12 @@ __global__ __attribute__((reqd_work_group_size(OV_WORK_GROUP_SIZE,1,1)))
 	  int np = 0;
 	  if(local_id == OV_WORK_GROUP_SIZE-1) np = tree_pos_buffer[buffer_offset+n_buffer-1]; 
 	  scangExclusive(&(tree_pos_buffer[buffer_offset]), temp, padded_n_buffer);
+//TODO: Global memory fence needed or syncthreads sufficient?
 	  __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
 	  if(local_id == OV_WORK_GROUP_SIZE-1){ //retrieve total number of non-zero overlaps
 	    nprocessed = tree_pos_buffer[buffer_offset + n_buffer-1] + np;
 	  }
-	  __syncthreads(CLK_LOCAL_MEM_FENCE);
+	  __syncthreads();
 	  
 
 	  //step 3: compute other quantities for non-zero volumes and store in tree
@@ -1420,7 +1432,7 @@ __global__ __attribute__((reqd_work_group_size(OV_WORK_GROUP_SIZE,1,1)))
 	    }
 	    pos += gsize;
 	  }
-	  __syncthreads(CLK_LOCAL_MEM_FENCE);
+	  __syncthreads();
 
 	  //scan of children counts to figure out children start indexes
 	  sum = scan1Exclusive(children_count[local_id], temp, gsize);      
@@ -1432,7 +1444,7 @@ __global__ __attribute__((reqd_work_group_size(OV_WORK_GROUP_SIZE,1,1)))
 	    ovProcessedFlag[slot] = 1;
 	    ovOKtoProcessFlag[slot] = 0;
 	  }
-
+//TODO: Global memory fence needed or syncthreads sufficient?
 	  __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE); //global to sync ovChildrenStartIndex etc.
 	  
 	  //figures out the new tree size
@@ -1440,9 +1452,10 @@ __global__ __attribute__((reqd_work_group_size(OV_WORK_GROUP_SIZE,1,1)))
 	    tree_size += nprocessed;
 	    niterations += 1;
 	  }
-	  __syncthreads(CLK_LOCAL_MEM_FENCE);
+	  __syncthreads();
 	  
 	}//n_buffer > 0
+//TODO: Global memory fence needed or syncthreads sufficient?
 	__syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
 	
       }while(nprocessed > 0 && niterations < gsize && panic == 0); //matches do{}while
@@ -1450,21 +1463,24 @@ __global__ __attribute__((reqd_work_group_size(OV_WORK_GROUP_SIZE,1,1)))
       if(local_id == OV_WORK_GROUP_SIZE-1){
 	if(niterations > NIterations[tree]) NIterations[tree] = niterations;
       }
-
+//TODO: Global memory fence needed or syncthreads sufficient?
       __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE); //to sync ovProcessedFlag etc.
     }
-    __syncthreads(CLK_LOCAL_MEM_FENCE);
+    __syncthreads();
     //stores tree size in global mem
     if(local_id == 0) ovAtomTreeSize[tree] = tree_size;
+//TODO: Global memory fence needed or syncthreads sufficient?
     __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
 
     //next tree
     tree += get_num_groups(0);
+//TODO: Global memory fence needed or syncthreads sufficient?
     __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
   }
   if(local_id == 0 && panic>0){
     atomic_inc(&PanicButton[0]);
   }
+//TODO: Global memory fence needed or syncthreads sufficient?
   __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
 }
 
@@ -1498,6 +1514,7 @@ __global__ void ResetRescanOverlapTree(const int ntrees,
 
     //next tree
     tree += get_num_groups(0);
+      //TODO: Global memory fence needed or syncthreads sufficient?
     __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
   }
 
@@ -1530,6 +1547,7 @@ __global__ void InitRescanOverlapTree(const int ntrees,
       slot += get_local_size(0);
     }
     tree += get_num_groups(0);
+      //TODO: Global memory fence needed or syncthreads sufficient?
     __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
   }
 
@@ -1600,17 +1618,21 @@ __device__ void RescanOverlapTree(const int ntrees,
     //start at the top of the tree and iterate until the end of the tree is reached
     for(unsigned int isection=0; isection < nsections; isection++){
       unsigned int slot = tree_ptr + isection*OV_WORK_GROUP_SIZE + local_id; //the slot to work on
+//TODO: Global memory fence needed or syncthreads sufficient?
       __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
       int parent = ovRootIndex[slot];
       int atom = ovLastAtom[slot];
       
       //for(unsigned int iiter = 0; iiter < 2 ; iiter++){
       do{
+//TODO: Global memory fence needed or syncthreads sufficient?
 	__syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
 	if(local_id==0) nprocessed = 0;
+//TODO: Global memory fence needed or syncthreads sufficient?
 	__syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
 	int processed = ovProcessedFlag[slot];
 	int ok2process = ovOKtoProcessFlag[slot];
+//TODO: Global memory fence needed or syncthreads sufficient?
 	__syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
 	bool letsgo = (parent >= 0 && processed == 0 && ok2process > 0 && atom >= 0);
 	if(letsgo){
@@ -1638,13 +1660,16 @@ __device__ void RescanOverlapTree(const int ntrees,
 	    }
 	  }
 	}
+//TODO: Global memory fence needed or syncthreads sufficient?
 	__syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
       } while(nprocessed > 0);
+//TODO: Global memory fence needed or syncthreads sufficient?
       __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
     }
  
     // next tree
     tree += get_num_groups(0);
+//TODO: Global memory fence needed or syncthreads sufficient?
     __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
   }
 }
@@ -1682,6 +1707,7 @@ __global__ void InitOverlapTreeGammas_1body(
     }
 
     section += get_num_groups(0);
+//TODO: Global memory fence needed or syncthreads sufficient?
     __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
   }
 }
@@ -1729,17 +1755,21 @@ __device__ void RescanOverlapTreeGammas(const int ntrees,
     //start at the top of the tree and iterate until the end of the tree is reached
     for(unsigned int isection=0; isection < nsections; isection++){
       unsigned int slot = tree_ptr + isection*OV_WORK_GROUP_SIZE + local_id; //the slot to work on
+//TODO: Global memory fence needed or syncthreads sufficient?
       __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
       int parent = ovRootIndex[slot];
       int atom = ovLastAtom[slot];
       
       //for(unsigned int iiter = 0; iiter < 2 ; iiter++){
       do{
+//TODO: Global memory fence needed or syncthreads sufficient?
 	__syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
 	if(local_id==0) nprocessed = 0;
+//TODO: Global memory fence needed or syncthreads sufficient?
 	__syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
 	int processed = ovProcessedFlag[slot];
 	int ok2process = ovOKtoProcessFlag[slot];
+//TODO: Global memory fence needed or syncthreads sufficient?
 	__syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
 	bool letsgo = (parent >= 0 && processed == 0 && ok2process > 0 && atom >= 0);
 	if(letsgo){
@@ -1756,13 +1786,16 @@ __device__ void RescanOverlapTreeGammas(const int ntrees,
 	    }
 	  }
 	}
+//TODO: Global memory fence needed or syncthreads sufficient?
 	__syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
       } while(nprocessed > 0);
+//TODO: Global memory fence needed or syncthreads sufficient?
       __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
     }
  
     // next tree
     tree += get_num_groups(0);
+//TODO: Global memory fence needed or syncthreads sufficient?
     __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
   }
 }

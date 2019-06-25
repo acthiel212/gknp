@@ -533,9 +533,9 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
   bool verbose = verbose_level > 0;
 
   maxTiles = (nb.getUseCutoff() ? nb.getInteractingTiles().getSize() : 0);
-  
-      {
+
       //run CPU version once to estimate sizes
+      {
       GaussVol *gvol;
       std::vector<RealVec> positions;
       std::vector<int> ishydrogen;
@@ -722,8 +722,11 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
       
     }
 
+
+    // Reset tree kernel
+    //TODO: Remove setArg(). Set arguments using Cuda syntax for all CUfunctions that execute. Something like:
+    // void* args1[] = {&cu.getSomething().getDevicePointer(), &cu.getSomethingElse().getDevicePointer(), etc.}
     {
-      //Reset tree kernel
       map<string, string> defines;
       defines["FORCE_WORK_GROUP_SIZE"] = cu.intToString(ov_work_group_size);
       defines["NUM_ATOMS"] = cu.intToString(cu.getNumAtoms());
@@ -743,14 +746,14 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
 	if(verbose) cout << "compiling " << kernel_name << " ... ";
 	file = cu.replaceStrings(CudaGKNPKernelSources::GVolResetTree, replacements);
 	module = cu.createModule(file, defines);
-	//reset tree kernel
+	// reset tree kernel
 	resetTreeKernel = cu.getKernel(module, kernel_name.c_str());
 	if(verbose) cout << " done. " << endl;
       }
       kernel = resetTreeKernel;
       index = 0;
+
       kernel.setArg<int>(index++, gtree->num_sections);
-      //TODO: cl.hpp classes?
       kernel.setArg<cl::Buffer>(index++, gtree->ovTreePointer->getDeviceBuffer());
       kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreePointer->getDeviceBuffer());
       kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreeSize->getDeviceBuffer());
@@ -774,7 +777,7 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
       kernel.setArg<cl::Buffer>(index++, gtree->NIterations->getDeviceBuffer());
 
       
-      //reset buffer kernel
+      // reset buffer kernel
       kernel_name = "resetBuffer";
       if(!hasCreatedKernels){
 	if(verbose) cout << "compiling " << kernel_name << " ... ";
@@ -792,7 +795,7 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
       if(useLong) kernel.setArg<cl::Buffer>(index++, gtree->gradBuffers_long->getDeviceBuffer());
 
       
-      //reset tree counters kernel
+      // reset tree counters kernel
       kernel_name = "resetSelfVolumes";
       if(!hasCreatedKernels){
 	if(verbose) cout << "compiling " << kernel_name << " ... ";
@@ -818,10 +821,12 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
       
     }
 
-
+    //Tree construction
+    //TODO: Remove setArg(). Set arguments using Cuda syntax for all CUfunctions that execute. Something like:
+    // void* args1[] = {&cu.getSomething().getDevicePointer(), &cu.getSomethingElse().getDevicePointer(), etc.}
     {
-      //Tree construction 
       CUmodule module;
+      CUfunction kernel;
       string kernel_name;
       int index;
 
@@ -1513,9 +1518,11 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
 
     }
 
-
+    //Self volumes kernel
+    //TODO: Remove setArg(). Set arguments using Cuda syntax for all CUfunctions that execute. Something like:
+    // void* args1[] = {&cu.getSomething().getDevicePointer(), &cu.getSomethingElse().getDevicePointer(), etc.}
     {
-      //Self volumes kernel
+
       map<string, string> defines;
       defines["FORCE_WORK_GROUP_SIZE"] = cu.intToString(ov_work_group_size);
       defines["NUM_ATOMS_TREE"] = cu.intToString(gtree->total_atoms_in_tree);
@@ -1582,8 +1589,10 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
       kernel.setArg<cl::Buffer>(index++, gtree->selfVolumeBuffer->getDeviceBuffer());
     }
 
+    //Self volumes reduction kernel (pass 2)
+    //TODO: Remove setArg(). Set arguments using Cuda syntax for all CUfunctions that execute. Something like:
+    // void* args1[] = {&cu.getSomething().getDevicePointer(), &cu.getSomethingElse().getDevicePointer(), etc.}
     {
-      //Self volumes reduction kernel (pass 2)
       map<string, string> defines;
       defines["FORCE_WORK_GROUP_SIZE"] = cu.intToString(ov_work_group_size);
       defines["NUM_ATOMS_TREE"] = cu.intToString(gtree->total_atoms_in_tree);
@@ -1647,9 +1656,11 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
       
     }
 
+    //TODO: Remove Born Radii kernels?
+    //Born radii initialization and calculation kernels
+    //TODO: Remove setArg(). Set arguments using Cuda syntax for all CUfunctions that execute. Something like:
+    // void* args1[] = {&cu.getSomething().getDevicePointer(), &cu.getSomethingElse().getDevicePointer(), etc.}
     {
-      //TODO: Remove Born Radii?
-      //Born radii initialization and calculation kernels
       map<string, string> defines;
       defines["NUM_ATOMS"] = cu.intToString(cu.getNumAtoms());
       defines["PADDED_NUM_ATOMS"] = cu.intToString(cu.getPaddedNumAtoms());
@@ -1899,10 +1910,11 @@ void CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl& context, bool incl
       kernel.setArg<cl::Buffer>(index++, GBDerU->getDeviceBuffer());
     }
 
+    //TODO: Remove energy kernels?
+    //GB Energy kernels
+    //TODO: Remove setArg(). Set arguments using Cuda syntax for all CUfunctions that execute. Something like:
+    // void* args1[] = {&cu.getSomething().getDevicePointer(), &cu.getSomethingElse().getDevicePointer(), etc.}
     {
-      //TODO: Remove energy kernels?
-      //GB Energy kernels
-   
       double dielectric_in = 1.0;
       double dielectric_out= 80.0;
       double tokjmol = 4.184*332.0/10.0; //the factor of 10 is the conversion of 1/r from nm to Ang

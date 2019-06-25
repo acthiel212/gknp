@@ -10,15 +10,18 @@
  * Initialize tree for execution, set Processed to 0, OKtoProcess=1 for leaves and out-of-bound,
  * reset self volume accumulators.
  */
-void resetTreeCounters(
+//TODO: Replace OpenCL get_ functions with Cuda thread variables
+//TODO: Convert all real4 types to real3
+
+__device__ void resetTreeCounters(
   unsigned          const int            padded_tree_size,
   unsigned          const int            tree_size,
   unsigned          const int            offset,
-  __global                int*   restrict ovProcessedFlag,
-  __global                int*   restrict ovOKtoProcessFlag,
-  __global          const int*   restrict ovChildrenStartIndex,
-  __global          const int*   restrict ovChildrenCount,
-  __global                int*   restrict ovChildrenReported
+  __device__                int*   restrict ovProcessedFlag,
+  __device__                int*   restrict ovOKtoProcessFlag,
+  __device__          const int*   restrict ovChildrenStartIndex,
+  __device__          const int*   restrict ovChildrenCount,
+  __device__                int*   restrict ovChildrenReported
 ){
   const unsigned int id = get_local_id(0);  //the index of this thread in the workgroup
   const unsigned int nblock = get_local_size(0); //size of work group
@@ -40,25 +43,25 @@ void resetTreeCounters(
 
 
 //assume num. groups = num. tree sections
-__kernel void resetSelfVolumes(const int ntrees,
-			       __global const int*   restrict ovTreePointer,
-			       __global const int*   restrict ovAtomTreePointer,
-			       __global const int*   restrict ovAtomTreeSize,
-			       __global const int*   restrict ovAtomTreePaddedSize,
-			       __global const int*   restrict ovChildrenStartIndex,
-			       __global const int*   restrict ovChildrenCount,
-			       __global       int*   restrict ovProcessedFlag,
-			       __global       int*   restrict ovOKtoProcessFlag,
-			       __global       int*   restrict ovChildrenReported,
-			       __global       int*   restrict PanicButton
+__global__ void resetSelfVolumes(const int ntrees,
+			       __device__ const int*   restrict ovTreePointer,
+			       __device__ const int*   restrict ovAtomTreePointer,
+			       __device__ const int*   restrict ovAtomTreeSize,
+			       __device__ const int*   restrict ovAtomTreePaddedSize,
+			       __device__ const int*   restrict ovChildrenStartIndex,
+			       __device__ const int*   restrict ovChildrenCount,
+			       __device__       int*   restrict ovProcessedFlag,
+			       __device__       int*   restrict ovOKtoProcessFlag,
+			       __device__       int*   restrict ovChildrenReported,
+			       __device__       int*   restrict PanicButton
 ){
-    uint tree = get_group_id(0);      //initial tree
+    unsigned int tree = get_group_id(0);      //initial tree
     if(PanicButton[0] > 0) return;
     while (tree < ntrees){
 
-      uint offset = ovTreePointer[tree];
-      uint tree_size = ovAtomTreeSize[tree];
-      uint padded_tree_size = ovAtomTreePaddedSize[tree];
+      unsigned int offset = ovTreePointer[tree];
+      unsigned int tree_size = ovAtomTreeSize[tree];
+      unsigned int padded_tree_size = ovAtomTreePaddedSize[tree];
       resetTreeCounters(padded_tree_size, tree_size, offset, 
 			ovProcessedFlag,
 			ovOKtoProcessFlag,
@@ -74,25 +77,24 @@ __kernel void resetSelfVolumes(const int ntrees,
  * Initialize tree for execution, set Processed to 0, OKtoProcess=1 for leaves and out-of-bound,
  * reset self volume accumulators.
  */
- //TODO: Convert all real4 types to real3
-void resetTreeSection(
+__device__ void resetTreeSection(
 		      unsigned const int padded_tree_size,
 		      unsigned const int offset,
-		      __global       int*   restrict ovLevel,
-		      __global       real*  restrict ovVolume,
-		      __global       real*  restrict ovVsp,
-		      __global       real*  restrict ovVSfp,
-		      __global       real*  restrict ovSelfVolume,
-		      __global       real*  restrict ovVolEnergy,
-		      __global       int*   restrict ovLastAtom,
-		      __global       int*   restrict ovRootIndex,
-		      __global       int*   restrict ovChildrenStartIndex,
-		      __global       int*   restrict ovChildrenCount,
-		      __global       real4* restrict ovDV1,
-		      __global       real4* restrict ovDV2,
-		      __global       int*   restrict ovProcessedFlag,
-		      __global       int*   restrict ovOKtoProcessFlag,
-		      __global       int*   restrict ovChildrenReported){
+		      __device__       int*   restrict ovLevel,
+		      __device__       real*  restrict ovVolume,
+		      __device__       real*  restrict ovVsp,
+		      __device__       real*  restrict ovVSfp,
+		      __device__       real*  restrict ovSelfVolume,
+		      __device__       real*  restrict ovVolEnergy,
+		      __device__       int*   restrict ovLastAtom,
+		      __device__       int*   restrict ovRootIndex,
+		      __device__       int*   restrict ovChildrenStartIndex,
+		      __device__       int*   restrict ovChildrenCount,
+		      __device__       real4* restrict ovDV1,
+		      __device__       real4* restrict ovDV2,
+		      __device__       int*   restrict ovProcessedFlag,
+		      __device__       int*   restrict ovOKtoProcessFlag,
+		      __device__       int*   restrict ovChildrenReported){
   const unsigned int nblock = get_local_size(0); //size of thread block
   const unsigned int id = get_local_id(0);  //the index of this thread in the warp
 
@@ -116,14 +118,14 @@ void resetTreeSection(
 }
 
 
-__kernel void resetBuffer(unsigned const int             bufferSize,
+__global__ void resetBuffer(unsigned const int             bufferSize,
 			  unsigned const int             numBuffers,
-			  __global       real4* restrict ovAtomBuffer,
-			  __global        real* restrict selfVolumeBuffer
+			  __device__       real4* restrict ovAtomBuffer,
+			  __device__        real* restrict selfVolumeBuffer
 #ifdef SUPPORTS_64_BIT_ATOMICS
 			  ,
-			  __global long*   restrict selfVolumeBuffer_long,
-			  __global long*   restrict gradBuffers_long
+			  __device__ long*   restrict selfVolumeBuffer_long,
+			  __device__ long*   restrict gradBuffers_long
 
 #endif
 ){
@@ -144,33 +146,34 @@ __kernel void resetBuffer(unsigned const int             bufferSize,
     id += get_global_size(0);
   }
 #endif
-  barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
+//TODO: Global memory fence needed or syncthreads sufficient?
+  __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
 }
 
 
-__kernel void resetTree(const int ntrees,
-			__global const int*   restrict ovTreePointer,
-			__global const int*   restrict ovAtomTreePointer,
-			__global       int*   restrict ovAtomTreeSize,
-			__global const int*   restrict ovAtomTreePaddedSize,
-			__global       int*   restrict ovLevel,
-			__global       real*  restrict ovVolume,
-			__global       real*  restrict ovVsp,
-			__global       real*  restrict ovVSfp,
-			__global       real*  restrict ovSelfVolume,
-			__global       real*  restrict ovVolEnergy,
-			__global       int*   restrict ovLastAtom,
-			__global       int*   restrict ovRootIndex,
-			__global       int*   restrict ovChildrenStartIndex,
-			__global       int*   restrict ovChildrenCount,
-			__global       real4* restrict ovDV1,
-			__global       real4* restrict ovDV2,
+__global__ void resetTree(const int ntrees,
+			__device__ const int*   restrict ovTreePointer,
+			__device__ const int*   restrict ovAtomTreePointer,
+			__device__       int*   restrict ovAtomTreeSize,
+			__device__ const int*   restrict ovAtomTreePaddedSize,
+			__device__       int*   restrict ovLevel,
+			__device__       real*  restrict ovVolume,
+			__device__       real*  restrict ovVsp,
+			__device__       real*  restrict ovVSfp,
+			__device__       real*  restrict ovSelfVolume,
+			__device__       real*  restrict ovVolEnergy,
+			__device__       int*   restrict ovLastAtom,
+			__device__       int*   restrict ovRootIndex,
+			__device__       int*   restrict ovChildrenStartIndex,
+			__device__       int*   restrict ovChildrenCount,
+			__device__       real4* restrict ovDV1,
+			__device__       real4* restrict ovDV2,
 
-			__global       int*  restrict ovProcessedFlag,
-			__global       int*  restrict ovOKtoProcessFlag,
-			__global       int*  restrict ovChildrenReported,
-			__global       int*  restrict ovAtomTreeLock,
-			__global       int*  restrict NIterations
+			__device__       int*  restrict ovProcessedFlag,
+			__device__       int*  restrict ovOKtoProcessFlag,
+			__device__       int*  restrict ovChildrenReported,
+			__device__       int*  restrict ovAtomTreeLock,
+			__device__       int*  restrict NIterations
 			
 			){
 
