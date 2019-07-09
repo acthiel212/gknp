@@ -1,15 +1,14 @@
-//TODO: Cuda Analog or is it even necessary?
-#pragma OPENCL EXTENSION cl_khr_fp64 : enable
-#ifdef SUPPORTS_64_BIT_ATOMICS
-#pragma OPENCL EXTENSION cl_khr_int64_base_atomics : enable
-#endif
+////TODO: Cuda Analog or is it even necessary?
+//#pragma OPENCL EXTENSION cl_khr_fp64 : enable
+//#ifdef SUPPORTS_64_BIT_ATOMICS
+//#pragma OPENCL EXTENSION cl_khr_int64_base_atomics : enable
+//#endif
 
 #define PI (3.14159265359f)
-//TODO: Replace OpenCL get_ functions with Cuda thread variables
-//TODO: Convert all real4 types to real3
+
 //computes volume energy and self-volumes
 //TODO: __attribute__ ?
-__global__ __attribute__((reqd_work_group_size(OV_WORK_GROUP_SIZE,1,1)))
+//__global__ __attribute__((reqd_work_group_size(OV_WORK_GROUP_SIZE,1,1)))
 void computeSelfVolumes(const int ntrees,
   __device__ const int* restrict ovTreePointer,
   __device__ const int* restrict ovAtomTreePointer,
@@ -42,18 +41,18 @@ void computeSelfVolumes(const int ntrees,
   __device__       int*  restrict ovOKtoProcessFlag,
   __device__       int*  restrict ovChildrenReported,
   __device__     real4*  restrict ovAtomBuffer,
-#ifdef SUPPORTS_64_BIT_ATOMICS
+//#ifdef SUPPORTS_64_BIT_ATOMICS
   __device__      long*   restrict gradBuffers_long,
   __device__      long*   restrict selfVolumeBuffer_long,
-#endif
+//#endif
    __device__      real*   restrict selfVolumeBuffer
 ){
-  const unsigned int id = get_local_id(0);
-  const unsigned int gsize = get_local_size(0);
+  const unsigned int id = threadIdx.x;
+  const unsigned int gsize = blockDim.x;
   __local volatile unsigned int nprocessed;
   __local volatile unsigned int niterations;
 
-  unsigned int tree = get_group_id(0);      //index of initial tree
+  unsigned int tree = blockIdx.x;      //index of initial tree
   while(tree < ntrees){
     unsigned int offset = ovTreePointer[tree]; //offset into tree
     unsigned int buffer_offset = tree*padded_num_atoms; // offset into buffer arrays
@@ -75,31 +74,33 @@ void computeSelfVolumes(const int ntrees,
       int atom = ovLastAtom[slot];
       int level = ovLevel[slot];
       if(id == 0) niterations = 0;
-//TODO: Global memory fence needed or syncthreads sufficient?
-      __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
+//TODOLater: Global memory fence needed or syncthreads sufficient?
+      __syncthreads();
       //
       // process section
       //
       do{
-//TODO: Global memory fence needed or syncthreads sufficient?
-	__syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
+//TODOLater: Global memory fence needed or syncthreads sufficient?
+	__syncthreads();
 	if(id == 0) nprocessed = 0;
-//TODO: Global memory fence needed or syncthreads sufficient?
-	__syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
+//TODOLater: Global memory fence needed or syncthreads sufficient?
+	__syncthreads();
 	int processed = ovProcessedFlag[slot];
 	int ok2process = ovOKtoProcessFlag[slot];
-	__syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
+//TODOLater: Global memory fence needed or syncthreads sufficient?
+	__syncthreads();
 	if(processed == 0 && ok2process == 0 && atom >= 0){
 	  if(ovChildrenReported[slot] == ovChildrenCount[slot]){
 	    ok2process = 1;
 	    ovOKtoProcessFlag[slot] = 1;
 	  }
 	}
-//TODO: Global memory fence needed or syncthreads sufficient?
-	__syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
+//TODOLater: Global memory fence needed or syncthreads sufficient?
+	__syncthreads();
 	
 	if(processed == 0 && ok2process > 0 && atom >= 0) {
-	  atomic_inc(&(nprocessed));
+	  //atomic_inc(&(nprocessed));
+	  atomicInc(&(nprocessed));
 	  
 	  real cf = level % 2 == 0 ? -1.0 : 1.0;
 	  real volcoeff  = level > 0 ? cf : 0;
@@ -114,7 +115,8 @@ void computeSelfVolumes(const int ntrees,
 	  //dv1.xyz is (P)1..i in the paper
 	  //dv1.w   is (F)1..i in the paper
 	  //in relation to the gradient of the volume energy function
-	  real4 dv1 = (real4)(0,0,0,volcoeffp*ovVSfp[slot]*ovGamma1i[slot]);
+	  //real4 dv1 = (real4)(0,0,0,volcoeffp*ovVSfp[slot]*ovGamma1i[slot]);
+      real4 dv1 = make_real4(0,0,0,volcoeffp*ovVSfp[slot]*ovGamma1i[slot]);
 	  int start = ovChildrenStartIndex[slot];
 	  int count = ovChildrenCount[slot];
 	  if(count > 0 && start >= 0){
@@ -140,21 +142,31 @@ void computeSelfVolumes(const int ntrees,
 	  real a1i = ovG[slot].w;
 	  real a1 = a1i - an;
 	  real dvvc = dv1.w;//this is (F)1..i
-	  ovDV2[slot].xyz = -ovDV1[slot].xyz * dvvc  + (an/a1i)*dv1.xyz; //this gets accumulated later
-	  ovDV2[slot].w = ovVolume[slot] *  dvvc;//for derivative wrt volumei, gets divided by volumei later
-	  ovPF[slot].xyz =  ovDV1[slot].xyz * dvvc  + (a1/a1i)*dv1.xyz;
-	  ovPF[slot].w   =  ovDV1[slot].w   * dvvc;
+	  //ovDV2[slot].xyz = -ovDV1[slot].xyz * dvvc  + (an/a1i)*dv1.xyz; //this gets accumulated later
+	  //ovDV2[slot].w = ovVolume[slot] *  dvvc;//for derivative wrt volumei, gets divided by volumei later
+	  ovDV2[slot] = make_real4(-ovDV1[slot].x * dvcc + (an/a1i)*dv1.x,
+	                           -ovDV1[slot].y * dvcc + (an/a1i)*dv1.y,
+	                           -ovDV1[slot].z * dvcc + (an/a1i)*dv1.z,
+	                           ovVolume[slot] * dvvc);
+	  //ovPF[slot].xyz =  ovDV1[slot].xyz * dvvc  + (a1/a1i)*dv1.xyz;
+	  //ovPF[slot].w   =  ovDV1[slot].w   * dvvc;
+	  ovPF[slot] = make_real4(ovDV1[slot].x * dvvc  + (a1/a1i)*dv1.x,
+	                          ovDV1[slot].y * dvvc  + (a1/a1i)*dv1.y,
+	                          ovDV1[slot].z * dvvc  + (a1/a1i)*dv1.z,
+	                          ovDV1[slot].w * dvvc);
 	  
 	  //mark parent ok to process counter
 	  int parent_index = ovRootIndex[slot];
 	  if(parent_index >= 0){
-	    atomic_inc(&(ovChildrenReported[parent_index]));
+	    //atomic_inc(&(ovChildrenReported[parent_index]));
+        atomicInc(&(ovChildrenReported[parent_index]));
 	  }
 	  ovProcessedFlag[slot] = 1; //mark as processed
 	  ovOKtoProcessFlag[slot] = 0; //prevent more processing
 	}
 	if(id==0) niterations += 1;
-	__syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
+//TODOLater: Global memory fence needed or syncthreads sufficient?
+	__syncthreads();
       }while( nprocessed > 0 && niterations < gsize); // loop until no more work is done
       //
       // End of processing for section
@@ -164,57 +176,63 @@ void computeSelfVolumes(const int ntrees,
       }
 
       // Updates energy and derivative buffer for this section
-      //TODO: Global memory fence needed or syncthreads sufficient?
-      __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
-#ifdef SUPPORTS_64_BIT_ATOMICS
+      //TODOLater: Global memory fence needed or syncthreads sufficient?
+      __syncthreads();
+//#ifdef SUPPORTS_64_BIT_ATOMICS
       if(atom >= 0){
 	real4 dv2 = ovDV2[slot];
 	/*
+	 * Commented Code in Original  Plugin
 	atom_add(&forceBuffers[atom], (long) (dv2.x*0x100000000));
 	atom_add(&forceBuffers[atom+padded_num_atoms], (long) (dv2.y*0x100000000));
 	atom_add(&forceBuffers[atom+2*padded_num_atoms], (long) (dv2.z*0x100000000));
 	atom_add(&gradVBuffer_long[atom], (long) (-dv2.w*0x100000000));
 	*/
-	atom_add(&gradBuffers_long[atom                   ], (long) (dv2.x*0x100000000));
-	atom_add(&gradBuffers_long[atom+  padded_num_atoms], (long) (dv2.y*0x100000000));
-	atom_add(&gradBuffers_long[atom+2*padded_num_atoms], (long) (dv2.z*0x100000000));
-	atom_add(&gradBuffers_long[atom+3*padded_num_atoms], (long) (dv2.w*0x100000000));
-	atom_add(&selfVolumeBuffer_long[atom], (long) (ovSelfVolume[slot]*0x100000000));
+//	atom_add(&gradBuffers_long[atom                   ], (long) (dv2.x*0x100000000));
+//	atom_add(&gradBuffers_long[atom+  padded_num_atoms], (long) (dv2.y*0x100000000));
+//	atom_add(&gradBuffers_long[atom+2*padded_num_atoms], (long) (dv2.z*0x100000000));
+//	atom_add(&gradBuffers_long[atom+3*padded_num_atoms], (long) (dv2.w*0x100000000));
+//	atom_add(&selfVolumeBuffer_long[atom], (long) (ovSelfVolume[slot]*0x100000000));
+    atomicAdd(&gradBuffers_long[atom                   ], (long) (dv2.x*0x100000000));
+    atomicAdd(&gradBuffers_long[atom+  padded_num_atoms], (long) (dv2.y*0x100000000));
+    atomicAdd(&gradBuffers_long[atom+2*padded_num_atoms], (long) (dv2.z*0x100000000));
+    atomicAdd(&gradBuffers_long[atom+3*padded_num_atoms], (long) (dv2.w*0x100000000));
+    atomicAdd(&selfVolumeBuffer_long[atom], (long) (ovSelfVolume[slot]*0x100000000));
 	// nothing to do here for the volume energy,
 	// it is automatically stored in ovVolEnergy at the 1-body level
       }
-#else
-      // 
-      //without atomics can not accumulate in parallel due to "atom" collisions
-      //
-      if(id==0){
-	unsigned int tree_offset =  offset + isection*gsize;
-	for(unsigned int is = tree_offset ; is < tree_offset + gsize ; is++){ //loop over slots in section
-	  int at = ovLastAtom[is];
-	  if(at >= 0){
-	    // nothing to do here for the volume energy,
-	    // it is automatically stored in ovVolEnergy at the 1-body level
-	    ovAtomBuffer[buffer_offset + at] += ovDV2[is];//xyz is position gradient, w is volume gradient
-	    selfVolumeBuffer[buffer_offset + at] += ovSelfVolume[is];
-	  }
-	}
-      }
-#endif
-//TODO: Global memory fence needed or syncthreads sufficient?
-      __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
+//#else
+//      //
+//      //without atomics can not accumulate in parallel due to "atom" collisions
+//      //
+//      if(id==0){
+//	unsigned int tree_offset =  offset + isection*gsize;
+//	for(unsigned int is = tree_offset ; is < tree_offset + gsize ; is++){ //loop over slots in section
+//	  int at = ovLastAtom[is];
+//	  if(at >= 0){
+//	    // nothing to do here for the volume energy,
+//	    // it is automatically stored in ovVolEnergy at the 1-body level
+//	    ovAtomBuffer[buffer_offset + at] += ovDV2[is];//xyz is position gradient, w is volume gradient
+//	    selfVolumeBuffer[buffer_offset + at] += ovSelfVolume[is];
+//	  }
+//	}
+//      }
+//#endif
+//TODOLater: Global memory fence needed or syncthreads sufficient?
+      __syncthreads();
     }
 
     // moves to next tree
-    tree += get_num_groups(0);
-//TODO: Global memory fence needed or syncthreads sufficient?
-    __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
+    tree += gridDim.x;
+//TODOLater: Global memory fence needed or syncthreads sufficient?
+    __syncthreads();
   }
 }
 
 #ifdef NOTNOW
 //same as self-volume kernel above but does not update self volumes
 //TODO: __attribute__ ?
-__global__ __attribute__((reqd_work_group_size(OV_WORK_GROUP_SIZE,1,1)))
+//__global__ __attribute__((reqd_work_group_size(OV_WORK_GROUP_SIZE,1,1)))
 void computeVolumeEnergy(const int ntrees,
   __device__ const int* restrict ovTreePointer,
   __device__ const int* restrict ovAtomTreePointer,
@@ -245,16 +263,16 @@ void computeVolumeEnergy(const int ntrees,
   __device__       int*  restrict ovOKtoProcessFlag,
   __device__       int*  restrict ovChildrenReported,
   __device__     real4*  restrict ovAtomBuffer
-#ifdef SUPPORTS_64_BIT_ATOMICS
+//#ifdef SUPPORTS_64_BIT_ATOMICS
    , __device__      long*   restrict forceBuffers
-#endif
+//#endif
 ){
-  const unsigned int id = get_local_id(0);
-  const unsigned int gsize = get_local_size(0);
+  const unsigned int id = threadIdx.x;
+  const unsigned int gsize = blockDim.x;
   __local volatile unsigned int nprocessed;
   __local volatile unsigned int niterations;
 
-  unsigned int tree = get_group_id(0);      //index of initial tree
+  unsigned int tree = blockIdx.x;      //index of initial tree
   while(tree < ntrees){
     unsigned int offset = ovTreePointer[tree]; //offset into tree
     unsigned int buffer_offset = tree*PADDED_NUM_ATOMS; // offset into buffer arrays
@@ -271,36 +289,37 @@ void computeVolumeEnergy(const int ntrees,
 
       //reset accumulators
       ovVolEnergy[slot] = 0;
-      ovDV2[slot] = 0;
+      ovDV2[slot] = make_real4(0);
       int atom = ovLastAtom[slot];
       int level = ovLevel[slot];
       if(id == 0) niterations = 0;
-      //TODO: Global memory fence needed or syncthreads sufficient?
-      __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
+      //TODOLater: Global memory fence needed or syncthreads sufficient?
+      __syncthreads();
       //
       // process section
       //
       do{
-    //TODO: Global memory fence needed or syncthreads sufficient?
-	__syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
+    //TODOLater: Global memory fence needed or syncthreads sufficient?
+	__syncthreads();
 	if(id == 0) nprocessed = 0;
-	//TODO: Global memory fence needed or syncthreads sufficient?
-	__syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
+	//TODOLater: Global memory fence needed or syncthreads sufficient?
+	__syncthreads();
 	int processed = ovProcessedFlag[slot];
 	int ok2process = ovOKtoProcessFlag[slot];
-	//TODO: Global memory fence needed or syncthreads sufficient?
-	__syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
+	//TODOLater: Global memory fence needed or syncthreads sufficient?
+	__syncthreads();
 	if(processed == 0 && ok2process == 0 && atom >= 0){
 	  if(ovChildrenReported[slot] == ovChildrenCount[slot]){
 	    ok2process = 1;
 	    ovOKtoProcessFlag[slot] = 1;
 	  }
 	}
-	//TODO: Global memory fence needed or syncthreads sufficient?
-	__syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
+	//TODOLater: Global memory fence needed or syncthreads sufficient?
+	__syncthreads();
 	
 	if(processed == 0 && ok2process > 0 && atom >= 0) {
-	  atomic_inc(&(nprocessed));
+	  //atomic_inc(&(nprocessed));
+	  atomicInc(&(nprocessed));
 	  
 	  real cf = level % 2 == 0 ? -1.0 : 1.0;
 	  real volcoeff  = level > 0 ? cf : 0;
@@ -311,7 +330,8 @@ void computeVolumeEnergy(const int ntrees,
 	  
 	  //gather self volumes and derivatives from children
 	  //dv.w is the gradient of the energy
-	  real4 dv1 = (real4)(0,0,0,volcoeffp*ovVSfp[slot]*ovGamma1i[slot]);
+	  //real4 dv1 = (real4)(0,0,0,volcoeffp*ovVSfp[slot]*ovGamma1i[slot]);
+	  real4 dv1 = make_real4(0,0,0,volcoeffp*ovVSfp[slot]*ovGamma1i[slot]);
 	  int start = ovChildrenStartIndex[slot];
 	  int count = ovChildrenCount[slot];
 	  if(count > 0 && start >= 0){
@@ -333,20 +353,30 @@ void computeVolumeEnergy(const int ntrees,
 	  real a1i = ovG[slot].w;
 	  real a1 = a1i - an;
 	  real dvvc = dv1.w;
-	  ovDV2[slot].xyz = -ovDV1[slot].xyz * dvvc  + (an/a1i)*dv1.xyz; //this gets accumulated later
-	  ovPF[slot].xyz =  ovDV1[slot].xyz * dvvc  + (a1/a1i)*dv1.xyz;
-	  ovPF[slot].w   =  ovDV1[slot].w   * dvvc;
+	  //ovDV2[slot].xyz = -ovDV1[slot].xyz * dvvc  + (an/a1i)*dv1.xyz; //this gets accumulated later
+	  ovDV2[slot] = make_real4(-ovDV1[slot].x * dvcc + (an/a1i)*dv1.x,
+	                           -ovDV1[slot].y * dvcc + (an/a1i)*dv1.y,
+	                           -ovDV1[slot].z * dvcc + (an/a1i)*dv1.z,
+	                            ovDV2[slot].w);
+	  //ovPF[slot].xyz =  ovDV1[slot].xyz * dvvc  + (a1/a1i)*dv1.xyz;
+	  //ovPF[slot].w   =  ovDV1[slot].w   * dvvc;
+	  ovPF[slot] = make_real4(ovDV1[slot].x * dvvc  + (a1/a1i)*dv1.x,
+	                          ovDV1[slot].y * dvvc  + (a1/a1i)*dv1.y,
+	                          ovDV1[slot].z * dvvc  + (a1/a1i)*dv1.z,
+	                          ovDV1[slot].w * dvvc);
 	  
 	  //mark parent ok to process counter
 	  int parent_index = ovRootIndex[slot];
 	  if(parent_index >= 0){
-	    atomic_inc(&(ovChildrenReported[parent_index]));
+	    //atomic_inc(&(ovChildrenReported[parent_index]));
+	    atomicInc(&(ovChildrenReported[parent_index]));
 	  }
 	  ovProcessedFlag[slot] = 1; //mark as processed
 	  ovOKtoProcessFlag[slot] = 0; //prevent more processing
 	}
 	if(id==0) niterations += 1;
-	__syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
+	//TODOLater: Global memory fence needed or syncthreads sufficient?
+	__syncthreads();
       }while( nprocessed > 0 && niterations < gsize); // loop until no more work is done
       //
       // End of processing for section
@@ -356,41 +386,47 @@ void computeVolumeEnergy(const int ntrees,
       }
 
       // Updates energy and derivative buffer for this section
-      //TODO: Global memory fence needed or syncthreads sufficient?
-      __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
-#ifdef SUPPORTS_64_BIT_ATOMICS
+      //TODOLater: Global memory fence needed or syncthreads sufficient?
+      __syncthreads();
+//#ifdef SUPPORTS_64_BIT_ATOMICS
       if(atom >= 0 && atom < NUM_ATOMS_TREE){
 	real4 dv2 = -ovDV2[slot];
-	atom_add(&forceBuffers[atom], (long) (dv2.x*0x100000000));
-	atom_add(&forceBuffers[atom+PADDED_NUM_ATOMS], (long) (dv2.y*0x100000000));
-	atom_add(&forceBuffers[atom+2*PADDED_NUM_ATOMS], (long) (dv2.z*0x100000000));
+//	atom_add(&forceBuffers[atom], (long) (dv2.x*0x100000000));
+//	atom_add(&forceBuffers[atom+PADDED_NUM_ATOMS], (long) (dv2.y*0x100000000));
+//	atom_add(&forceBuffers[atom+2*PADDED_NUM_ATOMS], (long) (dv2.z*0x100000000));
+    atomicAdd(&forceBuffers[atom], (long) (dv2.x*0x100000000));
+    atomicAdd(&forceBuffers[atom+PADDED_NUM_ATOMS], (long) (dv2.y*0x100000000));
+    atomicAdd(&forceBuffers[atom+2*PADDED_NUM_ATOMS], (long) (dv2.z*0x100000000));
 	// nothing to do here for the volume energy,
 	// it is automatically stored in ovVolEnergy at the 1-body level
       }
-#else
-      // 
-      //without atomics can not accumulate in parallel due to "atom" collisions
-      //
-      if(id==0){
-	unsigned int tree_offset =  offset + isection*gsize;
-	for(unsigned int is = tree_offset ; is < tree_offset + gsize ; is++){ //loop over slots in section
-	  int at = ovLastAtom[is];
-	  if(at >= 0 && atom < NUM_ATOMS_TREE){
-	    // nothing to do here for the volume energy,
-	    // it is automatically stored in ovVolEnergy at the 1-body level
-	    ovAtomBuffer[buffer_offset + at] += (real4)(ovDV2[is].xyz, 0); //.w element was used to store the energy
-	  }
-	}
-      }
-#endif
-      //TODO: Global memory fence needed or syncthreads sufficient?
-      __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
+//#else
+//      //
+//      //without atomics can not accumulate in parallel due to "atom" collisions
+//      //
+//      if(id==0){
+//	unsigned int tree_offset =  offset + isection*gsize;
+//	for(unsigned int is = tree_offset ; is < tree_offset + gsize ; is++){ //loop over slots in section
+//	  int at = ovLastAtom[is];
+//	  if(at >= 0 && atom < NUM_ATOMS_TREE){
+//	    // nothing to do here for the volume energy,
+//	    // it is automatically stored in ovVolEnergy at the 1-body level
+//	    //ovAtomBuffer[buffer_offset + at] += (real4)(ovDV2[is].xyz, 0); //.w element was used to store the energy
+//	    ovAtomBuffer[buffer_offset + at] = make_real4(ovAtomBuffer[buffer_offset + at].x+ovDV2[is].x,
+//	            ovAtomBuffer[buffer_offset + at].y + ovDV2[is].y,
+//	            ovAtomBuffer[buffer_offset + at].z + ovDV2[is].z, 0);
+//	  }
+//	}
+//      }
+//#endif
+      //TODOLater: Global memory fence needed or syncthreads sufficient?
+      __syncthreads();
     }
 
     // moves to next tree
-    tree += get_num_groups(0);
-    //TODO: Global memory fence needed or syncthreads sufficient?
-    __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
+    tree += gridDim.x;
+    //TODOLater: Global memory fence needed or syncthreads sufficient?
+    __syncthreads();
   }
 }
 #endif

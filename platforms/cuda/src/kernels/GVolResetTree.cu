@@ -1,8 +1,8 @@
 //TODO: Cuda Analog or is it even necessary?
-#pragma OPENCL EXTENSION cl_khr_fp64 : enable
-#ifdef SUPPORTS_64_BIT_ATOMICS
-#pragma OPENCL EXTENSION cl_khr_int64_base_atomics : enable
-#endif
+//#pragma OPENCL EXTENSION cl_khr_fp64 : enable
+//#ifdef SUPPORTS_64_BIT_ATOMICS
+//#pragma OPENCL EXTENSION cl_khr_int64_base_atomics : enable
+//#endif
 
 #define PI (3.14159265359f)
 
@@ -10,8 +10,6 @@
  * Initialize tree for execution, set Processed to 0, OKtoProcess=1 for leaves and out-of-bound,
  * reset self volume accumulators.
  */
-//TODO: Replace OpenCL get_ functions with Cuda thread variables
-//TODO: Convert all real4 types to real3
 
 __device__ void resetTreeCounters(
   unsigned          const int            padded_tree_size,
@@ -23,8 +21,8 @@ __device__ void resetTreeCounters(
   __device__          const int*   restrict ovChildrenCount,
   __device__                int*   restrict ovChildrenReported
 ){
-  const unsigned int id = get_local_id(0);  //the index of this thread in the workgroup
-  const unsigned int nblock = get_local_size(0); //size of work group
+  const unsigned int id = threadIdx.x;  //the index of this thread in the workgroup
+  const unsigned int nblock = blockDim.x; //size of work group
   unsigned int begin = offset + id;
   unsigned int size = offset + tree_size;
   unsigned int end  = offset + padded_tree_size;
@@ -55,7 +53,7 @@ __global__ void resetSelfVolumes(const int ntrees,
 			       __device__       int*   restrict ovChildrenReported,
 			       __device__       int*   restrict PanicButton
 ){
-    unsigned int tree = get_group_id(0);      //initial tree
+    unsigned int tree = blockIdx.x;      //initial tree
     if(PanicButton[0] > 0) return;
     while (tree < ntrees){
 
@@ -68,7 +66,7 @@ __global__ void resetSelfVolumes(const int ntrees,
 			ovChildrenStartIndex,
 			ovChildrenCount,
 			ovChildrenReported);
-      tree += get_num_groups(0);
+      tree += gridDim.x;
     }
 }
 
@@ -95,8 +93,8 @@ __device__ void resetTreeSection(
 		      __device__       int*   restrict ovProcessedFlag,
 		      __device__       int*   restrict ovOKtoProcessFlag,
 		      __device__       int*   restrict ovChildrenReported){
-  const unsigned int nblock = get_local_size(0); //size of thread block
-  const unsigned int id = get_local_id(0);  //the index of this thread in the warp
+  const unsigned int nblock = blockDim.x; //size of thread block
+  const unsigned int id = threadIdx.x;  //the index of this thread in the warp
 
   unsigned int begin = offset + id;
   unsigned int end  = offset + padded_tree_size;
@@ -110,8 +108,10 @@ __device__ void resetTreeSection(
   for(int slot=begin; slot<end ; slot+=nblock) ovRootIndex[slot] = -1;
   for(int slot=begin; slot<end ; slot+=nblock) ovChildrenStartIndex[slot] = -1;
   for(int slot=begin; slot<end ; slot+=nblock) ovChildrenCount[slot] = 0;
-  for(int slot=begin; slot<end ; slot+=nblock) ovDV1[slot] = (real4)0;
-  for(int slot=begin; slot<end ; slot+=nblock) ovDV2[slot] = (real4)0;
+  //for(int slot=begin; slot<end ; slot+=nblock) ovDV1[slot] = (real4)0;
+  //for(int slot=begin; slot<end ; slot+=nblock) ovDV2[slot] = (real4)0;
+  for(int slot=begin; slot<end ; slot+=nblock) ovDV1[slot] = make_real4(0);
+  for(int slot=begin; slot<end ; slot+=nblock) ovDV2[slot] = make_real4(0);
   for(int slot=begin; slot<end ; slot+=nblock) ovProcessedFlag[slot] = 0;
   for(int slot=begin; slot<end ; slot+=nblock) ovOKtoProcessFlag[slot] = 0;
   for(int slot=begin; slot<end ; slot+=nblock) ovChildrenReported[slot] = 0;
@@ -122,32 +122,33 @@ __global__ void resetBuffer(unsigned const int             bufferSize,
 			  unsigned const int             numBuffers,
 			  __device__       real4* restrict ovAtomBuffer,
 			  __device__        real* restrict selfVolumeBuffer
-#ifdef SUPPORTS_64_BIT_ATOMICS
+//#ifdef SUPPORTS_64_BIT_ATOMICS
 			  ,
 			  __device__ long*   restrict selfVolumeBuffer_long,
 			  __device__ long*   restrict gradBuffers_long
 
-#endif
+//#endif
 ){
-  unsigned int id = get_global_id(0);
-#ifdef SUPPORTS_64_BIT_ATOMICS
+  unsigned int id = blockIdx.x*blockDim.x+threadIdx.x;
+//#ifdef SUPPORTS_64_BIT_ATOMICS
   while (id < bufferSize){
     selfVolumeBuffer_long[id] = 0;
     gradBuffers_long[id             ] = 0;
     gradBuffers_long[id+  bufferSize] = 0;
     gradBuffers_long[id+2*bufferSize] = 0;
     gradBuffers_long[id+3*bufferSize] = 0;
-    id += get_global_size(0);
+    id += blockDim.x*gridDim.x;
   }
-#else
-  while(id < bufferSize*numBuffers){
-    ovAtomBuffer[id] = (real4)0;
-    selfVolumeBuffer[id] = 0;
-    id += get_global_size(0);
-  }
-#endif
-//TODO: Global memory fence needed or syncthreads sufficient?
-  __syncthreads(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
+//#else
+//  while(id < bufferSize*numBuffers){
+//    //ovAtomBuffer[id] = (real4)0;
+//    ovAtomBuffer[id] = make_real4(0);
+//    selfVolumeBuffer[id] = 0;
+//    id += blockDim.x*gridDim.x;
+//  }
+//#endif
+//TODOLater: Global memory fence needed or syncthreads sufficient?
+  __syncthreads();
 }
 
 
@@ -178,7 +179,7 @@ __global__ void resetTree(const int ntrees,
 			){
 
 
-  unsigned int section = get_group_id(0); // initial assignment of warp to tree section
+  unsigned int section = blockIdx.x; // initial assignment of warp to tree section
   while(section < ntrees){
     unsigned int offset = ovTreePointer[section];
     unsigned int padded_tree_size = ovAtomTreePaddedSize[section];
@@ -201,10 +202,10 @@ __global__ void resetTree(const int ntrees,
 		     ovOKtoProcessFlag,
 		     ovChildrenReported
 		     );
-    if(get_local_id(0) == 0){
+    if(threadIdx.x == 0){
       ovAtomTreeLock[section] = 0;
       NIterations[section] = 0;
     }
-    section += get_num_groups(0); //next section  
+    section += gridDim.x; //next section
   }
 }
