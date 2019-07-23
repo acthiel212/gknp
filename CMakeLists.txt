@@ -1,6 +1,7 @@
 #---------------------------------------------------
 # OpenMM GKNP Plugin
 #----------------------------------------------------
+set(CMAKE_VERBOSE_MAKEFILE on)
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
@@ -81,6 +82,19 @@ ADD_SUBDIRECTORY(platforms/reference)
 
 #to find FindOpenCL.cmake etc.
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}")
+
+#
+# Build/Install for the Cuda platform (incomplete)
+#
+FIND_PACKAGE(Cuda QUIET)
+IF(CUDA_FOUND)
+    SET(GKNP_BUILD_CUDA_LIB ON CACHE BOOL "Build implementation for Cuda")
+ELSE(CUDA_FOUND)
+    SET(GKNP_BUILD_CUDA_LIB OFF CACHE BOOL "Build implementation for Cuda")
+ENDIF(CUDA_FOUND)
+IF(GKNP_BUILD_CUDA_LIB)
+    ADD_SUBDIRECTORY(platforms/cuda)
+ENDIF(GKNP_BUILD_CUDA_LIB)
 
 #
 # Testing
