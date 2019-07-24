@@ -21,15 +21,12 @@
   <component name="ChangeListManager">
     <list default="true" id="334c0868-2ae5-45bf-be91-b3ded1366d24" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/dictionaries/andthiel.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CMakeFiles/cmake.check_cache" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/platforms/cuda/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/platforms/cuda/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/platforms/cuda/EncodeCLFiles.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/platforms/cuda/EncodeCUFiles.cmake" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/platforms/cuda/src/CudaGKNPKernelSources.h.in" beforeDir="false" afterPath="$PROJECT_DIR$/platforms/cuda/src/CudaGKNPKernelSources.h.in" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/platforms/cuda/src/CudaGKNPKernels.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/platforms/cuda/src/CudaGKNPKernels.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/platforms/cuda/src/CudaGKNPKernels.h" beforeDir="false" afterPath="$PROJECT_DIR$/platforms/cuda/src/CudaGKNPKernels.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/platforms/cuda/tests/TestOpenCLAGBNPForce.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/platforms/cuda/tests/TestOpenCLAGBNPForce.cpp" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -45,107 +42,13 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/platforms/cuda/src/CudaGKNPKernels.cpp">
+        <entry file="file://$PROJECT_DIR$/platforms/cuda/tests/TestOpenCLAGBNPForce.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="226">
-              <caret line="1968" column="65" lean-forward="true" selection-start-line="1968" selection-start-column="65" selection-end-line="1968" selection-end-column="65" />
+            <state relative-caret-position="-605">
+              <caret line="31" column="6" selection-start-line="31" selection-start-column="6" selection-end-line="31" selection-end-column="6" />
               <folding>
-                <element signature="e#240#268#0" expanded="true" />
-                <element signature="e#1788#6580#0" />
-                <element signature="e#6582#8271#0" />
-                <element signature="e#8274#14833#0" />
-                <element signature="e#14835#15765#0" />
-                <element signature="e#15767#20080#0" />
-                <element signature="e#20082#20508#0" />
-                <element signature="e#20510#127110#0" />
-                <element signature="e#146125#147512#0" />
-                <marker date="1563907727000" expanded="true" signature="20946:30130" ph="{...}" />
-                <marker date="1563907727000" expanded="false" signature="30162:35505" ph="{...}" />
-                <marker date="1563907727000" expanded="false" signature="35535:77027" ph="{...}" />
-                <marker date="1563907727000" expanded="true" signature="77059:81305" ph="{...}" />
-                <marker date="1563907727000" expanded="true" signature="81356:84976" ph="{...}" />
-                <marker date="1563907727000" expanded="false" signature="86084:88023" ph="{...}" />
-                <marker date="1563907727000" expanded="false" signature="88061:88753" ph="{...}" />
-                <marker date="1563907727000" expanded="false" signature="88803:91435" ph="{...}" />
-                <marker date="1563907727000" expanded="false" signature="91482:94250" ph="{...}" />
-                <marker date="1563907727000" expanded="false" signature="94296:95532" ph="{...}" />
-                <marker date="1563907727000" expanded="false" signature="95561:99440" ph="{...}" />
-                <marker date="1563907727000" expanded="true" signature="99482:104675" ph="{...}" />
-                <marker date="1563907727000" expanded="false" signature="104725:105482" ph="{...}" />
-                <marker date="1563907727000" expanded="true" signature="105533:108805" ph="{...}" />
-                <marker date="1563907727000" expanded="true" signature="109430:110499" ph="{...}" />
-                <marker date="1563907727000" expanded="true" signature="110666:111472" ph="{...}" />
-                <marker date="1563907727000" expanded="false" signature="111517:114256" ph="{...}" />
-                <marker date="1563907727000" expanded="false" signature="114307:115548" ph="{...}" />
-                <marker date="1563907727000" expanded="false" signature="115592:116458" ph="{...}" />
-                <marker date="1563907727000" expanded="false" signature="116475:117041" ph="{...}" />
-                <marker date="1563907727000" expanded="false" signature="117061:117470" ph="{...}" />
-                <marker date="1563907727000" expanded="false" signature="117949:120625" ph="{...}" />
-                <marker date="1563907727000" expanded="false" signature="120674:121530" ph="{...}" />
-                <marker date="1563907727000" expanded="false" signature="121578:122317" ph="{...}" />
-                <marker date="1563907727000" expanded="false" signature="122361:124647" ph="{...}" />
-                <marker date="1563907727000" expanded="false" signature="124690:125759" ph="{...}" />
-                <marker date="1563907727000" expanded="false" signature="125835:126470" ph="{...}" />
-                <marker date="1563907727000" expanded="false" signature="126515:129254" ph="{...}" />
-                <marker date="1563907727000" expanded="false" signature="129352:130593" ph="{...}" />
-                <marker date="1563907727000" expanded="false" signature="130637:131503" ph="{...}" />
-                <marker date="1563907727000" expanded="false" signature="131522:131797" ph="{...}" />
-                <marker date="1563907727000" expanded="false" signature="131817:132226" ph="{...}" />
+                <element signature="e#305#327#0" expanded="true" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/platforms/cuda/src/CudaGKNPKernels.h">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="715">
-              <caret line="438" column="12" selection-start-line="438" selection-start-column="12" selection-end-line="438" selection-end-column="12" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file:///usr/local/cuda/include/cuda.h">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="772">
-              <caret line="8392" column="38" selection-start-line="8392" selection-start-column="31" selection-end-line="8392" selection-end-column="38" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/platforms/cuda/src/cl.hpp">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="20354">
-              <caret line="2650" column="41" selection-start-line="2650" selection-start-column="36" selection-end-line="2650" selection-end-column="41" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/../build_openmm_clean/include/openmm/cuda/CudaContext.h">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="15">
-              <caret line="177" column="15" selection-start-line="177" selection-start-column="15" selection-end-line="177" selection-end-column="15" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/../build_openmm_clean/include/openmm/opencl/OpenCLContext.h">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="285">
-              <caret line="773" column="16" selection-start-line="773" selection-start-column="16" selection-end-line="773" selection-end-column="16" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/openmmapi/include/GKNPForce.h">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="285">
-              <caret line="48" column="8" selection-start-line="48" selection-start-column="8" selection-end-line="48" selection-end-column="8" />
             </state>
           </provider>
         </entry>
@@ -154,9 +57,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>cu.getLongForceBuffer</find>
-      <find>Buffer</find>
-      <find>getF</find>
       <find>update_energy</find>
       <find>ResetRescanOverlapTreeKernel</find>
       <find>InitRescanOverlapTreeKernel</find>
@@ -183,7 +83,10 @@
       <find>Event</find>
       <find>buffer</find>
       <find>CUevent</find>
+      <find>Cuda_Dir</find>
       <find>panic</find>
+      <find>cuda</find>
+      <find>Cuda</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -198,15 +101,18 @@
         <option value="$PROJECT_DIR$/cmake-build-debug/CMakeCache.txt" />
         <option value="$PROJECT_DIR$/cmake-build-debug/platforms/cuda/src/CudaGKNPKernelSources.cpp" />
         <option value="$PROJECT_DIR$/platforms/cuda/src/CudaGKNPKernelSources.h.in" />
-        <option value="$PROJECT_DIR$/platforms/cuda/src/CudaGKNPKernels.h" />
         <option value="$PROJECT_DIR$/platforms/cuda/src/CudaGKNPKernels.cpp" />
+        <option value="$PROJECT_DIR$/platforms/cuda/src/CudaGKNPKernels.h" />
+        <option value="$PROJECT_DIR$/platforms/cuda/tests/TestOpenCLAGBNPForce.cpp" />
+        <option value="$PROJECT_DIR$/CMakeLists.txt" />
+        <option value="$PROJECT_DIR$/platforms/cuda/CMakeLists.txt" />
       </list>
     </option>
   </component>
   <component name="OCFindUsagesOptions" text="false" ivars="false" properties="true" derivedClasses="false" />
   <component name="ProjectFrameBounds">
-    <option name="x" value="143" />
-    <option name="y" value="23" />
+    <option name="x" value="145" />
+    <option name="y" value="26" />
     <option name="width" value="1676" />
     <option name="height" value="1050" />
   </component>
@@ -215,6 +121,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -233,18 +140,10 @@
               <item name="platforms" type="462c0819:PsiDirectoryNode" />
               <item name="cuda" type="462c0819:PsiDirectoryNode" />
             </path>
-            <path>
-              <item name="gknp" type="b2602c69:ProjectViewProjectNode" />
-              <item name="gknp" type="462c0819:PsiDirectoryNode" />
-              <item name="platforms" type="462c0819:PsiDirectoryNode" />
-              <item name="cuda" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-            </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -327,18 +226,19 @@
       <workItem from="1562860373339" duration="131000" />
       <workItem from="1562861338983" duration="21970000" />
       <workItem from="1563396183680" duration="138000" />
-      <workItem from="1563472687880" duration="17827000" />
+      <workItem from="1563472687880" duration="22170000" />
+      <workItem from="1563999934300" duration="555000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="46715000" />
+    <option name="totallyTimeSpent" value="51613000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="143" y="23" width="1676" height="1050" extended-state="0" />
+    <frame x="145" y="26" width="1676" height="1050" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.19951041" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.20195839" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -354,7 +254,7 @@
       <window_info anchor="bottom" id="Terminal" order="10" />
       <window_info anchor="bottom" id="Event Log" order="11" side_tool="true" />
       <window_info anchor="bottom" id="Version Control" order="12" />
-      <window_info anchor="bottom" id="CMake" order="13" weight="0.32882413" />
+      <window_info active="true" anchor="bottom" id="CMake" order="13" visible="true" weight="0.32881" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -390,13 +290,6 @@
     <entry file="file://$PROJECT_DIR$/cmake-build-debug/platforms/cuda/src/CudaGKNPKernelSources.h">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/cmake-build-debug/CMakeCache.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="5040">
-          <caret line="336" column="27" selection-start-line="336" selection-start-column="27" selection-end-line="336" selection-end-column="27" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/../build_openmm_clean/include/openmm/cuda/CudaContext.h">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="15">
@@ -418,13 +311,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/openmmapi/include/GKNPForce.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
-          <caret line="48" column="8" selection-start-line="48" selection-start-column="8" selection-end-line="48" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/platforms/cuda/src/cl.hpp">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="20354">
@@ -432,24 +318,51 @@
         </state>
       </provider>
     </entry>
-    <entry file="file:///usr/local/cuda/include/cuda.h">
+    <entry file="file://$PROJECT_DIR$/platforms/cuda/src/CudaGKNPKernels.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="772">
-          <caret line="8392" column="38" selection-start-line="8392" selection-start-column="31" selection-end-line="8392" selection-end-column="38" />
+        <state relative-caret-position="1117">
+          <caret line="442" column="1" selection-start-line="442" selection-start-column="1" selection-end-line="442" selection-end-column="1" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/platforms/cuda/src/CudaGKNPKernels.h">
+    <entry file="file://$PROJECT_DIR$/cmake-build-debug/cmake_install.cmake">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/openmmapi/include/GKNPForce.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="715">
-          <caret line="438" column="12" selection-start-line="438" selection-start-column="12" selection-end-line="438" selection-end-column="12" />
+        <state relative-caret-position="105">
+          <caret line="7" column="9" selection-start-line="7" selection-start-column="9" selection-end-line="7" selection-end-column="9" />
+          <folding>
+            <element signature="e#299#326#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cmake-build-debug/CMakeCache.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4905">
+          <caret line="327" column="15" selection-start-line="327" selection-start-column="15" selection-end-line="327" selection-end-column="15" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1350">
+          <caret line="90" column="72" selection-start-line="90" selection-start-column="68" selection-end-line="90" selection-end-column="72" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/local/cuda/include/cuda.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="125880">
+          <caret line="8392" column="38" selection-start-line="8392" selection-start-column="31" selection-end-line="8392" selection-end-column="38" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/platforms/cuda/src/CudaGKNPKernels.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="226">
-          <caret line="1968" column="65" lean-forward="true" selection-start-line="1968" selection-start-column="65" selection-end-line="1968" selection-end-column="65" />
+        <state relative-caret-position="29520">
+          <caret line="1968" column="65" selection-start-line="1968" selection-start-column="65" selection-end-line="1968" selection-end-column="65" />
           <folding>
             <element signature="e#240#268#0" expanded="true" />
             <element signature="e#1788#6580#0" />
@@ -458,8 +371,6 @@
             <element signature="e#14835#15765#0" />
             <element signature="e#15767#20080#0" />
             <element signature="e#20082#20508#0" />
-            <element signature="e#20510#127110#0" />
-            <element signature="e#146125#147512#0" />
             <marker date="1563907727000" expanded="true" signature="20946:30130" ph="{...}" />
             <marker date="1563907727000" expanded="false" signature="30162:35505" ph="{...}" />
             <marker date="1563907727000" expanded="false" signature="35535:77027" ph="{...}" />
@@ -492,6 +403,33 @@
             <marker date="1563907727000" expanded="false" signature="130637:131503" ph="{...}" />
             <marker date="1563907727000" expanded="false" signature="131522:131797" ph="{...}" />
             <marker date="1563907727000" expanded="false" signature="131817:132226" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/openmmapi/src/GKNPForce.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="60">
+          <caret line="4" column="9" selection-start-line="4" selection-start-column="9" selection-end-line="4" selection-end-column="9" />
+          <folding>
+            <element signature="e#240#259#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/platforms/cuda/CMakeLists.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="528">
+          <caret line="64" column="49" selection-start-line="64" selection-start-column="49" selection-end-line="64" selection-end-column="49" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/platforms/cuda/tests/TestOpenCLAGBNPForce.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-605">
+          <caret line="31" column="6" selection-start-line="31" selection-start-column="6" selection-end-line="31" selection-end-column="6" />
+          <folding>
+            <element signature="e#305#327#0" expanded="true" />
           </folding>
         </state>
       </provider>

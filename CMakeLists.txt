@@ -86,7 +86,7 @@ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}")
 #
 # Build/Install for the Cuda platform (incomplete)
 #
-FIND_PACKAGE(Cuda QUIET)
+FIND_PACKAGE(CUDA QUIET)
 IF(CUDA_FOUND)
     SET(GKNP_BUILD_CUDA_LIB ON CACHE BOOL "Build implementation for Cuda")
 ELSE(CUDA_FOUND)

@@ -6,7 +6,7 @@
  * This tests the OpenCL implementation of AGBNPForce.
  */
 
-#include "AGBNPForce.h"
+#include "GKNPForce.h"
 #include "openmm/internal/AssertionUtilities.h"
 #include "openmm/Context.h"
 #include "openmm/Platform.h"
@@ -17,7 +17,7 @@
 #include <iostream>
 #include <vector>
 
-using namespace AGBNPPlugin;
+using namespace GKNPPlugin;
 using namespace OpenMM;
 using namespace std;
 
@@ -28,8 +28,8 @@ void testForce() {
     bool veryverbose = false;
     System system;
     NonbondedForce *nb = new NonbondedForce(); //needed to set up force buffers
-    AGBNPForce* force = new AGBNPForce();
-    force->setVersion(1); 
+    GKNPForce* force = new GKNPForce();
+    //force->setVersion(1);
     system.addForce(nb); 
     system.addForce(force);
     //read from stdin
