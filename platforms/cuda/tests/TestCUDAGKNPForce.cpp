@@ -1,9 +1,9 @@
 /* -------------------------------------------------------------------------- *
- *                              OpenMM-AGBNP                                 *
+ *                              OpenMM-GKNP                                 *
  * -------------------------------------------------------------------------- */
 
 /**
- * This tests the OpenCL implementation of AGBNPForce.
+ * This tests the CUDA implementation of GKNPForce.
  */
 
 #include "GKNPForce.h"
@@ -21,7 +21,7 @@ using namespace GKNPPlugin;
 using namespace OpenMM;
 using namespace std;
 
-extern "C" OPENMM_EXPORT void registerAGBNPOpenCLKernelFactories();
+extern "C" OPENMM_EXPORT void registerGKNPCUDAKernelFactories();
 
 void testForce() {
     bool verbose = true;
@@ -66,10 +66,10 @@ void testForce() {
     }
     // Compute the forces and energy.
     VerletIntegrator integ(1.0);
-    Platform& platform = Platform::getPlatformByName("OpenCL");
+    Platform& platform = Platform::getPlatformByName("CUDA");
     map<string,string> properties;
-    //properties["OpenCLPlatformIndex"] = "1";
-    //properties["OpenCLPrecision"] = "single";
+    //properties["CUDAPlatformIndex"] = "1";
+    //properties["CUDAPrecision"] = "single";
     Context context(system, integ, platform, properties);
     context.setPositions(positions);
     State state = context.getState(State::Energy | State::Forces);
@@ -103,7 +103,7 @@ void testForce() {
 
 int main() {
   try {
-    registerAGBNPOpenCLKernelFactories();
+    registerGKNPCUDAKernelFactories();
     testForce();
   }
   catch(const std::exception& e) {
