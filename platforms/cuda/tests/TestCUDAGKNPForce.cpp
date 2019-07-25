@@ -82,7 +82,7 @@ void testForce() {
     }
 
     VerletIntegrator integ(1.0);
-    Platform& platform = Platform::getPlatformByName("Cuda");
+    Platform& platform = Platform::getPlatformByName("CUDA");
 
     Context context(system, integ, platform);
     context.setPositions(positions);
@@ -116,7 +116,9 @@ void testForce() {
 
 int main() {
   try {
+    cout << "test1" << endl;
     registerGKNPCudaKernelFactories();
+    cout << "test2" << endl;
     testForce();
   }
   catch(const std::exception& e) {

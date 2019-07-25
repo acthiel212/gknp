@@ -18,7 +18,7 @@ extern "C" OPENMM_EXPORT void registerPlatforms() {
 
 extern "C" OPENMM_EXPORT void registerKernelFactories() {
     try {
-        Platform& platform = Platform::getPlatformByName("Cuda");
+        Platform& platform = Platform::getPlatformByName("CUDA");
         CudaGKNPKernelFactory* factory = new CudaGKNPKernelFactory();
         platform.registerKernelFactory(CalcGKNPForceKernel::Name(), factory);
     }
@@ -29,7 +29,7 @@ extern "C" OPENMM_EXPORT void registerKernelFactories() {
 
 extern "C" OPENMM_EXPORT void registerGKNPCudaKernelFactories() {
     try {
-        Platform::getPlatformByName("Cuda");
+        Platform::getPlatformByName("CUDA");
     }
     catch (...) {
         Platform::registerPlatform(new CudaPlatform());
