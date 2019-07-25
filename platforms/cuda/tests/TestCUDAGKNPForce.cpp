@@ -21,29 +21,45 @@ using namespace GKNPPlugin;
 using namespace OpenMM;
 using namespace std;
 
-extern "C" OPENMM_EXPORT void registerGKNPCUDAKernelFactories();
+extern "C" OPENMM_EXPORT void registerGKNPCudaKernelFactories();
+
+static struct MyAtomInfo {
+    const char* pdb;
+    double      mass,vdwRadiusInAng, vdwVolume, gamma;
+    bool        isHydrogen;
+    double      charge;
+    double      initPosInAng[3];
+} atoms[] = {
+
+        // pdb   mass vdwRad vdwVol gamma isHydrogen charge,  initPos
+        {" C ", 12.00, 1.89, 28.28,  .117,  false, -0.18,  0.76506600,    0.00000200,   -0.00000100},
+        {" C ", 12.00, 1.89, 28.28,  .117,  false, -0.18, -0.76506500,   -0.00000200,    0.00000100},
+        {" H ",  1.00, 1.45, 12.77,  1,     true,   0.06, -1.16573300,    0.67232500,    0.77710400},
+        {" H ",  1.00, 1.45, 12.77,  1,     true,   0.06, -1.16574800,    0.33683200,   -0.97079400},
+        {" H ",  1.00, 1.45, 12.77,  1,     true,   0.06, -1.16572400,   -1.00915800,    0.19369400},
+        {" H ",  1.00, 1.45, 12.77,  1,     true,   0.06,  1.16571800,    1.00915600,   -0.19370700},
+        {" H ",  1.00, 1.45, 12.77,  1,     true,   0.06,  1.16574000,   -0.33682500,    0.97080200},
+        {" H ",  1.00, 1.45, 12.77,  1,     true,   0.06,  1.16573600,   -0.67233000,   -0.77709700},
+        {""} // end of list
+};
 
 void testForce() {
-    bool verbose = true;
     bool veryverbose = false;
+
     System system;
-    NonbondedForce *nb = new NonbondedForce(); //needed to set up force buffers
+    NonbondedForce *nb = new NonbondedForce();
     GKNPForce* force = new GKNPForce();
-    //force->setVersion(1);
-    system.addForce(nb); 
+    force->setNonbondedMethod(GKNPForce::CutoffNonPeriodic);//NoCutoff also accepted
+    force->setCutoffDistance(1.2);
+    system.addForce(nb);
     system.addForce(force);
-    //read from stdin
-    int numParticles = 0;
-    double id, x, y, z, radius, charge;
-    double epsilon, sigma, bornr;
-    double gamma;
-    bool ishydrogen;
+
+    int numParticles = 5;
     vector<Vec3> positions;
-    std::cin >> numParticles;
-    int ih;
+
+    double rminToSigma = 1.0 / pow(2.0, 1.0 / 6.0);
     double ang2nm = 0.1;
     double kcalmol2kjmol = 4.184;
-
     double sigmaw = 3.15365*ang2nm; /* LJ sigma of TIP4P water oxygen */
     double epsilonw = 0.155*kcalmol2kjmol;        /* LJ epsilon of TIP4P water oxygen */
     double rho = 0.033428/pow(ang2nm,3);   /* water number density */
@@ -51,38 +67,35 @@ void testForce() {
     double sigma_LJ;
 
     for(int i=0;i<numParticles;i++){
-      std::cin >> id >> x >> y >> z >> radius >> charge >> gamma >> ih;
-      system.addParticle(1.0);
-      positions.push_back(Vec3(x, y, z)*ang2nm);
-      ishydrogen = (ih > 0);
-      radius *= ang2nm;
-      gamma *= kcalmol2kjmol/(ang2nm*ang2nm);
-      sigma_LJ = 2.*radius;
-      double sij = sqrt(sigmaw*sigma_LJ);
-      double eij = sqrt(epsilonw*epsilon_LJ);
-      double alpha = - 16.0 * M_PI * rho * eij * pow(sij,6) / 3.0;  
-      nb->addParticle(0.0,0.0,0.0);
-      force->addParticle(radius, gamma, alpha, charge, ishydrogen);      
+
+        system.addParticle(atoms[i].mass);
+        positions.push_back(Vec3(atoms[i].initPosInAng[0], atoms[i].initPosInAng[1], atoms[i].initPosInAng[2])*ang2nm);
+        atoms[i].vdwRadiusInAng *= ang2nm;
+        sigma_LJ = 2.*atoms[i].vdwRadiusInAng;
+        atoms[i].vdwRadiusInAng *= rminToSigma;
+        double sij = sqrt(sigmaw*sigma_LJ);
+        double eij = sqrt(epsilonw*epsilon_LJ);
+        double alpha = - 16.0 * M_PI * rho * eij * pow(sij,6) / 3.0;
+        nb->addParticle(0.0,0.0,0.0);
+        force->addParticle(atoms[i].vdwRadiusInAng, atoms[i].gamma, alpha, atoms[i].charge, atoms[i].isHydrogen);
+        force->getParticleParameters(i, atoms[i].vdwRadiusInAng, atoms[i].gamma, alpha, atoms[i].charge, atoms[i].isHydrogen);
     }
-    // Compute the forces and energy.
+
     VerletIntegrator integ(1.0);
-    Platform& platform = Platform::getPlatformByName("CUDA");
-    map<string,string> properties;
-    //properties["CUDAPlatformIndex"] = "1";
-    //properties["CUDAPrecision"] = "single";
-    Context context(system, integ, platform, properties);
+    Platform& platform = Platform::getPlatformByName("Cuda");
+
+    Context context(system, integ, platform);
     context.setPositions(positions);
-    State state = context.getState(State::Energy | State::Forces);
+    State state = context.getState(State::Energy | State::Forces | State::Positions);
 
-    double energy1 = state.getPotentialEnergy();
-    std::cout << "Energy: " <<  energy1  << std::endl;
+    double energy1 = 0;
+    energy1 = state.getPotentialEnergy();
+    cout << "Energy: " <<  energy1  << endl;
 
-    if(veryverbose){
-      //print out forces for debugging
-      cout << "Forces: " << endl;
-      for(int i = 0; i < numParticles; i++){
-	cout << "FW: " << i << " " << state.getForces()[i][0] << " " << state.getForces()[i][1] << " "  << state.getForces()[i][2] << " "<< endl;      
-      }
+    cout << "Forces: " << endl;
+    for(int i = 0; i < numParticles; i++) {
+        cout << "FW: " << i << " " << state.getForces()[i][0] << " " << state.getForces()[i][1] << " "
+             << state.getForces()[i][2] << " " << endl;
     }
     
     // validate force by moving an atom
@@ -103,7 +116,7 @@ void testForce() {
 
 int main() {
   try {
-    registerGKNPCUDAKernelFactories();
+    registerGKNPCudaKernelFactories();
     testForce();
   }
   catch(const std::exception& e) {
