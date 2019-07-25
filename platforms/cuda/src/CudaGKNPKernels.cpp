@@ -389,7 +389,7 @@ int GKNPPlugin::CudaCalcGKNPForceKernel::CudaOverlapTree::copy_tree_to_device(vo
 }
 
 void GKNPPlugin::CudaCalcGKNPForceKernel::initialize(const System &system, const GKNPForce &force) {
-    verbose_level = 0;
+    verbose_level = 5;
 
     roffset = GKNP_RADIUS_INCREMENT;
 

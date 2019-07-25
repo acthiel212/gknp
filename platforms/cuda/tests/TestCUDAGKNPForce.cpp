@@ -120,6 +120,7 @@ int main() {
     registerGKNPCudaKernelFactories();
     cout << "test2" << endl;
     testForce();
+    cout << "test3" << endl;
   }
   catch(const std::exception& e) {
     std::cout << "exception: " << e.what() << std::endl;
