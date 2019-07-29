@@ -9,11 +9,11 @@
 __device__ void resetTreeCounters(unsigned const int padded_tree_size,
                                   unsigned const int tree_size,
                                   unsigned const int offset,
-                                  int *restrict ovProcessedFlag,
-                                  int *restrict ovOKtoProcessFlag,
-                                  const int *restrict ovChildrenStartIndex,
-                                  const int *restrict ovChildrenCount,
-                                  int *restrict ovChildrenReported) {
+                                  int* __restrict__ ovProcessedFlag,
+                                  int* __restrict__ ovOKtoProcessFlag,
+                                  const int* __restrict__ ovChildrenStartIndex,
+                                  const int* __restrict__ ovChildrenCount,
+                                  int* __restrict__ ovChildrenReported) {
     const unsigned int id = threadIdx.x;  //the index of this thread in the workgroup
     const unsigned int nblock = blockDim.x; //size of work group
     unsigned int begin = offset + id;
@@ -35,16 +35,16 @@ __device__ void resetTreeCounters(unsigned const int padded_tree_size,
 
 //assume num. groups = num. tree sections
 __global__ void resetSelfVolumes(const int ntrees,
-                                 const int *restrict ovTreePointer,
-                                 const int *restrict ovAtomTreePointer,
-                                 const int *restrict ovAtomTreeSize,
-                                 const int *restrict ovAtomTreePaddedSize,
-                                 const int *restrict ovChildrenStartIndex,
-                                 const int *restrict ovChildrenCount,
-                                 int *restrict ovProcessedFlag,
-                                 int *restrict ovOKtoProcessFlag,
-                                 int *restrict ovChildrenReported,
-                                 int *restrict PanicButton) {
+                                 const int* __restrict__ ovTreePointer,
+                                 const int* __restrict__ ovAtomTreePointer,
+                                 const int* __restrict__ ovAtomTreeSize,
+                                 const int* __restrict__ ovAtomTreePaddedSize,
+                                 const int* __restrict__ ovChildrenStartIndex,
+                                 const int* __restrict__ ovChildrenCount,
+                                 int* __restrict__ ovProcessedFlag,
+                                 int* __restrict__ ovOKtoProcessFlag,
+                                 int* __restrict__ ovChildrenReported,
+                                 int* __restrict__ PanicButton) {
     unsigned int tree = blockIdx.x;      //initial tree
     if (PanicButton[0] > 0) return;
     while (tree < ntrees) {
@@ -69,21 +69,21 @@ __global__ void resetSelfVolumes(const int ntrees,
  */
 __device__ void resetTreeSection(unsigned const int padded_tree_size,
                                  unsigned const int offset,
-                                 int *restrict ovLevel,
-                                 real *restrict ovVolume,
-                                 real *restrict ovVsp,
-                                 real *restrict ovVSfp,
-                                 real *restrict ovSelfVolume,
-                                 real *restrict ovVolEnergy,
-                                 int *restrict ovLastAtom,
-                                 int *restrict ovRootIndex,
-                                 int *restrict ovChildrenStartIndex,
-                                 int *restrict ovChildrenCount,
-                                 real4 *restrict ovDV1,
-                                 real4 *restrict ovDV2,
-                                 int *restrict ovProcessedFlag,
-                                 int *restrict ovOKtoProcessFlag,
-                                 int *restrict ovChildrenReported) {
+                                 int* __restrict__ ovLevel,
+                                 real* __restrict__ ovVolume,
+                                 real* __restrict__ ovVsp,
+                                 real* __restrict__ ovVSfp,
+                                 real* __restrict__ ovSelfVolume,
+                                 real* __restrict__ ovVolEnergy,
+                                 int* __restrict__ ovLastAtom,
+                                 int* __restrict__ ovRootIndex,
+                                 int* __restrict__ ovChildrenStartIndex,
+                                 int* __restrict__ ovChildrenCount,
+                                 real4* __restrict__ ovDV1,
+                                 real4* __restrict__ ovDV2,
+                                 int* __restrict__ ovProcessedFlag,
+                                 int* __restrict__ ovOKtoProcessFlag,
+                                 int* __restrict__ ovChildrenReported) {
     const unsigned int nblock = blockDim.x; //size of thread block
     const unsigned int id = threadIdx.x;  //the index of this thread in the warp
 
@@ -101,20 +101,19 @@ __device__ void resetTreeSection(unsigned const int padded_tree_size,
     for (int slot = begin; slot < end; slot += nblock) ovChildrenCount[slot] = 0;
     //for(int slot=begin; slot<end ; slot+=nblock) ovDV1[slot] = (real4)0;
     //for(int slot=begin; slot<end ; slot+=nblock) ovDV2[slot] = (real4)0;
-    for (int slot = begin; slot < end; slot += nblock) ovDV1[slot] = make_real4(0);
-    for (int slot = begin; slot < end; slot += nblock) ovDV2[slot] = make_real4(0);
+    for (int slot = begin; slot < end; slot += nblock) ovDV1[slot] = make_real4(0,0,0,0);
+    for (int slot = begin; slot < end; slot += nblock) ovDV2[slot] = make_real4(0,0,0,0);
     for (int slot = begin; slot < end; slot += nblock) ovProcessedFlag[slot] = 0;
     for (int slot = begin; slot < end; slot += nblock) ovOKtoProcessFlag[slot] = 0;
     for (int slot = begin; slot < end; slot += nblock) ovChildrenReported[slot] = 0;
 }
 
-
 __global__ void resetBuffer(unsigned const int bufferSize,
                             unsigned const int numBuffers,
-                            real4 *restrict ovAtomBuffer,
-                            real *restrict selfVolumeBuffer,
-                            long *restrict selfVolumeBuffer_long,
-                            long *restrict gradBuffers_long) {
+                            real4* __restrict__ ovAtomBuffer,
+                            real* __restrict__ selfVolumeBuffer,
+                            long* __restrict__ selfVolumeBuffer_long,
+                            long* __restrict__ gradBuffers_long) {
 
     unsigned int id = blockIdx.x * blockDim.x + threadIdx.x;
 //#ifdef SUPPORTS_64_BIT_ATOMICS
@@ -140,28 +139,27 @@ __global__ void resetBuffer(unsigned const int bufferSize,
 
 
 __global__ void resetTree(const int ntrees,
-                          const int *restrict ovTreePointer,
-                          const int *restrict ovAtomTreePointer,
-                          int *restrict ovAtomTreeSize,
-                          const int *restrict ovAtomTreePaddedSize,
-                          int *restrict ovLevel,
-                          real *restrict ovVolume,
-                          real *restrict ovVsp,
-                          real *restrict ovVSfp,
-                          real *restrict ovSelfVolume,
-                          real *restrict ovVolEnergy,
-                          int *restrict ovLastAtom,
-                          int *restrict ovRootIndex,
-                          int *restrict ovChildrenStartIndex,
-                          int *restrict ovChildrenCount,
-                          real4 *restrict ovDV1,
-                          real4 *restrict ovDV2,
-                          int *restrict ovProcessedFlag,
-                          int *restrict ovOKtoProcessFlag,
-                          int *restrict ovChildrenReported,
-                          int *restrict ovAtomTreeLock,
-                          int *restrict NIterations) {
-
+                          const int* __restrict__ ovTreePointer,
+                          const int* __restrict__ ovAtomTreePointer,
+                          int* __restrict__ ovAtomTreeSize,
+                          const int* __restrict__ ovAtomTreePaddedSize,
+                          int* __restrict__ ovLevel,
+                          real* __restrict__ ovVolume,
+                          real* __restrict__ ovVsp,
+                          real* __restrict__ ovVSfp,
+                          real* __restrict__ ovSelfVolume,
+                          real* __restrict__ ovVolEnergy,
+                          int* __restrict__ ovLastAtom,
+                          int* __restrict__ ovRootIndex,
+                          int* __restrict__ ovChildrenStartIndex,
+                          int* __restrict__ ovChildrenCount,
+                          real4* __restrict__ ovDV1,
+                          real4* __restrict__ ovDV2,
+                          int* __restrict__ ovProcessedFlag,
+                          int* __restrict__ ovOKtoProcessFlag,
+                          int* __restrict__ ovChildrenReported,
+                          int* __restrict__ ovAtomTreeLock,
+                          int* __restrict__ NIterations) {
     unsigned int section = blockIdx.x; // initial assignment of warp to tree section
     while (section < ntrees) {
         unsigned int offset = ovTreePointer[section];
