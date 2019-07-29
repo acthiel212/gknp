@@ -1,9 +1,3 @@
-//TODO: Cuda Analog or is it even necessary?
-//#pragma OPENCL EXTENSION cl_khr_fp64 : enable
-//#ifdef SUPPORTS_64_BIT_ATOMICS
-//#pragma OPENCL EXTENSION cl_khr_int64_base_atomics : enable
-//#endif
-
 #define PI (3.14159265359f)
 
 

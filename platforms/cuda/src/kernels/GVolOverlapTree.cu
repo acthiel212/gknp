@@ -1,9 +1,3 @@
-//TODO: Cuda Analog or is it even necessary?
-//#pragma OPENCL EXTENSION cl_khr_global_int32_base_atomics : enable
-//#ifdef SUPPORTS_64_BIT_ATOMICS
-//#pragma OPENCL EXTENSION cl_khr_int64_base_atomics : enable
-//#endif
-
 #define PI (3.14159265359f)
 #define Min_GVol (MIN_GVOL)
 #define VolMin0 (VOLMIN0)
@@ -336,7 +330,7 @@ __global__ void InitOverlapTreeCount(
 // version of InitOverlapTreeCount optimized for CPU devices
 //  1 CPU core, instead of a minimum of 32 as in the GPU-optimized version, loads a TILE_SIZE of interactions
 //  and processes them
-//TODO: __attribute__ ?
+
 //__global__ __attribute__((reqd_work_group_size(1,1,1)))
 __device__ void InitOverlapTreeCount_cpu(
     __device__ const int* restrict ovAtomTreePointer,    //pointers to atom trees
@@ -729,7 +723,7 @@ __global__ void InitOverlapTree(
 // version of InitOverlapTreeCount optimized for CPU devices
 //  1 CPU core, instead of 32 as in the GPU-optimized version, loads a TILE_SIZE of interactions
 //  and process them
-//TODO: __attribute__ ?
+
 //__global__ __attribute__((reqd_work_group_size(1,1,1)))
 __device__ void InitOverlapTree_cpu(
     __device__ const int* restrict ovAtomTreePointer,    //pointers to atom trees
@@ -1047,7 +1041,7 @@ __device__ inline void scangExclusive(__device__ unsigned int * buffer, __shared
 
 //used for the "scan" of children counts to get children start indexes
 //assumes that work group size = OV_WORK_GROUP_SIZE
-//TODO: __attribute__ ?
+
 //__global__ __attribute__((reqd_work_group_size(OV_WORK_GROUP_SIZE,1,1)))
 __device__ void reduceovCountBuffer(const int ntrees,
 			 __device__ const int*  restrict ovTreePointer,
@@ -1225,7 +1219,7 @@ __global__ void SortOverlapTree2body(
 //1. Retrieve siblings j and process overlaps i<j, count non-zero overlaps
 //2. Do a parallel prefix sum (scan) of the array of counts to fill ovChildrenStartIndex[]
 //3. Re-process the i<j overlaps and saves them starting at ovChildrenStartIndex[]
-//TODO: __attribute__ ?
+
 //__global__ __attribute__((reqd_work_group_size(OV_WORK_GROUP_SIZE,1,1)))
  __device__ void ComputeOverlapTree_1pass(const int ntrees,
    __device__ const int* restrict ovTreePointer,
@@ -1611,7 +1605,7 @@ __global__ void InitRescanOverlapTree(const int ntrees,
 
 //this kernel recomputes the overlap volumes of the current tree
 //it does not modify the tree in any other way
-//TODO: __attribute__ ?
+
 //__global__ __attribute__((reqd_work_group_size(OV_WORK_GROUP_SIZE,1,1)))
 __device__ void RescanOverlapTree(const int ntrees,
    __device__ const int* restrict ovTreePointer,
@@ -1760,7 +1754,7 @@ __global__ void InitOverlapTreeGammas_1body(
 //of the overlap tree,
 //it *does not* recompute overlap volumes
 //  used to prep calculations of volume derivatives of GB and van der Waals energies
-//TODO: __attribute__ ?
+
 //__global__ __attribute__((reqd_work_group_size(OV_WORK_GROUP_SIZE,1,1)))
 __device__ void RescanOverlapTreeGammas(const int ntrees,
    __device__ const int* restrict ovTreePointer,

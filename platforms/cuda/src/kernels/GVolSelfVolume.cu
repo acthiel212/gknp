@@ -1,13 +1,7 @@
-////TODO: Cuda Analog or is it even necessary?
-//#pragma OPENCL EXTENSION cl_khr_fp64 : enable
-//#ifdef SUPPORTS_64_BIT_ATOMICS
-//#pragma OPENCL EXTENSION cl_khr_int64_base_atomics : enable
-//#endif
-
 #define PI (3.14159265359f)
 
 //computes volume energy and self-volumes
-//TODO: __attribute__ ?
+
 //__global__ __attribute__((reqd_work_group_size(OV_WORK_GROUP_SIZE,1,1)))
 void computeSelfVolumes(const int ntrees,
   __device__ const int* restrict ovTreePointer,

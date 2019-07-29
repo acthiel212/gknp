@@ -49,7 +49,7 @@ void testForce() {
     System system;
     NonbondedForce *nb = new NonbondedForce();
     GKNPForce* force = new GKNPForce();
-    force->setNonbondedMethod(GKNPForce::CutoffNonPeriodic);//NoCutoff also accepted
+    force->setNonbondedMethod(GKNPForce::NoCutoff);//NoCutoff also accepted
     force->setCutoffDistance(1.2);
     system.addForce(nb);
     system.addForce(force);

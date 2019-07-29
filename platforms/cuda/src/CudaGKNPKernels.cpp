@@ -415,7 +415,6 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::initialize(const System &system, const
 
     testBuffer = new CudaArray(cu, cu.getPaddedNumAtoms(), sizeof(float), "testBuffer");
 
-    //TODO: No Cuda analog
     //bool useLong = cu.getSupports64BitGlobalAtomics();
 
     // this the accumulation buffer for overlap atom-level data (self-volumes, etc.)
@@ -505,7 +504,6 @@ double GKNPPlugin::CudaCalcGKNPForceKernel::execute(ContextImpl &context, bool i
 
 void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &context, bool includeForces, bool includeEnergy) {
     CudaNonbondedUtilities &nb = cu.getNonbondedUtilities();
-    //TODO: No Cuda analog
     //bool useLong = cu.getSupports64BitGlobalAtomics();
     bool verbose = verbose_level > 0;
 
@@ -1622,7 +1620,6 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
 
 double GKNPPlugin::CudaCalcGKNPForceKernel::executeGVolSA(ContextImpl &context, bool includeForces, bool includeEnergy) {
     CudaNonbondedUtilities &nb = cu.getNonbondedUtilities();
-    //TODO: No Cuda analog
     //bool useLong = cu.getSupports64BitGlobalAtomics();
     bool verbose = verbose_level > 0;
     niterations += 1;
