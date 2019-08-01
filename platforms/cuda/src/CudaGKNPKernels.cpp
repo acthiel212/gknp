@@ -718,11 +718,8 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
             file = cu.replaceStrings(CudaGKNPKernelSources::GVolResetTree, replacements);
             module = cu.createModule(file, defines);
             // reset tree kernel
-            resetTreeKernel = cu.getKernel(module, kernel_name.c_str());
             if (verbose) cout << " done. " << endl;
         }
-        kernel = resetTreeKernel;
-        index = 0;
 
 //      kernel.setArg<int>(index++, gtree->num_sections);
 //      kernel.setArg<cl::Buffer>(index++, gtree->ovTreePointer->getDeviceBuffer());
@@ -751,11 +748,8 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
         kernel_name = "resetBuffer";
         if (!hasCreatedKernels) {
             if (verbose) cout << "compiling " << kernel_name << " ... ";
-            resetBufferKernel = cu.getKernel(module, kernel_name.c_str());
             if (verbose) cout << " done. " << endl;
         }
-        index = 0;
-        if (verbose) cout << "setting arguments for kernel " << kernel_name << " ... " << endl;
 //      kernel = resetBufferKernel;
 //      kernel.setArg<int>(index++, cu.getPaddedNumAtoms());
 //      kernel.setArg<int>(index++, gtree->num_sections);
@@ -769,12 +763,8 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
         kernel_name = "resetSelfVolumes";
         if (!hasCreatedKernels) {
             if (verbose) cout << "compiling " << kernel_name << " ... ";
-            resetSelfVolumesKernel = cu.getKernel(module, kernel_name.c_str());
             if (verbose) cout << " done. " << endl;
         }
-        index = 0;
-        kernel = resetSelfVolumesKernel;
-        if (verbose) cout << "setting arguments for kernel " << kernel_name << " ... " << endl;
 //      kernel.setArg<int>(index++, gtree->num_sections);
 //      kernel.setArg<cl::Buffer>(index++, gtree->ovTreePointer->getDeviceBuffer());
 //      kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreePointer->getDeviceBuffer());
@@ -878,7 +868,7 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
                 "	real dfp = df/PI; \n"
                 "	real gvol = v1*v2*dfp*dfp*rsqrt(dfp)*ef; \n"
                 "       if(gvol > VolMinA ){ \n" //VolMin0?
-                "          atomic_inc(&ovChildrenCount[parent_slot]); \n"
+                "          ovChildrenCount[parent_slot] = atomicAdd(&ovChildrenCount[parent_slot], 1); \n"
                 "       } \n";
 
         replacements["COMPUTE_INTERACTION_2COUNT"] =
@@ -961,11 +951,11 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
                 "        int endslot, children_count;\n"
                 "        if(s*gvol > SMALL_VOLUME){ \n"
                 "          //use top counter \n"
-                "          children_count = atomic_inc(&ovChildrenCountTop[parent_slot]); \n"
+                "          children_count = atomicAdd(&ovChildrenCountTop[parent_slot], 1); \n"
                 "          endslot = parent_children_start + children_count; \n"
                 "        }else{ \n"
                 "          //use bottom counter \n"
-                "          children_count = atomic_inc(&ovChildrenCountBottom[parent_slot]); \n"
+                "          children_count = atomicAdd(&ovChildrenCountBottom[parent_slot], 1); \n"
                 "          endslot = parent_children_start + ovChildrenCount[parent_slot] - children_count - 1; \n"
                 "        }\n"
                 "        ovLevel[endslot] = 2; //two-body\n"
@@ -1079,7 +1069,7 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
                 "       //ovG[slot] = (real4)(c12.xyz, a12);\n"
                 "       //ovDV1[slot] = (real4)(-delta.xyz*dgvol,dgvolv);\n"
                 "       ovG[slot] = make_real4(c12.x, c12.y, c12.z, a12);\n"
-                "       ovDV1[endslot] = make_real4(-delta.x*dgvol, -delta.y*dgvol, -delta.z*dgvol, dgvolv); \n";
+                "       ovDV1[slot] = make_real4(-delta.x*dgvol, -delta.y*dgvol, -delta.z*dgvol, dgvolv); \n";
 
 
         int reset_tree_size;
@@ -1097,13 +1087,9 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
             if (verbose) cout << " done. " << endl;
 
             if (verbose) cout << "compiling " << kernel_name << " ... ";
-            InitOverlapTreeKernel_1body_1 = cu.getKernel(module, kernel_name.c_str());
             if (verbose) cout << " done. " << endl;
         }
         reset_tree_size = 1;
-        index = 0;
-        kernel = InitOverlapTreeKernel_1body_1;
-        if (verbose) cout << "setting arguments for kernel" << kernel_name << " ... " << endl;
 //      kernel.setArg<int>(index++, cu.getPaddedNumAtoms());
 //      kernel.setArg<int>(index++, gtree->num_sections);
 //      kernel.setArg<int>(index++, reset_tree_size);
@@ -1139,10 +1125,8 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
             if (verbose) cout << "compiling " << kernel_name << " ... ";
             module = cu.createModule(InitOverlapTreeSrc, pairValueDefines);
             if (verbose) cout << " done. " << endl;
-            InitOverlapTreeKernel_1body_2 = cu.getKernel(module, kernel_name.c_str());
         }
         reset_tree_size = 0;
-        index = 0;
 //      kernel = InitOverlapTreeKernel_1body_2;//vdW radii
 //      kernel.setArg<int>(index++, cu.getPaddedNumAtoms());
 //      kernel.setArg<int>(index++, gtree->num_sections);
@@ -1178,11 +1162,8 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
 
         if (!hasCreatedKernels) {
             if (verbose) cout << "compiling " << kernel_name << " ... ";
-            InitOverlapTreeCountKernel = cu.getKernel(module, kernel_name.c_str());
             if (verbose) cout << " done. " << endl;
         }
-        index = 0;
-        kernel = InitOverlapTreeCountKernel;
 //      kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreePointer->getDeviceBuffer());
 //      kernel.setArg<cl::Buffer>(index++, cu.getPosq().getDeviceBuffer() );
 //      InitOverlapTreeCountKernelGaArgIndex = index;
@@ -1207,11 +1188,8 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
             kernel_name = "reduceovCountBuffer";
             replacements["KERNEL_NAME"] = kernel_name;
             if (verbose) cout << "compiling " << kernel_name << " ... ";
-            reduceovCountBufferKernel = cu.getKernel(module, kernel_name.c_str());
             if (verbose) cout << " done. " << endl;
         }
-        index = 0;
-        kernel = reduceovCountBufferKernel;
 //      kernel.setArg<int>(index++, gtree->num_sections);
 //      kernel.setArg<cl::Buffer>(index++, gtree->ovTreePointer->getDeviceBuffer());
 //      kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreePointer->getDeviceBuffer());
@@ -1228,11 +1206,8 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
             kernel_name = "InitOverlapTree";
             replacements["KERNEL_NAME"] = kernel_name;
             if (verbose) cout << "compiling " << kernel_name << " ... ";
-            InitOverlapTreeKernel = cu.getKernel(module, kernel_name.c_str());
             if (verbose) cout << " done. " << endl;
         }
-        index = 0;
-        kernel = InitOverlapTreeKernel;
 //        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreePointer->getDeviceBuffer());
 //        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreeSize->getDeviceBuffer());
 //        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreePaddedSize->getDeviceBuffer());
@@ -1271,11 +1246,8 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
             kernel_name = "resetComputeOverlapTree";
             if (verbose) cout << "compiling " << kernel_name << " ... ";
             module = cu.createModule(InitOverlapTreeSrc, pairValueDefines);
-            resetComputeOverlapTreeKernel = cu.getKernel(module, kernel_name.c_str());
             if (verbose) cout << " done. " << endl;
         }
-        index = 0;
-        kernel = resetComputeOverlapTreeKernel;
 //        kernel.setArg<int>(index++, gtree->num_sections);
 //        kernel.setArg<cl::Buffer>(index++, gtree->ovTreePointer->getDeviceBuffer());
 //        kernel.setArg<cl::Buffer>(index++, gtree->ovProcessedFlag->getDeviceBuffer());
@@ -1290,11 +1262,8 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
             kernel_name = "ComputeOverlapTree_1pass";
             replacements["KERNEL_NAME"] = kernel_name;
             if (verbose) cout << "compiling " << kernel_name << " ... ";
-            ComputeOverlapTree_1passKernel = cu.getKernel(module, kernel_name.c_str());
             if (verbose) cout << " done. " << endl;
         }
-        index = 0;
-        kernel = ComputeOverlapTree_1passKernel;
 //        kernel.setArg<int>(index++, gtree->num_sections);
 //        kernel.setArg<cl::Buffer>(index++, gtree->ovTreePointer->getDeviceBuffer());
 //        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreePointer->getDeviceBuffer());
@@ -1336,11 +1305,8 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
             kernel_name = "SortOverlapTree2body";
             replacements["KERNEL_NAME"] = kernel_name;
             if (verbose) cout << "compiling " << kernel_name << " ... ";
-            SortOverlapTree2bodyKernel = cu.getKernel(module, kernel_name.c_str());
             if (verbose) cout << " done. " << endl;
         }
-        index = 0;
-        kernel = SortOverlapTree2bodyKernel;
 //        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreePointer->getDeviceBuffer());
 //        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreeSize->getDeviceBuffer());
 //        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreePaddedSize->getDeviceBuffer());
@@ -1360,11 +1326,8 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
             kernel_name = "ResetRescanOverlapTree";
             replacements["KERNEL_NAME"] = kernel_name;
             if (verbose) cout << "compiling " << kernel_name << " ... ";
-            ResetRescanOverlapTreeKernel = cu.getKernel(module, kernel_name.c_str());
             if (verbose) cout << " done. " << endl;
         }
-        index = 0;
-        kernel = ResetRescanOverlapTreeKernel;
 //        kernel.setArg<int>(index++, gtree->num_sections);
 //        kernel.setArg<cl::Buffer>(index++, gtree->ovTreePointer->getDeviceBuffer());
 //        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreePointer->getDeviceBuffer());
@@ -1377,11 +1340,8 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
             kernel_name = "InitRescanOverlapTree";
             replacements["KERNEL_NAME"] = kernel_name;
             if (verbose) cout << "compiling " << kernel_name << " ... ";
-            InitRescanOverlapTreeKernel = cu.getKernel(module, kernel_name.c_str());
             if (verbose) cout << " done. " << endl;
         }
-        index = 0;
-        kernel = InitRescanOverlapTreeKernel;
 //        kernel.setArg<int>(index++, gtree->num_sections);
 //        kernel.setArg<cl::Buffer>(index++, gtree->ovTreePointer->getDeviceBuffer());
 //        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreeSize->getDeviceBuffer());
@@ -1395,11 +1355,8 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
             kernel_name = "RescanOverlapTree";
             replacements["KERNEL_NAME"] = kernel_name;
             if (verbose) cout << "compiling " << kernel_name << " ... ";
-            RescanOverlapTreeKernel = cu.getKernel(module, kernel_name.c_str());
             if (verbose) cout << " done. " << endl;
         }
-        index = 0;
-        kernel = RescanOverlapTreeKernel;
 //        kernel.setArg<int>(index++, gtree->num_sections);
 //        kernel.setArg<cl::Buffer>(index++, gtree->ovTreePointer->getDeviceBuffer());
 //        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreePointer->getDeviceBuffer());
@@ -1431,11 +1388,8 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
         if (!hasCreatedKernels) {
             kernel_name = "InitOverlapTreeGammas_1body";
             if (verbose) cout << "compiling " << kernel_name << " ... ";
-            InitOverlapTreeGammasKernel_1body_W = cu.getKernel(module, kernel_name.c_str());
             if (verbose) cout << " done. " << endl;
         }
-        index = 0;
-        kernel = InitOverlapTreeGammasKernel_1body_W;
 //        kernel.setArg<int>(index++, cu.getPaddedNumAtoms());
 //        kernel.setArg<int>(index++, gtree->num_sections);
 //        kernel.setArg<cl::Buffer>(index++, gtree->ovTreePointer->getDeviceBuffer());
@@ -1456,11 +1410,8 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
             kernel_name = "RescanOverlapTreeGammas";
             replacements["KERNEL_NAME"] = kernel_name;
             if (verbose) cout << "compiling " << kernel_name << "... ";
-            RescanOverlapTreeGammasKernel_W = cu.getKernel(module, kernel_name.c_str());
             if (verbose) cout << " done. " << endl;
         }
-        index = 0;
-        kernel = RescanOverlapTreeGammasKernel_W;
 //        kernel.setArg<int>(index++, gtree->num_sections);
 //        kernel.setArg<cl::Buffer>(index++, gtree->ovTreePointer->getDeviceBuffer());
 //        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreePointer->getDeviceBuffer());
@@ -1509,12 +1460,8 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
             //accumulates self volumes and volume energy function (and forces)
             //with the energy-per-unit-volume parameters (Gamma1i) currently loaded into tree
             if (verbose) cout << "compiling kernel " << kernel_name << " ... ";
-            computeSelfVolumesKernel = cu.getKernel(module, kernel_name.c_str());
             if (verbose) cout << " done. " << endl;
         }
-        kernel = computeSelfVolumesKernel;
-        if (verbose) cout << "setting arguments for kernel" << kernel_name << " ... " << endl;
-        int index = 0;
 //        kernel.setArg<int>(index++, gtree->num_sections);
 //        kernel.setArg<cl::Buffer>(index++, gtree->ovTreePointer->getDeviceBuffer());
 //        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreePointer->getDeviceBuffer());
@@ -1574,12 +1521,8 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
             module = cu.createModule(file, defines);
 
             if (verbose) cout << "compiling " << kernel_name << " ... ";
-            reduceSelfVolumesKernel_buffer = cu.getKernel(module, kernel_name.c_str());
             if (verbose) cout << " done. " << endl;
         }
-        if (verbose) cout << "setting arguments for kernel" << kernel_name << " ... " << endl;
-        CUfunction kernel = reduceSelfVolumesKernel_buffer;
-        int index = 0;
 //        kernel.setArg<int>(index++, cu.getNumAtoms());
 //        kernel.setArg<int>(index++, cu.getPaddedNumAtoms());
 //        kernel.setArg<int>(index++, gtree->num_sections);
@@ -1598,12 +1541,8 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
         kernel_name = "updateSelfVolumesForces";
         if (!hasCreatedKernels) {
             if (verbose) cout << "compiling " << kernel_name << " ... ";
-            updateSelfVolumesForcesKernel = cu.getKernel(module, kernel_name.c_str());
             if (verbose) cout << " done. " << endl;
         }
-        if (verbose) cout << "setting arguments for kernel" << kernel_name << " ... " << endl;
-        kernel = updateSelfVolumesForcesKernel;
-        index = 0;
         int update_energy = 1;
 //        kernel.setArg<int>(index++, update_energy);
 //        kernel.setArg<int>(index++, cu.getNumAtoms());

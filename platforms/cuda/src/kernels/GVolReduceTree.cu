@@ -6,26 +6,21 @@
  * energyBuffer could be linked to the selfVolumeBuffer, depending on the use
  */
 
-__global__ void reduceSelfVolumes_buffer(int num_atoms, int padded_num_atoms,
-				       int numBuffers, 
-				       __device__ const int*   restrict ovAtomTreePointer,
-				       __device__ const real4* restrict ovAtomBuffer,
-//#ifdef SUPPORTS_64_BIT_ATOMICS
-				       __device__       long*  restrict gradBuffers_long,
-				       __device__       long*  restrict selfVolumeBuffer_long,
-//#endif
-				       __device__       real*  restrict selfVolumeBuffer,
-				       __device__       real*  restrict selfVolume,
-				       __device__ const real* restrict global_gaussian_volume, //atomic Gaussian volume
-				       __device__ const real* restrict global_atomic_gamma, //atomic gammas
-				       __device__       real4* restrict grad //gradient wrt to atom positions and volume
-){
+__global__ void reduceSelfVolumes_buffer(int num_atoms,
+                                         int padded_num_atoms,
+                                         int numBuffers,
+                                         const int* __restrict__ ovAtomTreePointer,
+                                         const real4* __restrict__ ovAtomBuffer,
+				                         long long* __restrict__ gradBuffers_long,
+				                         long long* __restrict__ selfVolumeBuffer_long,
+				                         real* __restrict__ selfVolumeBuffer,
+				                         real* __restrict__ selfVolume,
+				                         const real* __restrict__ global_gaussian_volume, //atomic Gaussian volume
+				                         const real* __restrict__ global_atomic_gamma, //atomic gammas
+				                         real4* __restrict__ grad ){    //gradient wrt to atom positions and volume
   unsigned int id = blockIdx.x*blockDim.x+threadIdx.x;
   int totalSize = padded_num_atoms*numBuffers;
-//#ifdef SUPPORTS_64_BIT_ATOMICS
-  real scale = 1/(real) 0x100000000;
-//#endif
-  
+  real scale = 1/((real) 0x100000000);
   //accumulate self volumes
   unsigned int atom = id;
   while (atom < num_atoms) {
@@ -95,16 +90,11 @@ __global__ void reduceSelfVolumes_buffer(int num_atoms, int padded_num_atoms,
 __global__ void updateSelfVolumesForces(int update_energy,
 				      int num_atoms,
 				      int padded_num_atoms,
-				      __device__ const int*  restrict ovAtomTreePointer,
-				      __device__ const real* restrict ovVolEnergy,
-				      __device__ const real4* restrict grad, //gradient wrt to atom positions and volume
-//#ifdef SUPPORTS_64_BIT_ATOMICS
-				      __device__ long*   restrict forceBuffers,
-//#else
-//				      __device__ real4* restrict forceBuffers,
-//#endif
-				      __device__ mixed*  restrict energyBuffer
-){
+				      const int*  __restrict__ ovAtomTreePointer,
+				      const real* __restrict__ ovVolEnergy,
+				      const real4* __restrict__ grad, //gradient wrt to atom positions and volume
+				      long long*   __restrict__ forceBuffers,
+				      mixed*  __restrict__ energyBuffer){
   //update OpenMM's energies and forces
   unsigned int id = blockIdx.x*blockDim.x+threadIdx.x;
   unsigned int atom = id;
@@ -120,9 +110,9 @@ __global__ void updateSelfVolumesForces(int update_energy,
 //    atom_add(&forceBuffers[atom                     ], (long)(-grad[atom].x*0x100000000));
 //    atom_add(&forceBuffers[atom +   padded_num_atoms], (long)(-grad[atom].y*0x100000000));
 //    atom_add(&forceBuffers[atom + 2*padded_num_atoms], (long)(-grad[atom].z*0x100000000));
-      atomicAdd(&forceBuffers[atom                     ], (long)(-grad[atom].x*0x100000000));
-      atomicAdd(&forceBuffers[atom +   padded_num_atoms], (long)(-grad[atom].y*0x100000000));
-      atomicAdd(&forceBuffers[atom + 2*padded_num_atoms], (long)(-grad[atom].z*0x100000000));
+      atomicAdd((unsigned long long*)&forceBuffers[atom                     ], (unsigned long long)(-grad[atom].x*0x100000000));
+      atomicAdd((unsigned long long*)&forceBuffers[atom +   padded_num_atoms], (unsigned long long)(-grad[atom].y*0x100000000));
+      atomicAdd((unsigned long long*)&forceBuffers[atom + 2*padded_num_atoms], (unsigned long long)(-grad[atom].z*0x100000000));
 //#else
 //    //forceBuffers[atom].xyz -= grad[atom].xyz;
 //    forceBuffers[atom].xyz = make_real4(forceBuffers[atom].x - grad[atom].x,
@@ -137,3 +127,4 @@ __global__ void updateSelfVolumesForces(int update_energy,
  __syncthreads();
  
 }
+
