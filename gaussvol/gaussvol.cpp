@@ -567,7 +567,7 @@ void GOverlap::print_overlap(void){
 
 void GOverlap_Tree::print_tree_r(int slot){
   GOverlap &ov = overlaps[slot];
-  std::cout << "tg: " << std::setw(6) << slot << " ";
+  std::cout << slot << " ";
   ov.print_overlap();
   for(int i=ov.children_startindex ; i < ov.children_startindex+ ov.children_count; i++){
     print_tree_r(i);

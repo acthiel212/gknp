@@ -60,7 +60,8 @@ void ReferenceCalcGKNPForceKernel::initialize(const System& system, const GKNPFo
     vol_dv.resize(numParticles);
 
     vector<double> vdwrad(numParticles);
-    roffset = 0.00005;
+    //roffset = 0.00005;
+    roffset = GKNP_RADIUS_INCREMENT;
     common_gamma = -1;
     for (int i = 0; i < numParticles; i++){
       double r, g, alpha, q;
@@ -74,7 +75,6 @@ void ReferenceCalcGKNPForceKernel::initialize(const System& system, const GKNPFo
       vdw_alpha[i] = alpha;
       charge[i] = q;
       ishydrogen[i] = h ? 1 : 0;
-
       //make sure that all gamma's are the same
       if(common_gamma < 0 && !h){
 	common_gamma = g; //first occurrence of a non-zero gamma

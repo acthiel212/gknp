@@ -44,12 +44,12 @@ void testEnergy() {
     System system;
     NonbondedForce *nb = new NonbondedForce();
     GKNPForce* force = new GKNPForce();
-    force->setNonbondedMethod(GKNPForce::CutoffNonPeriodic);//NoCutoff also accepted
-    force->setCutoffDistance(1.2);
+    force->setNonbondedMethod(GKNPForce::NoCutoff);//NoCutoff also accepted
+    force->setCutoffDistance(1.0);
     system.addForce(nb);
     system.addForce(force);
 
-    int numParticles = 5;
+    int numParticles = 8;
     vector<Vec3> positions;
 
     double rminToSigma = 1.0 / pow(2.0, 1.0 / 6.0);
@@ -73,6 +73,7 @@ void testEnergy() {
         double alpha = - 16.0 * M_PI * rho * eij * pow(sij,6) / 3.0;
         nb->addParticle(0.0,0.0,0.0);
         force->addParticle(atoms[i].vdwRadiusInAng, atoms[i].gamma, alpha, atoms[i].charge, atoms[i].isHydrogen);
+        cout << "Atom: " << i << " Radius: " << atoms[i].vdwRadiusInAng << " gamma: " << atoms[i].gamma << " alpha: " << alpha << " Charge: " << atoms[i].charge << " Hydrogen?: " << atoms[i].isHydrogen << endl;
         force->getParticleParameters(i, atoms[i].vdwRadiusInAng, atoms[i].gamma, alpha, atoms[i].charge, atoms[i].isHydrogen);
     }
 
