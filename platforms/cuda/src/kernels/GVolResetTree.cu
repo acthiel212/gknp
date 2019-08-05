@@ -34,7 +34,7 @@ __device__ void resetTreeCounters(unsigned const int padded_tree_size,
 
 
 //assume num. groups = num. tree sections
-__global__ void resetSelfVolumes(const int ntrees,
+extern "C" __global__ void resetSelfVolumes(const int ntrees,
                                  const int* __restrict__ ovTreePointer,
                                  const int* __restrict__ ovAtomTreePointer,
                                  const int* __restrict__ ovAtomTreeSize,
@@ -108,7 +108,7 @@ __device__ void resetTreeSection(unsigned const int padded_tree_size,
     for (int slot = begin; slot < end; slot += nblock) ovChildrenReported[slot] = 0;
 }
 
-__global__ void resetBuffer(unsigned const int bufferSize,
+extern "C" __global__ void resetBuffer(unsigned const int bufferSize,
                             unsigned const int numBuffers,
                             real4* __restrict__ ovAtomBuffer,
                             real* __restrict__ selfVolumeBuffer,
@@ -138,7 +138,7 @@ __global__ void resetBuffer(unsigned const int bufferSize,
 }
 
 
-__global__ void resetTree(const int ntrees,
+extern "C" __global__ void resetTree(const int ntrees,
                           const int* __restrict__ ovTreePointer,
                           const int* __restrict__ ovAtomTreePointer,
                           int* __restrict__ ovAtomTreeSize,

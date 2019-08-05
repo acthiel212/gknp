@@ -3,7 +3,7 @@
 //computes volume energy and self-volumes
 
 //__global__ __attribute__((reqd_work_group_size(OV_WORK_GROUP_SIZE,1,1)))
-void computeSelfVolumes(const int ntrees,
+extern "C" __global__ void computeSelfVolumes(const int ntrees,
                         const int *__restrict__ ovTreePointer,
                         const int *__restrict__ ovAtomTreePointer,
                         const int *__restrict__ ovAtomTreeSize,
@@ -222,7 +222,7 @@ void computeSelfVolumes(const int ntrees,
 //same as self-volume kernel above but does not update self volumes
 //TODO: __attribute__ ?
 //__global__ __attribute__((reqd_work_group_size(OV_WORK_GROUP_SIZE,1,1)))
-void computeVolumeEnergy(const int ntrees,
+extern "C" __global__ void computeVolumeEnergy(const int ntrees,
   const int*  __restrict__ ovTreePointer,
   const int*  __restrict__ ovAtomTreePointer,
   const int*  __restrict__ ovAtomTreeSize,

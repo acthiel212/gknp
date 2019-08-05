@@ -695,7 +695,6 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
 
     }
 
-
     // Reset tree kernel
     {
         map<string, string> defines;
@@ -708,82 +707,40 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
 
         map<string, string> replacements;
         string file, kernel_name;
-        CUfunction kernel;
         CUmodule module;
-        int index;
 
         kernel_name = "resetTree";
         if (!hasCreatedKernels) {
             if (verbose) cout << "compiling " << kernel_name << " ... ";
             file = cu.replaceStrings(CudaGKNPKernelSources::GVolResetTree, replacements);
             module = cu.createModule(file, defines);
+            resetTreeKernel = cu.getKernel(module, kernel_name);
             // reset tree kernel
             if (verbose) cout << " done. " << endl;
         }
-
-//      kernel.setArg<int>(index++, gtree->num_sections);
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovTreePointer->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreePointer->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreeSize->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreePaddedSize->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovLevel->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovVolume->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovVsp->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovVSfp->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovSelfVolume->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovVolEnergy->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovLastAtom->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovRootIndex->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovChildrenStartIndex->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovChildrenCount->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovDV1->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovDV2->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovProcessedFlag->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovOKtoProcessFlag->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovChildrenReported->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreeLock->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->NIterations->getDeviceBuffer());
 
         // reset buffer kernel
         kernel_name = "resetBuffer";
         if (!hasCreatedKernels) {
             if (verbose) cout << "compiling " << kernel_name << " ... ";
+            resetBufferKernel= cu.getKernel(module, kernel_name);
             if (verbose) cout << " done. " << endl;
         }
-//      kernel = resetBufferKernel;
-//      kernel.setArg<int>(index++, cu.getPaddedNumAtoms());
-//      kernel.setArg<int>(index++, gtree->num_sections);
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovAtomBuffer->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->selfVolumeBuffer->getDeviceBuffer());
-//      if(useLong) kernel.setArg<cl::Buffer>(index++, gtree->selfVolumeBuffer_long->getDeviceBuffer());
-//      if(useLong) kernel.setArg<cl::Buffer>(index++, gtree->gradBuffers_long->getDeviceBuffer());
 
 
         // reset tree counters kernel
         kernel_name = "resetSelfVolumes";
         if (!hasCreatedKernels) {
             if (verbose) cout << "compiling " << kernel_name << " ... ";
+            resetSelfVolumesKernel= cu.getKernel(module, kernel_name);
             if (verbose) cout << " done. " << endl;
         }
-//      kernel.setArg<int>(index++, gtree->num_sections);
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovTreePointer->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreePointer->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreeSize->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreePaddedSize->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovChildrenStartIndex->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovChildrenCount->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovProcessedFlag->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovOKtoProcessFlag->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovChildrenReported->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, PanicButton->getDeviceBuffer());
     }
 
     //Tree construction
     {
         CUmodule module;
-        CUfunction kernel;
         string kernel_name;
-        int index;
 
         //pass 1
         map<string, string> pairValueDefines;
@@ -1087,174 +1044,53 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
             if (verbose) cout << " done. " << endl;
 
             if (verbose) cout << "compiling " << kernel_name << " ... ";
+            InitOverlapTreeKernel_1body_1 = cu.getKernel(module, kernel_name);
             if (verbose) cout << " done. " << endl;
         }
         reset_tree_size = 1;
-//      kernel.setArg<int>(index++, cu.getPaddedNumAtoms());
-//      kernel.setArg<int>(index++, gtree->num_sections);
-//      kernel.setArg<int>(index++, reset_tree_size);
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovTreePointer->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovNumAtomsInTree->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovFirstAtom->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreeSize->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->NIterations->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreePaddedSize->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreePointer->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, cu.getPosq().getDeviceBuffer() );
-//      kernel.setArg<cl::Buffer>(index++, radiusParam1->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gammaParam1->getDeviceBuffer() );
-//      kernel.setArg<cl::Buffer>(index++, ishydrogenParam->getDeviceBuffer());
-//      InitOverlapTreeKernel_1body_1_GaArgIndex = index;
-//      kernel.setArg<cl::Buffer>(index++, GaussianExponent->getDeviceBuffer() );//changed by GKNP2
-//      InitOverlapTreeKernel_1body_1_GvArgIndex = index;
-//      kernel.setArg<cl::Buffer>(index++, GaussianVolume->getDeviceBuffer() );//changed by GKNP2
-//      kernel.setArg<cl::Buffer>(index++, AtomicGamma->getDeviceBuffer() );
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovLevel->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovVolume->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovVsp->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovVSfp->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovGamma1i->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovG->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovDV1->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovLastAtom->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovRootIndex->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovChildrenStartIndex->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovChildrenCount->getDeviceBuffer());
 
         if (!hasCreatedKernels) {
             if (verbose) cout << "compiling " << kernel_name << " ... ";
             module = cu.createModule(InitOverlapTreeSrc, pairValueDefines);
             if (verbose) cout << " done. " << endl;
+            InitOverlapTreeKernel_1body_2 = cu.getKernel(module, kernel_name);
         }
         reset_tree_size = 0;
-//      kernel = InitOverlapTreeKernel_1body_2;//vdW radii
-//      kernel.setArg<int>(index++, cu.getPaddedNumAtoms());
-//      kernel.setArg<int>(index++, gtree->num_sections);
-//      kernel.setArg<int>(index++, reset_tree_size);
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovTreePointer->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovNumAtomsInTree->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovFirstAtom->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreeSize->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->NIterations->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreePaddedSize->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreePointer->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, cu.getPosq().getDeviceBuffer() );
-//      kernel.setArg<cl::Buffer>(index++, radiusParam2->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gammaParam2->getDeviceBuffer() );
-//      kernel.setArg<cl::Buffer>(index++, ishydrogenParam->getDeviceBuffer() );
-//      kernel.setArg<cl::Buffer>(index++, GaussianExponent->getDeviceBuffer() );
-//      kernel.setArg<cl::Buffer>(index++, GaussianVolume->getDeviceBuffer() );
-//      kernel.setArg<cl::Buffer>(index++, AtomicGamma->getDeviceBuffer() );
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovLevel->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovVolume->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovVsp->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovVSfp->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovGamma1i->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovG->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovDV1->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovLastAtom->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovRootIndex->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovChildrenStartIndex->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovChildrenCount->getDeviceBuffer());
 
         kernel_name = "InitOverlapTreeCount";
         replacements["KERNEL_NAME"] = kernel_name;
 
         if (!hasCreatedKernels) {
             if (verbose) cout << "compiling " << kernel_name << " ... ";
+            InitOverlapTreeCountKernel = cu.getKernel(module, kernel_name);
             if (verbose) cout << " done. " << endl;
         }
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreePointer->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, cu.getPosq().getDeviceBuffer() );
-//      InitOverlapTreeCountKernelGaArgIndex = index;
-//      kernel.setArg<cl::Buffer>(index++, GaussianExponent->getDeviceBuffer() );//changed by GKNP2
-//      InitOverlapTreeCountKernelGvArgIndex = index;
-//      kernel.setArg<cl::Buffer>(index++, GaussianVolume->getDeviceBuffer() );//changed by GKNP2
-//      //neighbor list
-//      if (useCutoff) {
-//	      InitOverlapTreeCountKernel_first_nbarg = index;
-//        kernel.setArg<cl::Buffer>(index++, nb.getInteractingTiles().getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, nb.getInteractionCount().getDeviceBuffer());
-//	      kernel.setArg<cl::Buffer>(index++, nb.getInteractingAtoms().getDeviceBuffer());
-//        kernel.setArg<unsigned int>(index++, nb.getInteractingTiles().getSize());
-//        kernel.setArg<cl::Buffer>(index++, nb.getExclusionTiles().getDeviceBuffer());
-//      }else{
-//	    kernel.setArg<unsigned int>(index++, cu.getNumAtomBlocks()*(cu.getNumAtomBlocks()+1)/2);
-//      }
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovChildrenCount->getDeviceBuffer());
 
 
         if (!hasCreatedKernels) {
             kernel_name = "reduceovCountBuffer";
             replacements["KERNEL_NAME"] = kernel_name;
             if (verbose) cout << "compiling " << kernel_name << " ... ";
+            reduceovCountBufferKernel = cu.getKernel(module, kernel_name);
             if (verbose) cout << " done. " << endl;
         }
-//      kernel.setArg<int>(index++, gtree->num_sections);
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovTreePointer->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreePointer->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreeSize->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreePaddedSize->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovChildrenStartIndex->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovChildrenCount->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovChildrenCountTop->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, gtree->ovChildrenCountBottom->getDeviceBuffer());
-//      kernel.setArg<cl::Buffer>(index++, PanicButton->getDeviceBuffer());
 
 
         if (!hasCreatedKernels) {
             kernel_name = "InitOverlapTree";
             replacements["KERNEL_NAME"] = kernel_name;
             if (verbose) cout << "compiling " << kernel_name << " ... ";
+            InitOverlapTreeKernel = cu.getKernel(module, kernel_name);
             if (verbose) cout << " done. " << endl;
         }
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreePointer->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreeSize->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreePaddedSize->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, cu.getPosq().getDeviceBuffer());
-//        InitOverlapTreeKernelGaArgIndex = index;
-//        kernel.setArg<cl::Buffer>(index++, GaussianExponent->getDeviceBuffer());//changed by GKNP2
-//        InitOverlapTreeKernelGvArgIndex = index;
-//        kernel.setArg<cl::Buffer>(index++, GaussianVolume->getDeviceBuffer());//changed by GKNP2
-//        kernel.setArg<cl::Buffer>(index++, AtomicGamma->getDeviceBuffer());
-//        if (useCutoff) {
-//            InitOverlapTreeKernel_first_nbarg = index;
-//            kernel.setArg<cl::Buffer>(index++, nb.getInteractingTiles().getDeviceBuffer());
-//            kernel.setArg<cl::Buffer>(index++, nb.getInteractionCount().getDeviceBuffer());
-//            kernel.setArg<cl::Buffer>(index++, nb.getInteractingAtoms().getDeviceBuffer());
-//            kernel.setArg<unsigned int>(index++, nb.getInteractingTiles().getSize());
-//            kernel.setArg<cl::Buffer>(index++, nb.getExclusionTiles().getDeviceBuffer());
-//        } else {
-//            kernel.setArg<unsigned int>(index++, cu.getNumAtomBlocks() * (cu.getNumAtomBlocks() + 1) / 2);
-//        }
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovLevel->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovVolume->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovVsp->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovVSfp->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovGamma1i->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovG->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovDV1->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovLastAtom->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovRootIndex->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovChildrenStartIndex->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovChildrenCount->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovChildrenCountTop->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovChildrenCountBottom->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, PanicButton->getDeviceBuffer());
 
         if (!hasCreatedKernels) {
             kernel_name = "resetComputeOverlapTree";
             if (verbose) cout << "compiling " << kernel_name << " ... ";
             module = cu.createModule(InitOverlapTreeSrc, pairValueDefines);
+            resetComputeOverlapTreeKernel = cu.getKernel(module, kernel_name);
             if (verbose) cout << " done. " << endl;
         }
-//        kernel.setArg<int>(index++, gtree->num_sections);
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovTreePointer->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovProcessedFlag->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovOKtoProcessFlag->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreeSize->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovLevel->getDeviceBuffer());
-
 
 
         //pass 2 (1 pass kernel)
@@ -1262,92 +1098,35 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
             kernel_name = "ComputeOverlapTree_1pass";
             replacements["KERNEL_NAME"] = kernel_name;
             if (verbose) cout << "compiling " << kernel_name << " ... ";
+            ComputeOverlapTree_1passKernel = cu.getKernel(module, kernel_name);
             if (verbose) cout << " done. " << endl;
         }
-//        kernel.setArg<int>(index++, gtree->num_sections);
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovTreePointer->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreePointer->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreeSize->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->NIterations->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreePaddedSize->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreeLock->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, cu.getPosq().getDeviceBuffer());
-//        ComputeOverlapTree_1passGaArgIndex = index;
-//        kernel.setArg<cl::Buffer>(index++, GaussianExponent->getDeviceBuffer());//changed by GKNP2
-//        ComputeOverlapTree_1passGvArgIndex = index;
-//        kernel.setArg<cl::Buffer>(index++, GaussianVolume->getDeviceBuffer());//changed by GKNP2
-//        kernel.setArg<cl::Buffer>(index++, AtomicGamma->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovLevel->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovVolume->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovVsp->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovVSfp->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovGamma1i->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovG->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovDV1->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovLastAtom->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovRootIndex->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovChildrenStartIndex->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovChildrenCount->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovProcessedFlag->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovOKtoProcessFlag->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovChildrenReported->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovChildrenCountTop->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovChildrenCountBottom->getDeviceBuffer());
-//        kernel.setArg<int>(index++, gtree->temp_buffer_size);
-//        kernel.setArg<cl::Buffer>(index++, gtree->gvol_buffer_temp->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->tree_pos_buffer_temp->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->i_buffer_temp->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->atomj_buffer_temp->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, PanicButton->getDeviceBuffer());
 
         //2-body volumes sort kernel
         if(!hasCreatedKernels) {
             kernel_name = "SortOverlapTree2body";
             replacements["KERNEL_NAME"] = kernel_name;
             if (verbose) cout << "compiling " << kernel_name << " ... ";
+            SortOverlapTree2bodyKernel = cu.getKernel(module, kernel_name);
             if (verbose) cout << " done. " << endl;
         }
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreePointer->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreeSize->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreePaddedSize->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovLevel->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovVolume->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovVSfp->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovGamma1i->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovG->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovDV1->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovLastAtom->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovRootIndex->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovChildrenStartIndex->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovChildrenCount->getDeviceBuffer());
 
         //rescan kernels
         if(!hasCreatedKernels) {
             kernel_name = "ResetRescanOverlapTree";
             replacements["KERNEL_NAME"] = kernel_name;
             if (verbose) cout << "compiling " << kernel_name << " ... ";
+            ResetRescanOverlapTreeKernel = cu.getKernel(module, kernel_name);
             if (verbose) cout << " done. " << endl;
         }
-//        kernel.setArg<int>(index++, gtree->num_sections);
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovTreePointer->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreePointer->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreeSize->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreePaddedSize->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovProcessedFlag->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovOKtoProcessFlag->getDeviceBuffer());
 
         if (!hasCreatedKernels) {
             kernel_name = "InitRescanOverlapTree";
             replacements["KERNEL_NAME"] = kernel_name;
             if (verbose) cout << "compiling " << kernel_name << " ... ";
+            InitRescanOverlapTreeKernel = cu.getKernel(module, kernel_name);
             if (verbose) cout << " done. " << endl;
         }
-//        kernel.setArg<int>(index++, gtree->num_sections);
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovTreePointer->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreeSize->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovProcessedFlag->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovOKtoProcessFlag->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovLevel->getDeviceBuffer());
 
         //propagates atomic parameters (radii, gammas, etc) from the top to the bottom
         //of the overlap tree, recomputes overlap volumes as it goes
@@ -1355,51 +1134,18 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
             kernel_name = "RescanOverlapTree";
             replacements["KERNEL_NAME"] = kernel_name;
             if (verbose) cout << "compiling " << kernel_name << " ... ";
+            RescanOverlapTreeKernel = cu.getKernel(module, kernel_name);
             if (verbose) cout << " done. " << endl;
         }
-//        kernel.setArg<int>(index++, gtree->num_sections);
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovTreePointer->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreePointer->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreeSize->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->NIterations->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreePaddedSize->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreeLock->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, cu.getPosq().getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, GaussianExponent->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, GaussianVolume->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, AtomicGamma->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovLevel->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovVolume->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovVsp->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovVSfp->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovGamma1i->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovG->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovDV1->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovLastAtom->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovRootIndex->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovChildrenStartIndex->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovChildrenCount->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovProcessedFlag->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovOKtoProcessFlag->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovChildrenReported->getDeviceBuffer());
 
 
         //seeds tree with van der Waals + GB gamma parameters
         if (!hasCreatedKernels) {
             kernel_name = "InitOverlapTreeGammas_1body";
             if (verbose) cout << "compiling " << kernel_name << " ... ";
+            InitOverlapTreeGammasKernel_1body_W = cu.getKernel(module, kernel_name);
             if (verbose) cout << " done. " << endl;
         }
-//        kernel.setArg<int>(index++, cu.getPaddedNumAtoms());
-//        kernel.setArg<int>(index++, gtree->num_sections);
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovTreePointer->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovNumAtomsInTree->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovFirstAtom->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreeSize->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->NIterations->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreePointer->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, VdWDerW->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovGamma1i->getDeviceBuffer());
 
         //Same as RescanOverlapTree above:
         //propagates van der Waals + GB gamma atomic parameters from the top to the bottom
@@ -1410,25 +1156,9 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
             kernel_name = "RescanOverlapTreeGammas";
             replacements["KERNEL_NAME"] = kernel_name;
             if (verbose) cout << "compiling " << kernel_name << "... ";
+            RescanOverlapTreeGammasKernel_W = cu.getKernel(module, kernel_name);
             if (verbose) cout << " done. " << endl;
         }
-//        kernel.setArg<int>(index++, gtree->num_sections);
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovTreePointer->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreePointer->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreeSize->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->NIterations->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreePaddedSize->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreeLock->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, VdWDerW->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovLevel->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovGamma1i->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovLastAtom->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovRootIndex->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovChildrenStartIndex->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovChildrenCount->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovProcessedFlag->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovOKtoProcessFlag->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovChildrenReported->getDeviceBuffer());
 
     }
 
@@ -1447,7 +1177,6 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
         map<string, string> replacements;
         CUmodule module;
         string kernel_name;
-        CUfunction kernel;
         string file;
 
         kernel_name = "computeSelfVolumes";
@@ -1460,41 +1189,9 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
             //accumulates self volumes and volume energy function (and forces)
             //with the energy-per-unit-volume parameters (Gamma1i) currently loaded into tree
             if (verbose) cout << "compiling kernel " << kernel_name << " ... ";
+            computeSelfVolumesKernel = cu.getKernel(module, kernel_name);
             if (verbose) cout << " done. " << endl;
         }
-//        kernel.setArg<int>(index++, gtree->num_sections);
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovTreePointer->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreePointer->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreeSize->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->NIterations->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreePaddedSize->getDeviceBuffer());
-//        computeSelfVolumesGaArgIndex = index;
-//        kernel.setArg<cl::Buffer>(index++, GaussianExponent->getDeviceBuffer());//changed by GKNP2
-//        kernel.setArg<int>(index++, cu.getPaddedNumAtoms());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovLevel->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovVolume->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovVsp->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovVSfp->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovGamma1i->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovG->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovSelfVolume->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovVolEnergy->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovDV1->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovDV2->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovPF->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovLastAtom->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovRootIndex->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovChildrenStartIndex->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovChildrenCount->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovProcessedFlag->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovOKtoProcessFlag->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovChildrenReported->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomBuffer->getDeviceBuffer());
-//        if (useLong) {
-//            kernel.setArg<cl::Buffer>(index++, gtree->gradBuffers_long->getDeviceBuffer());
-//            kernel.setArg<cl::Buffer>(index++, gtree->selfVolumeBuffer_long->getDeviceBuffer());
-//        }
-//        kernel.setArg<cl::Buffer>(index++, gtree->selfVolumeBuffer->getDeviceBuffer());
     }
 
     //Self volumes reduction kernel (pass 2)
@@ -1521,39 +1218,18 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
             module = cu.createModule(file, defines);
 
             if (verbose) cout << "compiling " << kernel_name << " ... ";
+            reduceSelfVolumesKernel_buffer = cu.getKernel(module, kernel_name);
             if (verbose) cout << " done. " << endl;
         }
-//        kernel.setArg<int>(index++, cu.getNumAtoms());
-//        kernel.setArg<int>(index++, cu.getPaddedNumAtoms());
-//        kernel.setArg<int>(index++, gtree->num_sections);
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreePointer->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomBuffer->getDeviceBuffer());
-//        if (useLong) kernel.setArg<cl::Buffer>(index++, gtree->gradBuffers_long->getDeviceBuffer());
-//        if (useLong) kernel.setArg<cl::Buffer>(index++, gtree->selfVolumeBuffer_long->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->selfVolumeBuffer->getDeviceBuffer());
-//        reduceSelfVolumesSVArgIndex = index;
-//        kernel.setArg<cl::Buffer>(index++, selfVolume->getDeviceBuffer());//changed in GKNP2
-//        kernel.setArg<cl::Buffer>(index++, GaussianVolume->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, AtomicGamma->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, grad->getDeviceBuffer());
 
 
         kernel_name = "updateSelfVolumesForces";
         if (!hasCreatedKernels) {
             if (verbose) cout << "compiling " << kernel_name << " ... ";
+            updateSelfVolumesForcesKernel = cu.getKernel(module, kernel_name);
             if (verbose) cout << " done. " << endl;
         }
         int update_energy = 1;
-//        kernel.setArg<int>(index++, update_energy);
-//        kernel.setArg<int>(index++, cu.getNumAtoms());
-//        kernel.setArg<int>(index++, cu.getPaddedNumAtoms());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovAtomTreePointer->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, gtree->ovVolEnergy->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, grad->getDeviceBuffer());
-//        kernel.setArg<cl::Buffer>(index++, (useLong ? cu.getLongForceBuffer().getDeviceBuffer()
-//                                                    : cu.getForceBuffers().getDeviceBuffer())); //master force buffer
-//        kernel.setArg<cl::Buffer>(index++, cu.getEnergyBuffer().getDeviceBuffer());
-
     }
 }
 
@@ -1586,6 +1262,7 @@ double GKNPPlugin::CudaCalcGKNPForceKernel::executeGVolSA(ContextImpl &context, 
     {if (verbose_level > 1) cout << "Executing resetTreeKernel" << endl;
     //here workgroups cycle through tree sections to reset the tree section
 
+
     void *resetTreeKernelArgs[] = {&num_sections,
                                    &gtree->ovTreePointer->getDevicePointer(),
                                    &gtree->ovAtomTreePointer->getDevicePointer(),
@@ -1607,7 +1284,8 @@ double GKNPPlugin::CudaCalcGKNPForceKernel::executeGVolSA(ContextImpl &context, 
                                    &gtree->ovOKtoProcessFlag->getDevicePointer(),
                                    &gtree->ovChildrenReported->getDevicePointer(),
                                    &gtree->ovAtomTreeLock->getDevicePointer(),
-                                   &gtree->NIterations->getDevicePointer()};
+                                   &gtree->NIterations->getDevicePointer()
+                                  };
     cu.executeKernel(resetTreeKernel, resetTreeKernelArgs, ov_work_group_size * num_compute_units, ov_work_group_size);}
 
     //Execute resetBufferKernel

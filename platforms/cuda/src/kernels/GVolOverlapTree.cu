@@ -43,7 +43,7 @@ typedef struct {
 
 //this kernel initializes the tree with 1-body overlaps
 //it assumes that no. of atoms in tree section is < groups size
-__global__ void InitOverlapTree_1body(
+extern "C" __global__ void InitOverlapTree_1body(
         unsigned const int num_padded_atoms,
         unsigned const int num_sections,
         unsigned const int reset_tree_size,
@@ -121,7 +121,7 @@ __global__ void InitOverlapTree_1body(
 
 
 //this kernel counts the no. of 2-body overlaps for each atom, stores in ovChildrenCount
-__global__ void InitOverlapTreeCount(
+extern "C" __global__ void InitOverlapTreeCount(
         const int *__restrict__ ovAtomTreePointer,    //pointers to atom trees
         const real4 *__restrict__ posq, //atomic positions
         const real *__restrict__ global_gaussian_exponent, //atomic Gaussian exponent
@@ -498,7 +498,7 @@ const ushort2* exclusionTiles,
 
 
 //this kernel counts the no. of 2-body overlaps for each atom, stores in ovChildrenCount
-__global__ void InitOverlapTree(
+extern "C" __global__ void InitOverlapTree(
         const int *__restrict__ ovAtomTreePointer,    //pointers to atom trees
         int *__restrict__ ovAtomTreeSize,       //actual sizes
         const int *__restrict__ ovAtomTreePaddedSize, //padded allocated sizes
@@ -939,12 +939,12 @@ const ushort2* exclusionTiles,
 
 //this kernel initializes the tree to be processed by ComputeOverlapTree()
 //it assumes that 2-body overlaps are in place
-__global__ void resetComputeOverlapTree(const int ntrees,
-                                        const int *__restrict__ ovTreePointer,
-                                        int *__restrict__ ovProcessedFlag,
-                                        int *__restrict__ ovOKtoProcessFlag,
-                                        const int *__restrict__ ovAtomTreeSize,
-                                        const int *__restrict__ ovLevel
+extern "C" __global__ void resetComputeOverlapTree(const int ntrees,
+                                                   const int *__restrict__ ovTreePointer,
+                                                   int *__restrict__ ovProcessedFlag,
+                                                   int *__restrict__ ovOKtoProcessFlag,
+                                                   const int *__restrict__ ovAtomTreeSize,
+                                                   const int *__restrict__ ovLevel
 ) {
     unsigned int local_id = threadIdx.x;
     int tree = blockIdx.x;
@@ -1054,16 +1054,16 @@ __device__ inline void scangExclusive(unsigned int *buffer,
 //assumes that work group size = OV_WORK_GROUP_SIZE
 
 //__global__ __attribute__((reqd_work_group_size(OV_WORK_GROUP_SIZE,1,1)))
-__device__ void reduceovCountBuffer(const int ntrees,
-                                    const int *__restrict__ ovTreePointer,
-                                    const int *__restrict__ ovAtomTreePointer,    //pointers to atom trees
-                                    int *__restrict__ ovAtomTreeSize,       //actual sizes
-                                    const int *__restrict__ ovAtomTreePaddedSize, //actual sizes
-                                    unsigned int *__restrict__ ovChildrenStartIndex,
-                                    int *__restrict__ ovChildrenCount,
-                                    int *__restrict__ ovChildrenCountTop,
-                                    int *__restrict__ ovChildrenCountBottom,
-                                    int *__restrict__ PanicButton) {
+extern "C" __global__ void reduceovCountBuffer(const int ntrees,
+                                               const int *__restrict__ ovTreePointer,
+                                               const int *__restrict__ ovAtomTreePointer,    //pointers to atom trees
+                                               int *__restrict__ ovAtomTreeSize,       //actual sizes
+                                               const int *__restrict__ ovAtomTreePaddedSize, //actual sizes
+                                               unsigned int *__restrict__ ovChildrenStartIndex,
+                                               int *__restrict__ ovChildrenCount,
+                                               int *__restrict__ ovChildrenCountTop,
+                                               int *__restrict__ ovChildrenCountBottom,
+                                               int *__restrict__ PanicButton) {
     unsigned int local_id = threadIdx.x;
     unsigned int gsize = blockDim.x;
     __shared__ unsigned int temp[2 * OV_WORK_GROUP_SIZE];
@@ -1188,19 +1188,19 @@ __device__ inline void sortVolumes2body(unsigned const int idx,
 }
 
 /* this kernel sorts the 2-body portions of the tree according to volume. It is structured so that each thread gets one atom */
-__global__ void SortOverlapTree2body(const int *__restrict__ ovAtomTreePointer,    //pointers to atom trees
-                                     const int *__restrict__ ovAtomTreeSize,       //actual sizes
-                                     const int *__restrict__ ovAtomTreePaddedSize, //padded allocated sizes
-                                     int *__restrict__ ovLevel, //this and below define tree
-                                     real *__restrict__ ovVolume,
-                                     real *__restrict__ ovVSfp,
-                                     real *__restrict__ ovGamma1i,
-                                     real4 *__restrict__ ovG,
-                                     real4 *__restrict__ ovDV1,
-                                     int *__restrict__ ovLastAtom,
-                                     int *__restrict__ ovRootIndex,
-                                     const int *__restrict__ ovChildrenStartIndex,
-                                     const int *__restrict__ ovChildrenCount
+extern "C" __global__ void SortOverlapTree2body(const int *__restrict__ ovAtomTreePointer,    //pointers to atom trees
+                                                const int *__restrict__ ovAtomTreeSize,       //actual sizes
+                                                const int *__restrict__ ovAtomTreePaddedSize, //padded allocated sizes
+                                                int *__restrict__ ovLevel, //this and below define tree
+                                                real *__restrict__ ovVolume,
+                                                real *__restrict__ ovVSfp,
+                                                real *__restrict__ ovGamma1i,
+                                                real4 *__restrict__ ovG,
+                                                real4 *__restrict__ ovDV1,
+                                                int *__restrict__ ovLastAtom,
+                                                int *__restrict__ ovRootIndex,
+                                                const int *__restrict__ ovChildrenStartIndex,
+                                                const int *__restrict__ ovChildrenCount
 ) {
     unsigned int atom = blockIdx.x * blockDim.x + threadIdx.x; // to start
 
@@ -1234,40 +1234,40 @@ __global__ void SortOverlapTree2body(const int *__restrict__ ovAtomTreePointer, 
 //3. Re-process the i<j overlaps and saves them starting at ovChildrenStartIndex[]
 
 //__global__ __attribute__((reqd_work_group_size(OV_WORK_GROUP_SIZE,1,1)))
-__device__ void ComputeOverlapTree_1pass(const int ntrees,
-                                         const int *__restrict__ ovTreePointer,
-                                         const int *__restrict__ ovAtomTreePointer,    //pointers to atom trees
-                                         int *__restrict__ ovAtomTreeSize,       //actual sizes
-                                         int *__restrict__ NIterations,
-                                         const int *__restrict__ ovAtomTreePaddedSize, //padded allocated sizes
-                                         int *__restrict__ ovAtomTreeLock,       //tree locks
-                                         const real4 *__restrict__ posq, //atomic positions
-                                         const real *__restrict__ global_gaussian_exponent, //atomic Gaussian exponent
-                                         const real *__restrict__ global_gaussian_volume, //atomic Gaussian prefactor
-                                         const real *__restrict__ global_atomic_gamma, //atomic Gaussian prefactor
-                                         int *__restrict__ ovLevel, //this and below define tree
-                                         real *__restrict__ ovVolume,
-                                         real *__restrict__ ovVsp,
-                                         real *__restrict__ ovVSfp,
-                                         real *__restrict__ ovGamma1i,
-                                         real4 *__restrict__ ovG,
-                                         real4 *__restrict__ ovDV1,
-                                         int *__restrict__ ovLastAtom,
-                                         int *__restrict__ ovRootIndex,
-                                         int *__restrict__ ovChildrenStartIndex,
-                                         int *__restrict__ ovChildrenCount,
-                                         volatile int *__restrict__ ovProcessedFlag,
-                                         volatile int *__restrict__ ovOKtoProcessFlag,
-                                         volatile int *__restrict__ ovChildrenReported,
-                                         int *__restrict__ ovChildrenCountTop,
-                                         int *__restrict__ ovChildrenCountBottom,
-                                         // temporary buffers
-                                         unsigned const int buffer_size,//assume buffer_size/ntrees = multiple of group size
-                                         real *__restrict__ gvol_buffer,
-                                         unsigned int *__restrict__ tree_pos_buffer, // where to store in tree
-                                         int *__restrict__ i_buffer,
-                                         int *__restrict__ atomj_buffer,
-                                         int *__restrict__ PanicButton) {
+extern "C" __global__ void ComputeOverlapTree_1pass(const int ntrees,
+                                                    const int *__restrict__ ovTreePointer,
+                                                    const int *__restrict__ ovAtomTreePointer,    //pointers to atom trees
+                                                    int *__restrict__ ovAtomTreeSize,       //actual sizes
+                                                    int *__restrict__ NIterations,
+                                                    const int *__restrict__ ovAtomTreePaddedSize, //padded allocated sizes
+                                                    int *__restrict__ ovAtomTreeLock,       //tree locks
+                                                    const real4 *__restrict__ posq, //atomic positions
+                                                    const real *__restrict__ global_gaussian_exponent, //atomic Gaussian exponent
+                                                    const real *__restrict__ global_gaussian_volume, //atomic Gaussian prefactor
+                                                    const real *__restrict__ global_atomic_gamma, //atomic Gaussian prefactor
+                                                    int *__restrict__ ovLevel, //this and below define tree
+                                                    real *__restrict__ ovVolume,
+                                                    real *__restrict__ ovVsp,
+                                                    real *__restrict__ ovVSfp,
+                                                    real *__restrict__ ovGamma1i,
+                                                    real4 *__restrict__ ovG,
+                                                    real4 *__restrict__ ovDV1,
+                                                    int *__restrict__ ovLastAtom,
+                                                    int *__restrict__ ovRootIndex,
+                                                    int *__restrict__ ovChildrenStartIndex,
+                                                    int *__restrict__ ovChildrenCount,
+                                                    volatile int *__restrict__ ovProcessedFlag,
+                                                    volatile int *__restrict__ ovOKtoProcessFlag,
+                                                    volatile int *__restrict__ ovChildrenReported,
+                                                    int *__restrict__ ovChildrenCountTop,
+                                                    int *__restrict__ ovChildrenCountBottom,
+        // temporary buffers
+                                                    unsigned const int buffer_size,//assume buffer_size/ntrees = multiple of group size
+                                                    real *__restrict__ gvol_buffer,
+                                                    unsigned int *__restrict__ tree_pos_buffer, // where to store in tree
+                                                    int *__restrict__ i_buffer,
+                                                    int *__restrict__ atomj_buffer,
+                                                    int *__restrict__ PanicButton) {
 
     const unsigned int local_id = threadIdx.x;
     __shared__ unsigned int temp[2 * OV_WORK_GROUP_SIZE];
@@ -1285,10 +1285,14 @@ __device__ void ComputeOverlapTree_1pass(const int ntrees,
     __shared__ volatile int parent1_buffer[OV_WORK_GROUP_SIZE]; //tree slot of "i" overlap
     __shared__ volatile int level1_buffer[OV_WORK_GROUP_SIZE]; //overlap level of of "i" overlap
     //TODO: May need to declare posq1_buffer as volatile
-    __shared__ real4 posq1_buffer[OV_WORK_GROUP_SIZE]; //position of "i" overlap
-    __shared__ volatile real a1_buffer[OV_WORK_GROUP_SIZE]; //a parameter of "i" overlap
-    __shared__ volatile real v1_buffer[OV_WORK_GROUP_SIZE]; //volume of "i" overlap
-    __shared__ volatile real gamma1_buffer[OV_WORK_GROUP_SIZE]; //gamma parameter of "i" overlap
+    __shared__
+    real4 posq1_buffer[OV_WORK_GROUP_SIZE]; //position of "i" overlap
+    __shared__
+    volatile real a1_buffer[OV_WORK_GROUP_SIZE]; //a parameter of "i" overlap
+    __shared__
+    volatile real v1_buffer[OV_WORK_GROUP_SIZE]; //volume of "i" overlap
+    __shared__
+    volatile real gamma1_buffer[OV_WORK_GROUP_SIZE]; //gamma parameter of "i" overlap
     __shared__ volatile int children_count[OV_WORK_GROUP_SIZE]; //number of children
 
     if (local_id == 0) panic = PanicButton[0];
@@ -1363,7 +1367,7 @@ __device__ void ComputeOverlapTree_1pass(const int ntrees,
                         //atomic_inc(&panic);
                         //atomic_inc(&PanicButton[0]);
                         //atomic_inc(&PanicButton[1]);
-                        atomicAdd((unsigned int*) &panic, 1);
+                        atomicAdd((unsigned int *) &panic, 1);
                         atomicAdd(&PanicButton[0], 1);
                         atomicAdd(&PanicButton[1], 1);
                     }
@@ -1441,7 +1445,7 @@ __device__ void ComputeOverlapTree_1pass(const int ntrees,
                         unsigned int endslot = tree_ptr + tree_size + tree_pos_buffer[pos];
                         if (endslot - tree_ptr >= ovAtomTreePaddedSize[tree]) {
                             //atomic_inc(&panic);
-                            atomicAdd((unsigned int *)&panic, 1);
+                            atomicAdd((unsigned int *) &panic, 1);
                         }
                         if (atom2 >= 0 && gvol > VolMinA && panic == 0) {
                             int level = level1_buffer[overlap1] + 1;
@@ -1535,13 +1539,13 @@ __device__ void ComputeOverlapTree_1pass(const int ntrees,
 /**
  * Initialize tree for rescanning, set Processed, OKtoProcess=1 for leaves and out-of-bound,
  */
-__global__ void ResetRescanOverlapTree(const int ntrees,
-                                       const int *__restrict__ ovTreePointer,
-                                       const int *__restrict__ ovAtomTreePointer,    //pointers to atom tree sections
-                                       const int *__restrict__ ovAtomTreeSize,    //pointers to atom tree sections
-                                       const int *__restrict__ ovAtomTreePaddedSize,    //pointers to atom tree sections
-                                       int *__restrict__ ovProcessedFlag,
-                                       int *__restrict__ ovOKtoProcessFlag) {
+extern "C" __global__ void ResetRescanOverlapTree(const int ntrees,
+                                                  const int *__restrict__ ovTreePointer,
+                                                  const int *__restrict__ ovAtomTreePointer,    //pointers to atom tree sections
+                                                  const int *__restrict__ ovAtomTreeSize,    //pointers to atom tree sections
+                                                  const int *__restrict__ ovAtomTreePaddedSize,    //pointers to atom tree sections
+                                                  int *__restrict__ ovProcessedFlag,
+                                                  int *__restrict__ ovOKtoProcessFlag) {
     const unsigned int local_id = threadIdx.x;
     const unsigned int gsize = OV_WORK_GROUP_SIZE;
 
@@ -1567,12 +1571,12 @@ __global__ void ResetRescanOverlapTree(const int ntrees,
 }
 
 //this kernel initializes the tree to be processed by RescanOverlapTree()
-__global__ void InitRescanOverlapTree(const int ntrees,
-                                      const int *__restrict__ ovTreePointer,
-                                      const int *__restrict__ ovAtomTreeSize,
-                                      int *__restrict__ ovProcessedFlag,
-                                      int *__restrict__ ovOKtoProcessFlag,
-                                      const int *__restrict__ ovLevel) {
+extern "C" __global__ void InitRescanOverlapTree(const int ntrees,
+                                                 const int *__restrict__ ovTreePointer,
+                                                 const int *__restrict__ ovAtomTreeSize,
+                                                 int *__restrict__ ovProcessedFlag,
+                                                 int *__restrict__ ovOKtoProcessFlag,
+                                                 const int *__restrict__ ovLevel) {
     unsigned int local_id = threadIdx.x;
     int tree = blockIdx.x;
 
@@ -1620,32 +1624,32 @@ __global__ void InitRescanOverlapTree(const int ntrees,
 //it does not modify the tree in any other way
 
 //__global__ __attribute__((reqd_work_group_size(OV_WORK_GROUP_SIZE,1,1)))
-__device__ void RescanOverlapTree(const int ntrees,
-                                  const int *__restrict__ ovTreePointer,
-                                  const int *__restrict__ ovAtomTreePointer,    //pointers to atom trees
-                                  const int *__restrict__ ovAtomTreeSize,       //actual sizes
-                                  int *__restrict__ NIterations,
-                                  const int *__restrict__ ovAtomTreePaddedSize, //padded allocated sizes
-                                  const int *__restrict__ ovAtomTreeLock,       //tree locks
-                                  const real4 *__restrict__ posq, //atomic positions
-                                  const real *__restrict__ global_gaussian_exponent, //atomic Gaussian exponent
-                                  const real *__restrict__ global_gaussian_volume, //atomic Gaussian prefactor
-                                  const real *__restrict__ global_atomic_gamma, //atomic gamma
-                                  const int *__restrict__ ovLevel, //this and below define tree
-                                  real *__restrict__ ovVolume,
-                                  real *__restrict__ ovVsp,
-                                  real *__restrict__ ovVSfp,
-                                  real *__restrict__ ovGamma1i,
-                                  real4 *__restrict__ ovG,
-                                  real4 *__restrict__ ovDV1,
+extern "C" __global__ void RescanOverlapTree(const int ntrees,
+                                             const int *__restrict__ ovTreePointer,
+                                             const int *__restrict__ ovAtomTreePointer,    //pointers to atom trees
+                                             const int *__restrict__ ovAtomTreeSize,       //actual sizes
+                                             int *__restrict__ NIterations,
+                                             const int *__restrict__ ovAtomTreePaddedSize, //padded allocated sizes
+                                             const int *__restrict__ ovAtomTreeLock,       //tree locks
+                                             const real4 *__restrict__ posq, //atomic positions
+                                             const real *__restrict__ global_gaussian_exponent, //atomic Gaussian exponent
+                                             const real *__restrict__ global_gaussian_volume, //atomic Gaussian prefactor
+                                             const real *__restrict__ global_atomic_gamma, //atomic gamma
+                                             const int *__restrict__ ovLevel, //this and below define tree
+                                             real *__restrict__ ovVolume,
+                                             real *__restrict__ ovVsp,
+                                             real *__restrict__ ovVSfp,
+                                             real *__restrict__ ovGamma1i,
+                                             real4 *__restrict__ ovG,
+                                             real4 *__restrict__ ovDV1,
 
-                                  const int *__restrict__ ovLastAtom,
-                                  const int *__restrict__ ovRootIndex,
-                                  const int *__restrict__ ovChildrenStartIndex,
-                                  const int *__restrict__ ovChildrenCount,
-                                  volatile int *__restrict__ ovProcessedFlag,
-                                  volatile int *__restrict__ ovOKtoProcessFlag,
-                                  volatile int *__restrict__ ovChildrenReported) {
+                                             const int *__restrict__ ovLastAtom,
+                                             const int *__restrict__ ovRootIndex,
+                                             const int *__restrict__ ovChildrenStartIndex,
+                                             const int *__restrict__ ovChildrenCount,
+                                             volatile int *__restrict__ ovProcessedFlag,
+                                             volatile int *__restrict__ ovOKtoProcessFlag,
+                                             volatile int *__restrict__ ovChildrenReported) {
 
     const unsigned int local_id = threadIdx.x;
     const unsigned int gsize = OV_WORK_GROUP_SIZE;
@@ -1725,16 +1729,16 @@ __device__ void RescanOverlapTree(const int ntrees,
 
 
 //this kernel initializes the 1-body nodes with a new set of atomic gamma parameters
-__global__ void InitOverlapTreeGammas_1body(unsigned const int num_padded_atoms,
-                                            unsigned const int num_sections,
-                                            const int *__restrict__ ovTreePointer,
-                                            const int *__restrict__ ovNumAtomsInTree,
-                                            const int *__restrict__ ovFirstAtom,
-                                            int *__restrict__ ovAtomTreeSize,    //sizes of tree sections
-                                            int *__restrict__ NIterations,
-                                            const int *__restrict__ ovAtomTreePointer,    //pointers to atoms in tree
-                                            const float *__restrict__ gammaParam, //gamma
-                                            real *__restrict__ ovGamma1i) {
+extern "C" __global__ void InitOverlapTreeGammas_1body(unsigned const int num_padded_atoms,
+                                                       unsigned const int num_sections,
+                                                       const int *__restrict__ ovTreePointer,
+                                                       const int *__restrict__ ovNumAtomsInTree,
+                                                       const int *__restrict__ ovFirstAtom,
+                                                       int *__restrict__ ovAtomTreeSize,    //sizes of tree sections
+                                                       int *__restrict__ NIterations,
+                                                       const int *__restrict__ ovAtomTreePointer,    //pointers to atoms in tree
+                                                       const float *__restrict__ gammaParam, //gamma
+                                                       real *__restrict__ ovGamma1i) {
     const unsigned int id = threadIdx.x;
 
     unsigned int section = blockIdx.x;
@@ -1768,23 +1772,23 @@ __global__ void InitOverlapTreeGammas_1body(unsigned const int num_padded_atoms,
 //  used to prep calculations of volume derivatives of GB and van der Waals energies
 
 //__global__ __attribute__((reqd_work_group_size(OV_WORK_GROUP_SIZE,1,1)))
-__device__ void RescanOverlapTreeGammas(const int ntrees,
-                                        const int *__restrict__ ovTreePointer,
-                                        const int *__restrict__ ovAtomTreePointer,    //pointers to atom trees
-                                        const int *__restrict__ ovAtomTreeSize,       //actual sizes
-                                        int *__restrict__ NIterations,
-                                        const int *__restrict__ ovAtomTreePaddedSize, //padded allocated sizes
-                                        const int *__restrict__ ovAtomTreeLock,       //tree locks
-                                        const real *__restrict__ global_atomic_gamma, //atomic gamma
-                                        const int *__restrict__ ovLevel, //this and below define tree
-                                        real *__restrict__ ovGamma1i,
-                                        const int *__restrict__ ovLastAtom,
-                                        const int *__restrict__ ovRootIndex,
-                                        const int *__restrict__ ovChildrenStartIndex,
-                                        const int *__restrict__ ovChildrenCount,
-                                        volatile int *__restrict__ ovProcessedFlag,
-                                        volatile int *__restrict__ ovOKtoProcessFlag,
-                                        volatile int *__restrict__ ovChildrenReported) {
+extern "C" __global__ void RescanOverlapTreeGammas(const int ntrees,
+                                                   const int *__restrict__ ovTreePointer,
+                                                   const int *__restrict__ ovAtomTreePointer,    //pointers to atom trees
+                                                   const int *__restrict__ ovAtomTreeSize,       //actual sizes
+                                                   int *__restrict__ NIterations,
+                                                   const int *__restrict__ ovAtomTreePaddedSize, //padded allocated sizes
+                                                   const int *__restrict__ ovAtomTreeLock,       //tree locks
+                                                   const real *__restrict__ global_atomic_gamma, //atomic gamma
+                                                   const int *__restrict__ ovLevel, //this and below define tree
+                                                   real *__restrict__ ovGamma1i,
+                                                   const int *__restrict__ ovLastAtom,
+                                                   const int *__restrict__ ovRootIndex,
+                                                   const int *__restrict__ ovChildrenStartIndex,
+                                                   const int *__restrict__ ovChildrenCount,
+                                                   volatile int *__restrict__ ovProcessedFlag,
+                                                   volatile int *__restrict__ ovOKtoProcessFlag,
+                                                   volatile int *__restrict__ ovChildrenReported) {
 
     const unsigned int local_id = threadIdx.x;
     const unsigned int gsize = OV_WORK_GROUP_SIZE;

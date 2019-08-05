@@ -6,7 +6,7 @@
  * energyBuffer could be linked to the selfVolumeBuffer, depending on the use
  */
 
-__global__ void reduceSelfVolumes_buffer(int num_atoms,
+extern "C" __global__ void reduceSelfVolumes_buffer(int num_atoms,
                                          int padded_num_atoms,
                                          int numBuffers,
                                          const int* __restrict__ ovAtomTreePointer,
@@ -87,7 +87,7 @@ __global__ void reduceSelfVolumes_buffer(int num_atoms,
 }
 
 
-__global__ void updateSelfVolumesForces(int update_energy,
+extern "C" __global__ void updateSelfVolumesForces(int update_energy,
 				      int num_atoms,
 				      int padded_num_atoms,
 				      const int*  __restrict__ ovAtomTreePointer,
