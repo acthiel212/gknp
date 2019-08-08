@@ -9,6 +9,7 @@
 #include "openmm/cuda/CudaArray.h"
 #include "openmm/cuda/CudaContext.h"
 #include "openmm/cuda/CudaForceInfo.h"
+#include "cuda.h"
 #include <cmath>
 #include <cfloat>
 
@@ -1251,9 +1252,9 @@ double GKNPPlugin::CudaCalcGKNPForceKernel::executeGVolSA(ContextImpl &context, 
         }
     }
 
-    int num_sections = gtree->num_sections;
-    int paddedNumAtoms = cu.getPaddedNumAtoms();
-    int numAtoms = cu.getNumAtoms();
+    unsigned int num_sections = gtree->num_sections;
+    unsigned int paddedNumAtoms = cu.getPaddedNumAtoms();
+    unsigned int numAtoms = cu.getNumAtoms();
     //------------------------------------------------------------------------------------------------------------
     // Tree construction (large radii)
     //
@@ -1266,6 +1267,7 @@ double GKNPPlugin::CudaCalcGKNPForceKernel::executeGVolSA(ContextImpl &context, 
     void *resetTreeKernelArgs[] = {&num_sections,
                                    &gtree->ovTreePointer->getDevicePointer(),
                                    &gtree->ovAtomTreePointer->getDevicePointer(),
+                                   &gtree->ovAtomTreeSize->getDevicePointer(),
                                    &gtree->ovAtomTreePaddedSize->getDevicePointer(),
                                    &gtree->ovLevel->getDevicePointer(),
                                    &gtree->ovVolume->getDevicePointer(),
@@ -1280,7 +1282,6 @@ double GKNPPlugin::CudaCalcGKNPForceKernel::executeGVolSA(ContextImpl &context, 
                                    &gtree->ovDV1->getDevicePointer(),
                                    &gtree->ovDV2->getDevicePointer(),
                                    &gtree->ovProcessedFlag->getDevicePointer(),
-                                   &gtree->ovOKtoProcessFlag->getDevicePointer(),
                                    &gtree->ovOKtoProcessFlag->getDevicePointer(),
                                    &gtree->ovChildrenReported->getDevicePointer(),
                                    &gtree->ovAtomTreeLock->getDevicePointer(),
@@ -1300,16 +1301,19 @@ double GKNPPlugin::CudaCalcGKNPForceKernel::executeGVolSA(ContextImpl &context, 
     cu.executeKernel(resetBufferKernel, resetBufferKernelArgs, ov_work_group_size * num_compute_units, ov_work_group_size);}
 
     //Execute InitOverlapTreeKernel_1body_1
+
     {if (verbose_level > 1) cout << "Executing InitOverlapTreeKernel_1body_1" << endl;
     //fills up tree with 1-body overlaps
-    int reset_tree_size =1;
+    unsigned int reset_tree_size =1;
+    cout << cu.getPosq().getDevicePointer() << endl;
     void *InitOverlapTreeKernel_1body_1Args[] = {&paddedNumAtoms,
                                                  &num_sections,
                                                  &reset_tree_size,
                                                  &gtree->ovTreePointer->getDevicePointer(),
                                                  &gtree->ovNumAtomsInTree->getDevicePointer(),
+                                                 &gtree->ovFirstAtom->getDevicePointer(),
+                                                 &gtree->ovAtomTreeSize->getDevicePointer(),
                                                  &gtree->NIterations->getDevicePointer(),
-                                                 &gtree->ovAtomTreePaddedSize->getDevicePointer(),
                                                  &gtree->ovAtomTreePaddedSize->getDevicePointer(),
                                                  &gtree->ovAtomTreePointer->getDevicePointer(),
                                                  &cu.getPosq().getDevicePointer(),
@@ -1329,9 +1333,16 @@ double GKNPPlugin::CudaCalcGKNPForceKernel::executeGVolSA(ContextImpl &context, 
                                                  &gtree->ovLastAtom->getDevicePointer(),
                                                  &gtree->ovRootIndex->getDevicePointer(),
                                                  &gtree->ovChildrenStartIndex->getDevicePointer(),
-                                                 &gtree->ovChildrenCount->getDevicePointer()};
-
+                                                 &gtree->ovChildrenCount->getDevicePointer()
+    };
+//    int threads = ov_work_group_size * num_compute_units;
+//    int blockSize = ov_work_group_size;
+//    int sharedSize=0;
+//    int numThreadBlocks=cu.getNumThreadBlocks();
+//    int gridSize = std::min((threads+blockSize-1)/blockSize, numThreadBlocks);
+//    CUresult result = CUDAAPI::cuLaunchKernel(InitOverlapTreeKernel_1body_1, gridSize, 1, 1, blockSize, 1, 1, sharedSize, cu.getCurrentStream(), InitOverlapTreeKernel_1body_1Args, NULL);
     cu.executeKernel(InitOverlapTreeKernel_1body_1, InitOverlapTreeKernel_1body_1Args, ov_work_group_size * num_compute_units, ov_work_group_size);}
+
 
     //Execute InitOverlapTreeCountKernel
     {if (verbose_level > 1) cout << "Executing InitOverlapTreeCountKernel" << endl;

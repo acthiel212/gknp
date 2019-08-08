@@ -47,31 +47,31 @@ extern "C" __global__ void InitOverlapTree_1body(
         unsigned const int num_padded_atoms,
         unsigned const int num_sections,
         unsigned const int reset_tree_size,
-        const int *__restrict__ ovTreePointer,
-        const int *__restrict__ ovNumAtomsInTree,
-        const int *__restrict__ ovFirstAtom,
-        int *__restrict__ ovAtomTreeSize,    //sizes of tree sections
-        int *__restrict__ NIterations,
-        const int *__restrict__ ovAtomTreePaddedSize,
-        const int *__restrict__ ovAtomTreePointer,    //pointers to atoms in tree
-        const real4 *__restrict__ posq, //atomic positions
-        const float *__restrict__ radiusParam, //atomic radius
-        const float *__restrict__ gammaParam, //gamma
-        const int *__restrict__ ishydrogenParam, //1=hydrogen atom
-        real *__restrict__ GaussianExponent, //atomic Gaussian exponent
-        real *__restrict__ GaussianVolume, //atomic Gaussian volume
-        real *__restrict__ AtomicGamma, //atomic Gaussian gamma
-        int *__restrict__ ovLevel, //this and below define tree
-        real *__restrict__ ovVolume,
-        real *__restrict__ ovVsp,
-        real *__restrict__ ovVSfp,
-        real *__restrict__ ovGamma1i,
-        real4 *__restrict__ ovG,
-        real4 *__restrict__ ovDV1,
-        int *__restrict__ ovLastAtom,
-        int *__restrict__ ovRootIndex,
-        int *__restrict__ ovChildrenStartIndex,
-        volatile int *__restrict__ ovChildrenCount) {
+        const int* __restrict__ ovTreePointer,
+        const int* __restrict__ ovNumAtomsInTree,
+        const int* __restrict__ ovFirstAtom,
+        int* __restrict__ ovAtomTreeSize,    //sizes of tree sections
+        int* __restrict__ NIterations,
+        const int* __restrict__ ovAtomTreePaddedSize,
+        const int* __restrict__ ovAtomTreePointer,    //pointers to atoms in tree
+        const real4* __restrict__ posq, //atomic positions
+        const float* __restrict__ radiusParam, //atomic radius
+        const float* __restrict__ gammaParam, //gamma
+        const int* __restrict__ ishydrogenParam, //1=hydrogen atom
+        real* __restrict__ GaussianExponent, //atomic Gaussian exponent
+        real* __restrict__ GaussianVolume, //atomic Gaussian volume
+        real* __restrict__ AtomicGamma, //atomic Gaussian gamma
+        int* __restrict__ ovLevel, //this and below define tree
+        real* __restrict__ ovVolume,
+        real* __restrict__ ovVsp,
+        real* __restrict__ ovVSfp,
+        real* __restrict__ ovGamma1i,
+        real4* __restrict__ ovG,
+        real4* __restrict__ ovDV1,
+        int* __restrict__ ovLastAtom,
+        int* __restrict__ ovRootIndex,
+        int* __restrict__ ovChildrenStartIndex,
+        volatile int* __restrict__ ovChildrenCount) {
     const unsigned int id = threadIdx.x;
     unsigned int section = blockIdx.x;
     while (section < num_sections) {
@@ -79,7 +79,6 @@ extern "C" __global__ void InitOverlapTree_1body(
         int iat = id;
         while (iat < natoms_in_section) {
             int atom = ovFirstAtom[section] + iat;
-
             bool h = (ishydrogenParam[atom] > 0);
             real r = radiusParam[atom];
             real a = KFC / (r * r);
@@ -87,7 +86,6 @@ extern "C" __global__ void InitOverlapTree_1body(
             real g = h ? 0 : gammaParam[atom];
 
             real4 c = posq[atom];
-
             GaussianExponent[atom] = a;
             GaussianVolume[atom] = v;
             AtomicGamma[atom] = g;
@@ -98,12 +96,10 @@ extern "C" __global__ void InitOverlapTree_1body(
             ovVsp[slot] = 1;
             ovVSfp[slot] = 1;
             ovGamma1i[slot] = g;
-
             //ovG[slot] = (real4)(c.xyz,a);
             //ovDV1[slot] = (real4)0.f;
             ovG[slot] = make_real4(c.x, c.y, c.z, a);
             ovDV1[slot] = make_real4(0, 0, 0, 0);
-
             ovLastAtom[slot] = atom;
 
             iat += blockDim.x;
@@ -122,10 +118,10 @@ extern "C" __global__ void InitOverlapTree_1body(
 
 //this kernel counts the no. of 2-body overlaps for each atom, stores in ovChildrenCount
 extern "C" __global__ void InitOverlapTreeCount(
-        const int *__restrict__ ovAtomTreePointer,    //pointers to atom trees
-        const real4 *__restrict__ posq, //atomic positions
-        const real *__restrict__ global_gaussian_exponent, //atomic Gaussian exponent
-        const real *__restrict__ global_gaussian_volume, //atomic Gaussian volume
+        const int* __restrict__ ovAtomTreePointer,    //pointers to atom trees
+        const real4* __restrict__ posq, //atomic positions
+        const real* __restrict__ global_gaussian_exponent, //atomic Gaussian exponent
+        const real* __restrict__ global_gaussian_volume, //atomic Gaussian volume
 #ifdef USE_CUTOFF
 const int* __restrict__ tiles,
 const unsigned int* __restrict__ interactionCount,
@@ -529,8 +525,7 @@ const ushort2* exclusionTiles,
         int *__restrict__ ovChildrenCount,
         int *__restrict__ ovChildrenCountTop,
         int *__restrict__ ovChildrenCountBottom,
-        int *__restrict__ PanicButton
-) {
+        int *__restrict__ PanicButton) {
     const unsigned int totalWarps = blockDim.x * gridDim.x / TILE_SIZE;
     const unsigned int warp = (blockIdx.x * blockDim.x + threadIdx.x) / TILE_SIZE;
     const unsigned int tgx = threadIdx.x & (TILE_SIZE - 1); //warp id in group
@@ -1055,15 +1050,15 @@ __device__ inline void scangExclusive(unsigned int *buffer,
 
 //__global__ __attribute__((reqd_work_group_size(OV_WORK_GROUP_SIZE,1,1)))
 extern "C" __global__ void reduceovCountBuffer(const int ntrees,
-                                               const int *__restrict__ ovTreePointer,
-                                               const int *__restrict__ ovAtomTreePointer,    //pointers to atom trees
-                                               int *__restrict__ ovAtomTreeSize,       //actual sizes
-                                               const int *__restrict__ ovAtomTreePaddedSize, //actual sizes
-                                               unsigned int *__restrict__ ovChildrenStartIndex,
-                                               int *__restrict__ ovChildrenCount,
-                                               int *__restrict__ ovChildrenCountTop,
-                                               int *__restrict__ ovChildrenCountBottom,
-                                               int *__restrict__ PanicButton) {
+                                               const int* __restrict__ ovTreePointer,
+                                               const int* __restrict__ ovAtomTreePointer,    //pointers to atom trees
+                                               int* __restrict__ ovAtomTreeSize,       //actual sizes
+                                               const int* __restrict__ ovAtomTreePaddedSize, //actual sizes
+                                               unsigned int* __restrict__ ovChildrenStartIndex,
+                                               int* __restrict__ ovChildrenCount,
+                                               int* __restrict__ ovChildrenCountTop,
+                                               int* __restrict__ ovChildrenCountBottom,
+                                               int* __restrict__ PanicButton) {
     unsigned int local_id = threadIdx.x;
     unsigned int gsize = blockDim.x;
     __shared__ unsigned int temp[2 * OV_WORK_GROUP_SIZE];
@@ -1285,14 +1280,10 @@ extern "C" __global__ void ComputeOverlapTree_1pass(const int ntrees,
     __shared__ volatile int parent1_buffer[OV_WORK_GROUP_SIZE]; //tree slot of "i" overlap
     __shared__ volatile int level1_buffer[OV_WORK_GROUP_SIZE]; //overlap level of of "i" overlap
     //TODO: May need to declare posq1_buffer as volatile
-    __shared__
-    real4 posq1_buffer[OV_WORK_GROUP_SIZE]; //position of "i" overlap
-    __shared__
-    volatile real a1_buffer[OV_WORK_GROUP_SIZE]; //a parameter of "i" overlap
-    __shared__
-    volatile real v1_buffer[OV_WORK_GROUP_SIZE]; //volume of "i" overlap
-    __shared__
-    volatile real gamma1_buffer[OV_WORK_GROUP_SIZE]; //gamma parameter of "i" overlap
+    __shared__ real4 posq1_buffer[OV_WORK_GROUP_SIZE]; //position of "i" overlap
+    __shared__ volatile real a1_buffer[OV_WORK_GROUP_SIZE]; //a parameter of "i" overlap
+    __shared__ volatile real v1_buffer[OV_WORK_GROUP_SIZE]; //volume of "i" overlap
+    __shared__ volatile real gamma1_buffer[OV_WORK_GROUP_SIZE]; //gamma parameter of "i" overlap
     __shared__ volatile int children_count[OV_WORK_GROUP_SIZE]; //number of children
 
     if (local_id == 0) panic = PanicButton[0];

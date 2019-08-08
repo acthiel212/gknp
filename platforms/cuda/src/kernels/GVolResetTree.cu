@@ -116,7 +116,6 @@ extern "C" __global__ void resetBuffer(unsigned const int bufferSize,
                             long* __restrict__ gradBuffers_long) {
 
     unsigned int id = blockIdx.x * blockDim.x + threadIdx.x;
-//#ifdef SUPPORTS_64_BIT_ATOMICS
     while (id < bufferSize) {
         selfVolumeBuffer_long[id] = 0;
         gradBuffers_long[id] = 0;
@@ -125,14 +124,7 @@ extern "C" __global__ void resetBuffer(unsigned const int bufferSize,
         gradBuffers_long[id + 3 * bufferSize] = 0;
         id += blockDim.x * gridDim.x;
     }
-//#else
-//  while(id < bufferSize*numBuffers){
-//    //ovAtomBuffer[id] = (real4)0;
-//    ovAtomBuffer[id] = make_real4(0);
-//    selfVolumeBuffer[id] = 0;
-//    id += blockDim.x*gridDim.x;
-//  }
-//#endif
+
 //TODOLater: Global memory fence needed or syncthreads sufficient?
     __syncthreads();
 }
