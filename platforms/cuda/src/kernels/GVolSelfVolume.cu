@@ -38,6 +38,7 @@ extern "C" __global__ void computeSelfVolumes(const int ntrees,
     __shared__ volatile unsigned int nprocessed;
     __shared__ volatile unsigned int niterations;
     unsigned int tree = blockIdx.x;      //index of initial tree
+
     while (tree < ntrees) {
         unsigned int offset = ovTreePointer[tree]; //offset into tree
         unsigned int buffer_offset = tree * padded_num_atoms; // offset into buffer arrays
@@ -119,6 +120,8 @@ extern "C" __global__ void computeSelfVolumes(const int ntrees,
 
                     //stores energy
                     ovVolEnergy[slot] = energy;
+                    printf("ovVolEnergy: %u slot: %u \n", ovVolEnergy[slot], slot);
+                    printf("slot: %u\n", slot);
 
                     //
                     // Recursive rules for derivatives:
@@ -178,15 +181,21 @@ extern "C" __global__ void computeSelfVolumes(const int ntrees,
 //	atom_add(&gradBuffers_long[atom+2*padded_num_atoms], (long) (dv2.z*0x100000000));
 //	atom_add(&gradBuffers_long[atom+3*padded_num_atoms], (long) (dv2.w*0x100000000));
 //	atom_add(&selfVolumeBuffer_long[atom], (long) (ovSelfVolume[slot]*0x100000000));
-                atomicAdd((unsigned long long *) &gradBuffers_long[atom], (unsigned long long) (dv2.x * 0x100000000));
+                atomicAdd((unsigned long long *) &gradBuffers_long[atom],
+                          (unsigned long long) (dv2.x * 0x100000000));
+
                 atomicAdd((unsigned long long *) &gradBuffers_long[atom + padded_num_atoms],
                           (unsigned long long) (dv2.y * 0x100000000));
+
                 atomicAdd((unsigned long long *) &gradBuffers_long[atom + 2 * padded_num_atoms],
                           (unsigned long long) (dv2.z * 0x100000000));
+
                 atomicAdd((unsigned long long *) &gradBuffers_long[atom + 3 * padded_num_atoms],
                           (unsigned long long) (dv2.w * 0x100000000));
+
                 atomicAdd((unsigned long long *) &selfVolumeBuffer_long[atom],
-                          (long long) (ovSelfVolume[slot] * 0x100000000));
+                          (unsigned long long) (ovSelfVolume[slot] * 0x100000000));
+                printf("selfBuffer2: %d atom: %d\n", selfVolumeBuffer_long[atom], atom);
                 // nothing to do here for the volume energy,
                 // it is automatically stored in ovVolEnergy at the 1-body level
             }

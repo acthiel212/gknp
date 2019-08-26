@@ -137,8 +137,7 @@ const ushort2* exclusionTiles,
     const unsigned int warp = (blockIdx.x * blockDim.x + threadIdx.x) / TILE_SIZE;
     const unsigned int tgx = threadIdx.x & (TILE_SIZE - 1); //warp id in group
     const unsigned int tbx = threadIdx.x - tgx;           //id in warp
-    __shared__
-    AtomData localData[FORCE_WORK_GROUP_SIZE];
+    __shared__ AtomData localData[FORCE_WORK_GROUP_SIZE];
     const unsigned int localAtomIndex = threadIdx.x;
     INIT_VARS
 

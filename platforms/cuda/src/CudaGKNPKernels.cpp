@@ -612,7 +612,7 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
             std::cout << "Padded Num Atoms: " << cu.getPaddedNumAtoms() << std::endl;
             std::cout << "Num Atom Blocks: " << cu.getNumAtomBlocks() << std::endl;
             std::cout << "Num Tree Sections: " << gtree->num_sections << std::endl;
-            //std::cout << "Num Force Buffers: " << nb.getNumForceBuffers() << std::endl;
+            std::cout << "Num Force Buffers: " << nb.getNumEnergyBuffers() << std::endl;
             std::cout << "Tile size: " << CudaContext::TileSize << std::endl;
             std::cout << "getNumForceThreadBlocks: " << nb.getNumForceThreadBlocks() << std::endl;
             std::cout << "getForceThreadBlockSize: " << nb.getForceThreadBlockSize() << std::endl;
@@ -1258,7 +1258,6 @@ double GKNPPlugin::CudaCalcGKNPForceKernel::executeGVolSA(ContextImpl &context, 
     //------------------------------------------------------------------------------------------------------------
     // Tree construction (large radii)
     //
-    //TODO: Make sure work_group in OpenCL is correctly converted to blockSize in Cuda
     //Execute resetTreeKernel
     {if (verbose_level > 1) cout << "Executing resetTreeKernel" << endl;
     //here workgroups cycle through tree sections to reset the tree section
@@ -1301,11 +1300,9 @@ double GKNPPlugin::CudaCalcGKNPForceKernel::executeGVolSA(ContextImpl &context, 
     cu.executeKernel(resetBufferKernel, resetBufferKernelArgs, ov_work_group_size * num_compute_units, ov_work_group_size);}
 
     //Execute InitOverlapTreeKernel_1body_1
-
     {if (verbose_level > 1) cout << "Executing InitOverlapTreeKernel_1body_1" << endl;
     //fills up tree with 1-body overlaps
     unsigned int reset_tree_size =1;
-    cout << cu.getPosq().getDevicePointer() << endl;
     void *InitOverlapTreeKernel_1body_1Args[] = {&paddedNumAtoms,
                                                  &num_sections,
                                                  &reset_tree_size,
@@ -1342,7 +1339,6 @@ double GKNPPlugin::CudaCalcGKNPForceKernel::executeGVolSA(ContextImpl &context, 
 //    int gridSize = std::min((threads+blockSize-1)/blockSize, numThreadBlocks);
 //    CUresult result = CUDAAPI::cuLaunchKernel(InitOverlapTreeKernel_1body_1, gridSize, 1, 1, blockSize, 1, 1, sharedSize, cu.getCurrentStream(), InitOverlapTreeKernel_1body_1Args, NULL);
     cu.executeKernel(InitOverlapTreeKernel_1body_1, InitOverlapTreeKernel_1body_1Args, ov_work_group_size * num_compute_units, ov_work_group_size);}
-
 
     //Execute InitOverlapTreeCountKernel
     {if (verbose_level > 1) cout << "Executing InitOverlapTreeCountKernel" << endl;
@@ -1398,7 +1394,7 @@ double GKNPPlugin::CudaCalcGKNPForceKernel::executeGVolSA(ContextImpl &context, 
                                              &gtree->ovChildrenCountBottom->getDevicePointer(),
                                              &PanicButton->getDevicePointer()};
     cu.executeKernel(reduceovCountBufferKernel, reduceovCountBufferKernelArgs, ov_work_group_size * num_compute_units, ov_work_group_size);}
-
+/*
     if (verbose_level > 4) {
         float self_volume = 0.0;
         vector<float> self_volumes(gtree->total_tree_size);
@@ -1468,7 +1464,7 @@ double GKNPPlugin::CudaCalcGKNPForceKernel::executeGVolSA(ContextImpl &context, 
         }
         //std::cout << "Volume (from self volumes):" << self_volume <<std::endl;
     }
-
+*/
     //Execute InitOverlapTreeKernel
     {if (verbose_level > 1) cout << "Executing InitOverlapTreeKernel" << endl;
 //    if (nb_reassign) {
@@ -1721,7 +1717,6 @@ double GKNPPlugin::CudaCalcGKNPForceKernel::executeGVolSA(ContextImpl &context, 
         std::cout << endl;
 
     }
-
 
     if (verbose) {
         vector<int> atom_pointer;

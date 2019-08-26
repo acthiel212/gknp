@@ -23,7 +23,8 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/platforms/cuda/src/CudaGKNPKernels.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/platforms/cuda/src/CudaGKNPKernels.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/platforms/cuda/src/kernels/GVolOverlapTree.cu" beforeDir="false" afterPath="$PROJECT_DIR$/platforms/cuda/src/kernels/GVolOverlapTree.cu" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/platforms/cuda/src/kernels/GVolResetTree.cu" beforeDir="false" afterPath="$PROJECT_DIR$/platforms/cuda/src/kernels/GVolResetTree.cu" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/platforms/cuda/src/kernels/GVolReduceTree.cu" beforeDir="false" afterPath="$PROJECT_DIR$/platforms/cuda/src/kernels/GVolReduceTree.cu" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/platforms/cuda/src/kernels/GVolSelfVolume.cu" beforeDir="false" afterPath="$PROJECT_DIR$/platforms/cuda/src/kernels/GVolSelfVolume.cu" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -38,48 +39,60 @@
   <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/platforms/cuda/src/CudaGKNPKernels.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="183">
-              <caret line="1343" column="148" selection-start-line="1343" selection-start-column="148" selection-end-line="1343" selection-end-column="148" />
+            <state relative-caret-position="389">
+              <caret line="1724" column="26" selection-start-line="1724" selection-start-column="15" selection-end-line="1724" selection-end-column="26" />
               <folding>
                 <element signature="e#0#238#0" />
-                <element signature="e#240#268#0" expanded="true" />
-                <element signature="e#20071#20497#0" />
-                <element signature="e#20499#55981#0" />
-                <marker date="1565293113000" expanded="false" signature="20910:30094" ph="{...}" />
-                <marker date="1565293113000" expanded="false" signature="30125:31784" ph="{...}" />
-                <marker date="1565293113000" expanded="true" signature="31814:52976" ph="{...}" />
-                <marker date="1565293113000" expanded="false" signature="53008:54422" ph="{...}" />
-                <marker date="1565293113000" expanded="false" signature="54473:55981" ph="{...}" />
-                <marker date="1565293113000" expanded="false" signature="57089:59061" ph="{...}" />
-                <marker date="1565293113000" expanded="false" signature="59099:59791" ph="{...}" />
-                <marker date="1565293113000" expanded="false" signature="59842:63071" ph="{...}" />
-                <marker date="1565293113000" expanded="false" signature="63119:65887" ph="{...}" />
-                <marker date="1565293113000" expanded="false" signature="65933:67169" ph="{...}" />
-                <marker date="1565293113000" expanded="false" signature="67198:71077" ph="{...}" />
-                <marker date="1565293113000" expanded="false" signature="71119:76312" ph="{...}" />
-                <marker date="1565293113000" expanded="false" signature="76362:77119" ph="{...}" />
-                <marker date="1565293113000" expanded="false" signature="77170:80442" ph="{...}" />
-                <marker date="1565293113000" expanded="false" signature="81067:82136" ph="{...}" />
-                <marker date="1565293113000" expanded="false" signature="82303:83109" ph="{...}" />
-                <marker date="1565293113000" expanded="false" signature="83154:85893" ph="{...}" />
-                <marker date="1565293113000" expanded="false" signature="85944:87185" ph="{...}" />
-                <marker date="1565293113000" expanded="false" signature="87229:88095" ph="{...}" />
-                <marker date="1565293113000" expanded="false" signature="88112:88678" ph="{...}" />
-                <marker date="1565293113000" expanded="false" signature="88698:89107" ph="{...}" />
-                <marker date="1565293113000" expanded="false" signature="89586:92262" ph="{...}" />
-                <marker date="1565293113000" expanded="false" signature="92311:93167" ph="{...}" />
-                <marker date="1565293113000" expanded="false" signature="93215:93954" ph="{...}" />
-                <marker date="1565293113000" expanded="false" signature="93998:96284" ph="{...}" />
-                <marker date="1565293113000" expanded="false" signature="96327:97396" ph="{...}" />
-                <marker date="1565293113000" expanded="false" signature="97472:98107" ph="{...}" />
-                <marker date="1565293113000" expanded="false" signature="98152:100891" ph="{...}" />
-                <marker date="1565293113000" expanded="false" signature="100989:102230" ph="{...}" />
-                <marker date="1565293113000" expanded="false" signature="102274:103140" ph="{...}" />
-                <marker date="1565293113000" expanded="false" signature="103159:103434" ph="{...}" />
-                <marker date="1565293113000" expanded="false" signature="103454:103863" ph="{...}" />
+                <element signature="e#730#750#0" />
+                <element signature="e#895#925#0" />
+                <element signature="e#1003#1050#0" />
+                <element signature="e#1158#1672#1" />
+                <element signature="e#1219#1295#0" />
+                <element signature="e#1301#1415#0" />
+                <element signature="e#1421#1524#0" />
+                <element signature="e#1530#1620#0" />
+                <element signature="e#1675#1779#0" />
+                <element signature="e#1806#6598#0" />
+                <element signature="e#8292#14851#0" />
+                <element signature="e#14853#15783#0" />
+                <element signature="e#15785#20071#0" />
+                <element signature="e#20073#20499#0" />
+                <element signature="e#20501#55982#0" />
+                <marker date="1566337684000" expanded="false" signature="20910:30093" ph="{...}" />
+                <marker date="1566337684000" expanded="false" signature="30124:31783" ph="{...}" />
+                <marker date="1566337684000" expanded="false" signature="31813:52975" ph="{...}" />
+                <marker date="1566337684000" expanded="false" signature="53007:54421" ph="{...}" />
+                <marker date="1566337684000" expanded="false" signature="54472:55980" ph="{...}" />
+                <marker date="1566337684000" expanded="false" signature="57001:58973" ph="{...}" />
+                <marker date="1566337684000" expanded="false" signature="59011:59703" ph="{...}" />
+                <marker date="1566337684000" expanded="false" signature="59753:62929" ph="{...}" />
+                <marker date="1566337684000" expanded="false" signature="62976:65744" ph="{...}" />
+                <marker date="1566337684000" expanded="false" signature="65790:67026" ph="{...}" />
+                <marker date="1566337684000" expanded="false" signature="67057:70936" ph="{...}" />
+                <marker date="1566337684000" expanded="false" signature="70980:76173" ph="{...}" />
+                <marker date="1566337684000" expanded="false" signature="76223:76980" ph="{...}" />
+                <marker date="1566337684000" expanded="false" signature="77031:80303" ph="{...}" />
+                <marker date="1566337684000" expanded="false" signature="80928:81997" ph="{...}" />
+                <marker date="1566337684000" expanded="false" signature="82164:82970" ph="{...}" />
+                <marker date="1566337684000" expanded="false" signature="83015:85754" ph="{...}" />
+                <marker date="1566337684000" expanded="false" signature="85805:87046" ph="{...}" />
+                <marker date="1566337684000" expanded="false" signature="87090:87956" ph="{...}" />
+                <marker date="1566337684000" expanded="false" signature="87973:88539" ph="{...}" />
+                <marker date="1566337684000" expanded="true" signature="88558:88967" ph="{...}" />
+                <marker date="1566337684000" expanded="false" signature="89446:92122" ph="{...}" />
+                <marker date="1566337684000" expanded="false" signature="92171:93027" ph="{...}" />
+                <marker date="1566337684000" expanded="false" signature="93075:93814" ph="{...}" />
+                <marker date="1566337684000" expanded="false" signature="93858:96144" ph="{...}" />
+                <marker date="1566337684000" expanded="false" signature="96187:97256" ph="{...}" />
+                <marker date="1566337684000" expanded="true" signature="97332:97967" ph="{...}" />
+                <marker date="1566337684000" expanded="true" signature="98012:100751" ph="{...}" />
+                <marker date="1566337684000" expanded="false" signature="100849:102090" ph="{...}" />
+                <marker date="1566337684000" expanded="false" signature="102134:103000" ph="{...}" />
+                <marker date="1566337684000" expanded="false" signature="103019:103294" ph="{...}" />
+                <marker date="1566337684000" expanded="false" signature="103314:103723" ph="{...}" />
               </folding>
             </state>
           </provider>
@@ -88,8 +101,17 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/platforms/cuda/src/kernels/GVolOverlapTree.cu">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="220">
-              <caret line="75" column="38" selection-start-line="75" selection-start-column="38" selection-end-line="75" selection-end-column="38" />
+            <state relative-caret-position="151">
+              <caret line="88" column="21" selection-start-line="88" selection-start-column="21" selection-end-line="88" selection-end-column="21" />
+              <folding>
+                <element signature="e#135#330#0" />
+                <element signature="e#135#621#0" />
+                <element signature="e#623#762#0" />
+                <element signature="e#772#840#0" />
+                <element signature="e#861#963#0" />
+                <element signature="e#979#1034#0" />
+                <element signature="e#4460#4637#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -97,8 +119,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/platforms/cuda/src/kernels/GVolResetTree.cu">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="310">
-              <caret line="154" column="84" selection-start-line="154" selection-start-column="84" selection-end-line="154" selection-end-column="84" />
+            <state relative-caret-position="178">
+              <caret line="166" column="36" selection-start-line="166" selection-start-column="25" selection-end-line="166" selection-end-column="36" />
             </state>
           </provider>
         </entry>
@@ -106,26 +128,17 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/platforms/cuda/src/kernels/GVolReduceTree.cu">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="532">
-              <caret line="124" column="2" selection-start-line="124" selection-start-column="2" selection-end-line="124" selection-end-column="2" />
+            <state relative-caret-position="415">
+              <caret line="65" column="62" selection-start-line="65" selection-start-column="62" selection-end-line="65" selection-end-column="62" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/../build_openmm_clean/include/openmm/cuda/CudaArray.h">
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/platforms/cuda/src/kernels/GVolSelfVolume.cu">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="840">
-              <caret line="56" column="22" selection-start-line="56" selection-start-column="22" selection-end-line="56" selection-end-column="22" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/platforms/cuda/tests/TestCUDAGKNPForce.cpp">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1380">
-              <caret line="92" column="31" selection-start-line="92" selection-start-column="31" selection-end-line="92" selection-end-column="31" />
+            <state relative-caret-position="178">
+              <caret line="122" column="26" selection-start-line="122" selection-start-column="20" selection-end-line="122" selection-end-column="26" />
             </state>
           </provider>
         </entry>
@@ -134,36 +147,36 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>Exec</find>
-      <find>gtree</find>
-      <find>ovVolume</find>
-      <find>resetTreeKernel</find>
-      <find>reduceO</find>
-      <find>InitOver</find>
-      <find>__global__</find>
-      <find>reduceovCountBufferKernel</find>
-      <find>InitOverlapTree_</find>
-      <find>&amp;Panic</find>
-      <find>useCutoff</find>
-      <find>globalParams</find>
-      <find>paddedNumAtoms</find>
-      <find>AtomicGamma</find>
-      <find>InitOverlapTree_1body</find>
-      <find>reduce</find>
-      <find>panic_button</find>
-      <find>Panic</find>
-      <find>InitOverlapTree</find>
-      <find>update</find>
-      <find>updateSelfVolumes</find>
-      <find>u</find>
-      <find>Init</find>
-      <find>id =</find>
-      <find>resize</find>
       <find>resize_tree_buffers</find>
       <find>InitOverlapTreeKernel_1body_1</find>
       <find>KFC</find>
       <find>resetBuffer</find>
       <find>resetTree</find>
+      <find>Num Force Buffers:</find>
+      <find>compute_tree</find>
+      <find>Executing red</find>
+      <find>g</find>
+      <find>vol_energies</find>
+      <find>Volume Energy 1:</find>
+      <find>if(ver</find>
+      <find>verbose</find>
+      <find>num_sections</find>
+      <find>GKNP_RADIUS_INCREMENT</find>
+      <find>self_volume</find>
+      <find>atomicAdd</find>
+      <find>self_volumes</find>
+      <find>energy</find>
+      <find>if (verbose_level &gt; 4)</find>
+      <find>self_volume:</find>
+      <find>selfVolume</find>
+      <find>atomic</find>
+      <find>selfVolumeBuffer_long</find>
+      <find>atomicA</find>
+      <find>Energy</find>
+      <find>printf</find>
+      <find>print</find>
+      <find>Volume Ener</find>
+      <find>ovVolEnergy</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -187,11 +200,11 @@
         <option value="$PROJECT_DIR$/platforms/reference/src/ReferenceGKNPKernels.cpp" />
         <option value="$PROJECT_DIR$/platforms/cuda/tests/TestCUDAGKNPForce.cpp" />
         <option value="$PROJECT_DIR$/platforms/cuda/src/CudaGKNPKernels.h" />
+        <option value="$PROJECT_DIR$/platforms/cuda/src/kernels/GVolResetTree.cu" />
+        <option value="$PROJECT_DIR$/platforms/cuda/src/kernels/GVolOverlapTree.cu" />
+        <option value="$PROJECT_DIR$/platforms/cuda/src/CudaGKNPKernels.cpp" />
         <option value="$PROJECT_DIR$/platforms/cuda/src/kernels/GVolReduceTree.cu" />
         <option value="$PROJECT_DIR$/platforms/cuda/src/kernels/GVolSelfVolume.cu" />
-        <option value="$PROJECT_DIR$/platforms/cuda/src/CudaGKNPKernels.cpp" />
-        <option value="$PROJECT_DIR$/platforms/cuda/src/kernels/GVolOverlapTree.cu" />
-        <option value="$PROJECT_DIR$/platforms/cuda/src/kernels/GVolResetTree.cu" />
       </list>
     </option>
   </component>
@@ -203,9 +216,9 @@
   </component>
   <component name="OCFindUsagesOptions" text="false" ivars="false" properties="true" derivedClasses="false" />
   <component name="ProjectFrameBounds">
-    <option name="x" value="15" />
-    <option name="y" value="37" />
-    <option name="width" value="1819" />
+    <option name="x" value="236" />
+    <option name="y" value="23" />
+    <option name="width" value="1442" />
     <option name="height" value="1045" />
   </component>
   <component name="ProjectView">
@@ -213,12 +226,18 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
             <path>
               <item name="gknp" type="b2602c69:ProjectViewProjectNode" />
               <item name="gknp" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="gknp" type="b2602c69:ProjectViewProjectNode" />
+              <item name="gknp" type="462c0819:PsiDirectoryNode" />
+              <item name="gaussvol" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="gknp" type="b2602c69:ProjectViewProjectNode" />
@@ -250,7 +269,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -338,7 +356,12 @@
       <workItem from="1565016591777" duration="19250000" />
       <workItem from="1565191736176" duration="596000" />
       <workItem from="1565208453629" duration="10514000" />
-      <workItem from="1565278405258" duration="6038000" />
+      <workItem from="1565278405258" duration="6594000" />
+      <workItem from="1565374675786" duration="1387000" />
+      <workItem from="1566229522231" duration="3007000" />
+      <workItem from="1566249148372" duration="1972000" />
+      <workItem from="1566327304176" duration="8781000" />
+      <workItem from="1566505290329" duration="3724000" />
     </task>
     <task id="LOCAL-00001" summary="Modified Test script to match CUDA API">
       <created>1564002187194</created>
@@ -379,13 +402,13 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="159349000" />
+    <option name="totallyTimeSpent" value="178776000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="15" y="37" width="1819" height="1045" extended-state="0" />
+    <frame x="236" y="23" width="1442" height="1045" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.13618459" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.18357143" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -555,23 +578,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../build_openmm_clean/include/openmm/cuda/CudaNonbondedUtilities.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="182">
-          <caret line="317" column="103" lean-forward="true" selection-start-line="317" selection-start-column="103" selection-end-line="317" selection-end-column="123" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/gaussvol/gaussvol.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="8640">
-          <caret line="576" column="20" selection-start-line="576" selection-start-column="20" selection-end-line="576" selection-end-column="20" />
-          <folding>
-            <element signature="e#0#16#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/platforms/reference/tests/TestGKNPEnergy.cpp">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="347">
@@ -603,13 +609,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/platforms/cuda/src/kernels/GVolSelfVolume.cu">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="178">
-          <caret line="221" column="54" selection-start-line="221" selection-start-column="48" selection-end-line="221" selection-end-column="54" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file:///Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1/vector">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="204">
@@ -617,10 +616,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../build_openmm_clean/include/openmm/cuda/CudaArray.h">
+    <entry file="file://$PROJECT_DIR$/../build_openmm_clean/include/openmm/cuda/CudaNonbondedUtilities.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="840">
-          <caret line="56" column="22" selection-start-line="56" selection-start-column="22" selection-end-line="56" selection-end-column="22" />
+        <state relative-caret-position="1695">
+          <caret line="113" column="8" selection-start-line="113" selection-start-column="8" selection-end-line="113" selection-end-column="8" />
         </state>
       </provider>
     </entry>
@@ -631,69 +630,114 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/platforms/cuda/src/kernels/GVolOverlapTree.cu">
+    <entry file="file://$PROJECT_DIR$/../build_openmm_clean/include/openmm/cuda/CudaArray.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="220">
-          <caret line="75" column="38" selection-start-line="75" selection-start-column="38" selection-end-line="75" selection-end-column="38" />
+        <state relative-caret-position="204">
+          <caret line="161" column="9" selection-start-line="161" selection-start-column="9" selection-end-line="161" selection-end-column="9" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/platforms/cuda/src/kernels/GVolReduceTree.cu">
+    <entry file="file://$PROJECT_DIR$/gaussvol/gaussvol.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="532">
-          <caret line="124" column="2" selection-start-line="124" selection-start-column="2" selection-end-line="124" selection-end-column="2" />
+        <state relative-caret-position="546">
+          <caret line="576" column="25" selection-start-line="576" selection-start-column="20" selection-end-line="576" selection-end-column="25" />
+          <folding>
+            <element signature="e#0#16#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/platforms/cuda/src/kernels/GVolOverlapTree.cu">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="151">
+          <caret line="88" column="21" selection-start-line="88" selection-start-column="21" selection-end-line="88" selection-end-column="21" />
+          <folding>
+            <element signature="e#135#330#0" />
+            <element signature="e#135#621#0" />
+            <element signature="e#623#762#0" />
+            <element signature="e#772#840#0" />
+            <element signature="e#861#963#0" />
+            <element signature="e#979#1034#0" />
+            <element signature="e#4460#4637#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/platforms/cuda/src/kernels/GVolResetTree.cu">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="310">
-          <caret line="154" column="84" selection-start-line="154" selection-start-column="84" selection-end-line="154" selection-end-column="84" />
+        <state relative-caret-position="178">
+          <caret line="166" column="36" selection-start-line="166" selection-start-column="25" selection-end-line="166" selection-end-column="36" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/platforms/cuda/src/CudaGKNPKernels.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="183">
-          <caret line="1343" column="148" selection-start-line="1343" selection-start-column="148" selection-end-line="1343" selection-end-column="148" />
+        <state relative-caret-position="389">
+          <caret line="1724" column="26" selection-start-line="1724" selection-start-column="15" selection-end-line="1724" selection-end-column="26" />
           <folding>
             <element signature="e#0#238#0" />
-            <element signature="e#240#268#0" expanded="true" />
-            <element signature="e#20071#20497#0" />
-            <element signature="e#20499#55981#0" />
-            <marker date="1565293113000" expanded="false" signature="20910:30094" ph="{...}" />
-            <marker date="1565293113000" expanded="false" signature="30125:31784" ph="{...}" />
-            <marker date="1565293113000" expanded="true" signature="31814:52976" ph="{...}" />
-            <marker date="1565293113000" expanded="false" signature="53008:54422" ph="{...}" />
-            <marker date="1565293113000" expanded="false" signature="54473:55981" ph="{...}" />
-            <marker date="1565293113000" expanded="false" signature="57089:59061" ph="{...}" />
-            <marker date="1565293113000" expanded="false" signature="59099:59791" ph="{...}" />
-            <marker date="1565293113000" expanded="false" signature="59842:63071" ph="{...}" />
-            <marker date="1565293113000" expanded="false" signature="63119:65887" ph="{...}" />
-            <marker date="1565293113000" expanded="false" signature="65933:67169" ph="{...}" />
-            <marker date="1565293113000" expanded="false" signature="67198:71077" ph="{...}" />
-            <marker date="1565293113000" expanded="false" signature="71119:76312" ph="{...}" />
-            <marker date="1565293113000" expanded="false" signature="76362:77119" ph="{...}" />
-            <marker date="1565293113000" expanded="false" signature="77170:80442" ph="{...}" />
-            <marker date="1565293113000" expanded="false" signature="81067:82136" ph="{...}" />
-            <marker date="1565293113000" expanded="false" signature="82303:83109" ph="{...}" />
-            <marker date="1565293113000" expanded="false" signature="83154:85893" ph="{...}" />
-            <marker date="1565293113000" expanded="false" signature="85944:87185" ph="{...}" />
-            <marker date="1565293113000" expanded="false" signature="87229:88095" ph="{...}" />
-            <marker date="1565293113000" expanded="false" signature="88112:88678" ph="{...}" />
-            <marker date="1565293113000" expanded="false" signature="88698:89107" ph="{...}" />
-            <marker date="1565293113000" expanded="false" signature="89586:92262" ph="{...}" />
-            <marker date="1565293113000" expanded="false" signature="92311:93167" ph="{...}" />
-            <marker date="1565293113000" expanded="false" signature="93215:93954" ph="{...}" />
-            <marker date="1565293113000" expanded="false" signature="93998:96284" ph="{...}" />
-            <marker date="1565293113000" expanded="false" signature="96327:97396" ph="{...}" />
-            <marker date="1565293113000" expanded="false" signature="97472:98107" ph="{...}" />
-            <marker date="1565293113000" expanded="false" signature="98152:100891" ph="{...}" />
-            <marker date="1565293113000" expanded="false" signature="100989:102230" ph="{...}" />
-            <marker date="1565293113000" expanded="false" signature="102274:103140" ph="{...}" />
-            <marker date="1565293113000" expanded="false" signature="103159:103434" ph="{...}" />
-            <marker date="1565293113000" expanded="false" signature="103454:103863" ph="{...}" />
+            <element signature="e#730#750#0" />
+            <element signature="e#895#925#0" />
+            <element signature="e#1003#1050#0" />
+            <element signature="e#1158#1672#1" />
+            <element signature="e#1219#1295#0" />
+            <element signature="e#1301#1415#0" />
+            <element signature="e#1421#1524#0" />
+            <element signature="e#1530#1620#0" />
+            <element signature="e#1675#1779#0" />
+            <element signature="e#1806#6598#0" />
+            <element signature="e#8292#14851#0" />
+            <element signature="e#14853#15783#0" />
+            <element signature="e#15785#20071#0" />
+            <element signature="e#20073#20499#0" />
+            <element signature="e#20501#55982#0" />
+            <marker date="1566337684000" expanded="false" signature="20910:30093" ph="{...}" />
+            <marker date="1566337684000" expanded="false" signature="30124:31783" ph="{...}" />
+            <marker date="1566337684000" expanded="false" signature="31813:52975" ph="{...}" />
+            <marker date="1566337684000" expanded="false" signature="53007:54421" ph="{...}" />
+            <marker date="1566337684000" expanded="false" signature="54472:55980" ph="{...}" />
+            <marker date="1566337684000" expanded="false" signature="57001:58973" ph="{...}" />
+            <marker date="1566337684000" expanded="false" signature="59011:59703" ph="{...}" />
+            <marker date="1566337684000" expanded="false" signature="59753:62929" ph="{...}" />
+            <marker date="1566337684000" expanded="false" signature="62976:65744" ph="{...}" />
+            <marker date="1566337684000" expanded="false" signature="65790:67026" ph="{...}" />
+            <marker date="1566337684000" expanded="false" signature="67057:70936" ph="{...}" />
+            <marker date="1566337684000" expanded="false" signature="70980:76173" ph="{...}" />
+            <marker date="1566337684000" expanded="false" signature="76223:76980" ph="{...}" />
+            <marker date="1566337684000" expanded="false" signature="77031:80303" ph="{...}" />
+            <marker date="1566337684000" expanded="false" signature="80928:81997" ph="{...}" />
+            <marker date="1566337684000" expanded="false" signature="82164:82970" ph="{...}" />
+            <marker date="1566337684000" expanded="false" signature="83015:85754" ph="{...}" />
+            <marker date="1566337684000" expanded="false" signature="85805:87046" ph="{...}" />
+            <marker date="1566337684000" expanded="false" signature="87090:87956" ph="{...}" />
+            <marker date="1566337684000" expanded="false" signature="87973:88539" ph="{...}" />
+            <marker date="1566337684000" expanded="true" signature="88558:88967" ph="{...}" />
+            <marker date="1566337684000" expanded="false" signature="89446:92122" ph="{...}" />
+            <marker date="1566337684000" expanded="false" signature="92171:93027" ph="{...}" />
+            <marker date="1566337684000" expanded="false" signature="93075:93814" ph="{...}" />
+            <marker date="1566337684000" expanded="false" signature="93858:96144" ph="{...}" />
+            <marker date="1566337684000" expanded="false" signature="96187:97256" ph="{...}" />
+            <marker date="1566337684000" expanded="true" signature="97332:97967" ph="{...}" />
+            <marker date="1566337684000" expanded="true" signature="98012:100751" ph="{...}" />
+            <marker date="1566337684000" expanded="false" signature="100849:102090" ph="{...}" />
+            <marker date="1566337684000" expanded="false" signature="102134:103000" ph="{...}" />
+            <marker date="1566337684000" expanded="false" signature="103019:103294" ph="{...}" />
+            <marker date="1566337684000" expanded="false" signature="103314:103723" ph="{...}" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/platforms/cuda/src/kernels/GVolReduceTree.cu">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="415">
+          <caret line="65" column="62" selection-start-line="65" selection-start-column="62" selection-end-line="65" selection-end-column="62" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/platforms/cuda/src/kernels/GVolSelfVolume.cu">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="178">
+          <caret line="122" column="26" selection-start-line="122" selection-start-column="20" selection-end-line="122" selection-end-column="26" />
         </state>
       </provider>
     </entry>
