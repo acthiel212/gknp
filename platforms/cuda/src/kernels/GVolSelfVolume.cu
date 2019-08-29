@@ -1,5 +1,24 @@
 #define PI (3.14159265359f)
 
+/*
+ * atomicAddLong is a functional alternative to atomicAdd in CUDA that can handle signed long long ints
+ */
+__device__ long long atomicAddLong(long long* address, long long val)
+{
+    unsigned long long int* address_as_ull =
+            (unsigned long long int*)address;
+    unsigned long long int old = *address_as_ull, assumed;
+
+    do {
+        assumed = old;
+        old = atomicCAS(address_as_ull, assumed, val +assumed);
+
+        // Note: uses integer comparison to avoid hang in case of NaN (since NaN != NaN)
+    } while (assumed != old);
+
+    return old;
+}
+
 //computes volume energy and self-volumes
 
 //__global__ __attribute__((reqd_work_group_size(OV_WORK_GROUP_SIZE,1,1)))
@@ -86,7 +105,7 @@ extern "C" __global__ void computeSelfVolumes(const int ntrees,
 
                 if (processed == 0 && ok2process > 0 && atom >= 0) {
                     //atomic_inc(&(nprocessed));
-                    nprocessed = atomicAdd((unsigned int *) &nprocessed, 1);
+                    atomicAdd((unsigned int *) &nprocessed, 1);
                     real cf = level % 2 == 0 ? -1.0 : 1.0;
                     real volcoeff = level > 0 ? cf : 0;
                     real volcoeffp = level > 0 ? volcoeff / (float) level : 0;
@@ -120,8 +139,6 @@ extern "C" __global__ void computeSelfVolumes(const int ntrees,
 
                     //stores energy
                     ovVolEnergy[slot] = energy;
-                    printf("ovVolEnergy: %u slot: %u \n", ovVolEnergy[slot], slot);
-                    printf("slot: %u\n", slot);
 
                     //
                     // Recursive rules for derivatives:
@@ -147,7 +164,7 @@ extern "C" __global__ void computeSelfVolumes(const int ntrees,
                     int parent_index = ovRootIndex[slot];
                     if (parent_index >= 0) {
                         //atomic_inc(&(ovChildrenReported[parent_index]));
-                        ovChildrenReported[parent_index] = atomicAdd(&ovChildrenReported[parent_index], 1);
+                        atomicAdd(&ovChildrenReported[parent_index], 1);
                     }
                     ovProcessedFlag[slot] = 1; //mark as processed
                     ovOKtoProcessFlag[slot] = 0; //prevent more processing
@@ -181,21 +198,15 @@ extern "C" __global__ void computeSelfVolumes(const int ntrees,
 //	atom_add(&gradBuffers_long[atom+2*padded_num_atoms], (long) (dv2.z*0x100000000));
 //	atom_add(&gradBuffers_long[atom+3*padded_num_atoms], (long) (dv2.w*0x100000000));
 //	atom_add(&selfVolumeBuffer_long[atom], (long) (ovSelfVolume[slot]*0x100000000));
-                atomicAdd((unsigned long long *) &gradBuffers_long[atom],
-                          (unsigned long long) (dv2.x * 0x100000000));
+                atomicAddLong(&gradBuffers_long[atom], (dv2.x * 0x100000000));
 
-                atomicAdd((unsigned long long *) &gradBuffers_long[atom + padded_num_atoms],
-                          (unsigned long long) (dv2.y * 0x100000000));
+                atomicAddLong(&gradBuffers_long[atom + padded_num_atoms], (dv2.y * 0x100000000));
 
-                atomicAdd((unsigned long long *) &gradBuffers_long[atom + 2 * padded_num_atoms],
-                          (unsigned long long) (dv2.z * 0x100000000));
+                atomicAddLong(&gradBuffers_long[atom + 2 * padded_num_atoms], (dv2.z * 0x100000000));
 
-                atomicAdd((unsigned long long *) &gradBuffers_long[atom + 3 * padded_num_atoms],
-                          (unsigned long long) (dv2.w * 0x100000000));
+                atomicAddLong(&gradBuffers_long[atom + 3 * padded_num_atoms], (dv2.w * 0x100000000));
 
-                atomicAdd((unsigned long long *) &selfVolumeBuffer_long[atom],
-                          (unsigned long long) (ovSelfVolume[slot] * 0x100000000));
-                printf("selfBuffer2: %d atom: %d\n", selfVolumeBuffer_long[atom], atom);
+                atomicAddLong( &selfVolumeBuffer_long[atom], (ovSelfVolume[slot] * 0x100000000));
                 // nothing to do here for the volume energy,
                 // it is automatically stored in ovVolEnergy at the 1-body level
             }

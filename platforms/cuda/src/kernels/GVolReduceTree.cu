@@ -1,5 +1,22 @@
 #define PI (3.14159265359f)
+/*
+ * atomicAddLong is a functional alternative to atomicAdd in CUDA that can handle signed long long ints
+ */
+__device__ long long atomicAddLong(long long* address, long long val)
+{
+    unsigned long long int* address_as_ull =
+            (unsigned long long int*)address;
+    unsigned long long int old = *address_as_ull, assumed;
 
+    do {
+        assumed = old;
+        old = atomicCAS(address_as_ull, assumed, val +assumed);
+
+        // Note: uses integer comparison to avoid hang in case of NaN (since NaN != NaN)
+    } while (assumed != old);
+
+    return old;
+}
 
 /**
  * Reduce the atom self volumes
@@ -26,7 +43,7 @@ extern "C" __global__ void reduceSelfVolumes_buffer(int num_atoms,
   while (atom < num_atoms) {
     // copy self volumes and gradients from long energy buffer to regular one
     selfVolume[atom] = scale*selfVolumeBuffer_long[atom];
-    grad[atom].x = scale*gradBuffers_long[atom];
+      grad[atom].x = scale*gradBuffers_long[atom];
     grad[atom].y = scale*gradBuffers_long[atom+padded_num_atoms];
     grad[atom].z = scale*gradBuffers_long[atom+2*padded_num_atoms];
     // divide gradient with respect to volume by volume of atom
@@ -63,14 +80,13 @@ extern "C" __global__ void updateSelfVolumesForces(int update_energy,
       //alternative to the above, should give the same answer
       //energyBuffer[atom] += wen*global_atomic_gamma[atom]*selfVolume[atom];
     }
-      printf("ovVolEnergy: %d atom: %d\n", ovVolEnergy[atom], atom);
 //#ifdef SUPPORTS_64_BIT_ATOMICS
 //    atom_add(&forceBuffers[atom                     ], (long)(-grad[atom].x*0x100000000));
 //    atom_add(&forceBuffers[atom +   padded_num_atoms], (long)(-grad[atom].y*0x100000000));
 //    atom_add(&forceBuffers[atom + 2*padded_num_atoms], (long)(-grad[atom].z*0x100000000));
-      atomicAdd((unsigned long long*)&forceBuffers[atom                     ], (unsigned long long)(-grad[atom].x*0x100000000));
-      atomicAdd((unsigned long long*)&forceBuffers[atom +   padded_num_atoms], (unsigned long long)(-grad[atom].y*0x100000000));
-      atomicAdd((unsigned long long*)&forceBuffers[atom + 2*padded_num_atoms], (unsigned long long)(-grad[atom].z*0x100000000));
+      atomicAddLong(&forceBuffers[atom                     ], (-grad[atom].x*0x100000000));
+      atomicAddLong(&forceBuffers[atom +   padded_num_atoms], (-grad[atom].y*0x100000000));
+      atomicAddLong(&forceBuffers[atom + 2*padded_num_atoms], (-grad[atom].z*0x100000000));
 //#else
 //    //forceBuffers[atom].xyz -= grad[atom].xyz;
 //    forceBuffers[atom].xyz = make_real4(forceBuffers[atom].x - grad[atom].x,

@@ -826,7 +826,9 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
                 "	real dfp = df/PI; \n"
                 "	real gvol = v1*v2*dfp*dfp*rsqrt(dfp)*ef; \n"
                 "       if(gvol > VolMinA ){ \n" //VolMin0?
-                "          ovChildrenCount[parent_slot] = atomicAdd(&ovChildrenCount[parent_slot], 1); \n"
+                "          printf(\"ovChildrenCount[parent_slot]: %d, Slot: %d\\n\", ovChildrenCount[parent_slot], parent_slot);\n"
+                "          atomicAdd((int *)&ovChildrenCount[parent_slot], 1); \n"
+                "          printf(\"ovChildrenCount[parent_slot]: %d, Slot: %d\\n\", ovChildrenCount[parent_slot], parent_slot);\n"
                 "       } \n";
 
         replacements["COMPUTE_INTERACTION_2COUNT"] =
@@ -1230,7 +1232,6 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
             updateSelfVolumesForcesKernel = cu.getKernel(module, kernel_name);
             if (verbose) cout << " done. " << endl;
         }
-        int update_energy = 1;
     }
 }
 
@@ -1721,14 +1722,24 @@ double GKNPPlugin::CudaCalcGKNPForceKernel::executeGVolSA(ContextImpl &context, 
     if (verbose) {
         vector<int> atom_pointer;
         vector<float> vol_energies;
+        vector<float> ovSelfVolumes;
+        vector<int> ovChildrenStartIndexes;
+        vector<int> ovChildrenCounts;
         gtree->ovAtomTreePointer->download(atom_pointer);
         gtree->ovVolEnergy->download(vol_energies);
+        gtree->ovSelfVolume->download(ovSelfVolumes);
+        gtree->ovChildrenStartIndex->download(ovChildrenStartIndexes);
+        gtree->ovChildrenCount->download(ovChildrenCounts);
         double energy = 0;
         for (int i = 0; i < numParticles; i++) {
             int slot = atom_pointer[i];
             energy += vol_energies[slot];
+            cout <<"vol_energies[" << slot <<"]: " << vol_energies[slot] << endl;
+            cout <<"ovSelfVolume["<<slot<<"]: "<<ovSelfVolumes[slot] << endl;
+            cout <<"ovChildrenStartIndex["<< slot << "]: "<< ovChildrenStartIndexes[slot] << endl;
+            cout <<"ovChildrenCounts["<< slot << "]: "<< ovChildrenCounts[slot] << endl << endl;
         }
-        cout << "Volume Energy 1:" << energy << endl;
+        cout << "Volume Energy 1:" << energy << endl << endl;
     }
 
 
@@ -1918,7 +1929,7 @@ double GKNPPlugin::CudaCalcGKNPForceKernel::executeGVolSA(ContextImpl &context, 
         vector<float> self_volumes(cu.getPaddedNumAtoms());
         selfVolume->download(self_volumes);
         for (int i = 0; i < numParticles; i++) {
-            cout << "self_volume:" << i << "  " << self_volumes[i] << endl;
+            printf("self_volume: %6.6f atom: %d\n", self_volumes[i], i);
         }
     }
 
@@ -1926,14 +1937,24 @@ double GKNPPlugin::CudaCalcGKNPForceKernel::executeGVolSA(ContextImpl &context, 
     if (verbose) {
         vector<int> atom_pointer;
         vector<float> vol_energies;
+        vector<float> ovSelfVolumes;
+        vector<int> ovChildrenStartIndexes;
+        vector<int> ovChildrenCounts;
         gtree->ovAtomTreePointer->download(atom_pointer);
         gtree->ovVolEnergy->download(vol_energies);
+        gtree->ovSelfVolume->download(ovSelfVolumes);
+        gtree->ovChildrenStartIndex->download(ovChildrenStartIndexes);
+        gtree->ovChildrenCount->download(ovChildrenCounts);
         double energy = 0;
         for (int i = 0; i < numParticles; i++) {
             int slot = atom_pointer[i];
             energy += vol_energies[slot];
+            cout <<"vol_energies[" << slot <<"]: " << vol_energies[slot] << endl;
+            cout <<"ovSelfVolume["<<slot<<"]: "<<ovSelfVolumes[slot] << endl;
+            cout <<"ovChildrenStartIndex["<< slot << "]: "<< ovChildrenStartIndexes[slot] << endl;
+            cout <<"ovChildrenCounts["<< slot << "]: "<< ovChildrenCounts[slot] << endl << endl;
         }
-        cout << "Volume Energy 2:" << energy << endl;
+        cout << "Volume Energy 2:" << energy << endl << endl;
     }
 
 
