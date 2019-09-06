@@ -73,6 +73,7 @@ void testForce() {
         atoms[i].vdwRadiusInAng *= ang2nm;
         sigma_LJ = 2.*atoms[i].vdwRadiusInAng;
         atoms[i].vdwRadiusInAng *= rminToSigma;
+        atoms[i].gamma *= kcalmol2kjmol/(ang2nm*ang2nm);
         double sij = sqrt(sigmaw*sigma_LJ);
         double eij = sqrt(epsilonw*epsilon_LJ);
         double alpha = - 16.0 * M_PI * rho * eij * pow(sij,6) / 3.0;
@@ -98,7 +99,7 @@ void testForce() {
         cout << "FW: " << i << " " << state.getForces()[i][0] << " " << state.getForces()[i][1] << " "
              << state.getForces()[i][2] << " " << endl;
     }
-    
+
     // validate force by moving an atom
 #ifdef NOTNOW
     double offset = 2.e-3;
@@ -116,13 +117,14 @@ void testForce() {
 }
 
 int main() {
-  try {
-    registerGKNPCudaKernelFactories();
-    testForce();
-  }
-  catch(const std::exception& e) {
-    std::cout << "exception: " << e.what() << std::endl;
-    return 1;
-  }
-  return 0;
+    try {
+        registerGKNPCudaKernelFactories();
+        testForce();
+    }
+    catch(const std::exception& e) {
+        std::cout << "exception: " << e.what() << std::endl;
+        return 1;
+    }
+    return 0;
 }
+
