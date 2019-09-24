@@ -37,11 +37,11 @@ INSTALL_TARGETS(/lib RUNTIME_DIRECTORY /lib ${GAUSSVOLLIB_NAME})
 #
 #build/Install the main API library
 #
-SET(GKNP_PLUGIN_SOURCE_SUBDIRS openmmapi)
+SET(GKNP_PLUGIN_SOURCE_SUBDIRS openmmapi wrappers)
 SET(GKNP_LIBRARY_NAME GKNPPlugin)
 SET(SHARED_GKNP_TARGET ${GKNP_LIBRARY_NAME})
 #These are all the places to search for header files which are to be part of the API.
-SET(API_INCLUDE_DIRS "gaussvol" "openmmapi/include" "openmmapi/include/internal")
+SET(API_INCLUDE_DIRS "gaussvol" "openmmapi/include" "openmmapi/include/internal" "wrappers/include")
 # Locate header files.
 SET(API_INCLUDE_FILES)
 FOREACH(dir ${API_INCLUDE_DIRS})
