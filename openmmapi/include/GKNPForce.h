@@ -22,7 +22,7 @@
 #define VOLMINMSB (1.00f*ANG3)
 
 //radius offset for surf energy calc.
-#define GKNP_RADIUS_INCREMENT (0.5f*ANG)
+#define GKNP_RADIUS_INCREMENT (0.05f*ANG3)
 
 #define GKNP2_RADIUS_INCREMENT (0.1f*ANG)
 

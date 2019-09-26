@@ -43,7 +43,7 @@ extern "C" __global__ void reduceSelfVolumes_buffer(int num_atoms,
   while (atom < num_atoms) {
     // copy self volumes and gradients from long energy buffer to regular one
     selfVolume[atom] = scale*selfVolumeBuffer_long[atom];
-      grad[atom].x = scale*gradBuffers_long[atom];
+    grad[atom].x = scale*gradBuffers_long[atom];
     grad[atom].y = scale*gradBuffers_long[atom+padded_num_atoms];
     grad[atom].z = scale*gradBuffers_long[atom+2*padded_num_atoms];
     // divide gradient with respect to volume by volume of atom

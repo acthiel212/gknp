@@ -16,6 +16,7 @@
 #include <cmath>
 #include <iostream>
 #include <vector>
+#include <iomanip>
 
 using namespace GKNPPlugin;
 using namespace OpenMM;
@@ -32,18 +33,19 @@ static struct MyAtomInfo {
 } atoms[] = {
 
         // pdb   mass vdwRad vdwVol gamma isHydrogen charge,  initPos
-        {" C ", 12.00, 1.89, 28.28,  .117,  false, -0.18,  0.76506600,    0.00000200,   -0.00000100},
-        {" C ", 12.00, 1.89, 28.28,  .117,  false, -0.18, -0.76506500,   -0.00000200,    0.00000100},
-        {" H ",  1.00, 1.45, 12.77,  1,     true,   0.06, -1.16573300,    0.67232500,    0.77710400},
-        {" H ",  1.00, 1.45, 12.77,  1,     true,   0.06, -1.16574800,    0.33683200,   -0.97079400},
-        {" H ",  1.00, 1.45, 12.77,  1,     true,   0.06, -1.16572400,   -1.00915800,    0.19369400},
-        {" H ",  1.00, 1.45, 12.77,  1,     true,   0.06,  1.16571800,    1.00915600,   -0.19370700},
-        {" H ",  1.00, 1.45, 12.77,  1,     true,   0.06,  1.16574000,   -0.33682500,    0.97080200},
-        {" H ",  1.00, 1.45, 12.77,  1,     true,   0.06,  1.16573600,   -0.67233000,   -0.77709700},
+        {" C ", 12.00, 1.91, 28.28,  0.16,  false, -0.18,  0.76506600,    0.00000200,   -0.00000100},
+        {" C ", 12.00, 1.91, 28.28,  0.16,  false, -0.18, -0.76506500,   -0.00000200,    0.00000100},
+        {" H ",  1.00, 1.48, 12.77,  0,     true,   0.06, -1.16573300,    0.67232500,    0.77710400},
+        {" H ",  1.00, 1.48, 12.77,  0,     true,   0.06, -1.16574800,    0.33683200,   -0.97079400},
+        {" H ",  1.00, 1.48, 12.77,  0,     true,   0.06, -1.16572400,   -1.00915800,    0.19369400},
+        {" H ",  1.00, 1.48, 12.77,  0,     true,   0.06,  1.16571800,    1.00915600,   -0.19370700},
+        {" H ",  1.00, 1.48, 12.77,  0,     true,   0.06,  1.16574000,   -0.33682500,    0.97080200},
+        {" H ",  1.00, 1.48, 12.77,  0,     true,   0.06,  1.16573600,   -0.67233000,   -0.77709700},
         {""} // end of list
 };
 
 void testForce() {
+
     bool veryverbose = false;
 
     System system;
@@ -57,7 +59,12 @@ void testForce() {
     int numParticles = 8;
     vector<Vec3> positions;
 
-    double rminToSigma = 1.0 / pow(2.0, 1.0 / 6.0);
+    //Constants for unit/energy conversions
+    double solventPressure = 0.11337;
+    double volumeOffsetVdwToSEV = 27.939;
+    double surfaceAreaOffsetVdwToSASA = 46.111;
+    double surfaceTension = 0.16;
+    //double rminToSigma = 1.0 / pow(2.0, 1.0 / 6.0);
     double ang2nm = 0.1;
     double kcalmol2kjmol = 4.184;
     double sigmaw = 3.15365*ang2nm; /* LJ sigma of TIP4P water oxygen */
@@ -72,7 +79,7 @@ void testForce() {
         positions.push_back(Vec3(atoms[i].initPosInAng[0], atoms[i].initPosInAng[1], atoms[i].initPosInAng[2])*ang2nm);
         atoms[i].vdwRadiusInAng *= ang2nm;
         sigma_LJ = 2.*atoms[i].vdwRadiusInAng;
-        atoms[i].vdwRadiusInAng *= rminToSigma;
+        //atoms[i].vdwRadiusInAng *= rminToSigma;
         atoms[i].gamma *= kcalmol2kjmol/(ang2nm*ang2nm);
         double sij = sqrt(sigmaw*sigma_LJ);
         double eij = sqrt(epsilonw*epsilon_LJ);
@@ -92,7 +99,11 @@ void testForce() {
 
     double energy1 = 0;
     energy1 = state.getPotentialEnergy();
-    cout << "Energy: " <<  energy1  << endl;
+    double surfaceArea = (energy1/kcalmol2kjmol)/surfaceTension + surfaceAreaOffsetVdwToSASA;
+    double surfaceAreaEnergy=surfaceArea*surfaceTension;
+    cout << endl;
+    cout << std::setw(25) << std::left << "Surface Area: " << std::fixed << surfaceArea << " (Ang^2)" << endl;
+    cout << std::setw(25) << std::left << "Surface Area Energy: " << surfaceAreaEnergy << " (kcal/mol)" << endl << endl;
 
     cout << "Forces: " << endl;
     for(int i = 0; i < numParticles; i++) {
