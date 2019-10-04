@@ -1687,7 +1687,7 @@ double GKNPPlugin::CudaCalcGKNPForceKernel::executeGVolSA(ContextImpl &context, 
     cu.executeKernel(reduceSelfVolumesKernel_buffer, reduceSelfVolumesKernel_bufferArgs, ov_work_group_size * num_compute_units, ov_work_group_size);}
 
     //Execute updateSelfVolumesForces
-    {if (verbose_level > 1) cout << "Executing updateSelfVolumesForces" << endl;
+    {if (verbose_level > 1) cout << "Executing updateSelfVolumesForces" << endl << endl;
     int update_energy = 1;
     void *updateSelfVolumesForcesKernelArgs[] ={&update_energy,
                                                &numAtoms,
@@ -1717,19 +1717,32 @@ double GKNPPlugin::CudaCalcGKNPForceKernel::executeGVolSA(ContextImpl &context, 
 
     }
 
+    double volume1;
     if (verbose_level > 1) {
-        vector<int> atom_pointer;
-        vector<float> vol_energies;
-        gtree->ovAtomTreePointer->download(atom_pointer);
-        gtree->ovVolEnergy->download(vol_energies);
-        double energy = 0;
+        //print self volumes
+        vector<float> self_volumes(cu.getPaddedNumAtoms());
+        selfVolume->download(self_volumes);
         for (int i = 0; i < numParticles; i++) {
-            int slot = atom_pointer[i];
-            energy += vol_energies[slot];
-            cout <<"vol_energies[" << slot <<"]: " << vol_energies[slot] << endl;
+            //printf("self_volume: %6.6f atom: %d\n", self_volumes[i], i);
+            volume1+=self_volumes[i];
         }
-        cout << "Volume Energy 1:" << energy << endl << endl;
     }
+
+
+
+    vector<int> atom_pointer;
+    vector<float> vol_energies;
+    gtree->ovAtomTreePointer->download(atom_pointer);
+    gtree->ovVolEnergy->download(vol_energies);
+    double energy = 0;
+    for (int i = 0; i < numParticles; i++) {
+        int slot = atom_pointer[i];
+        energy += vol_energies[slot];
+        //cout <<"vol_energies[" << slot <<"]: " << vol_energies[slot] << endl;
+    }
+    //cout << "Volume 1: " << volume1/ANG3 << endl;
+    //cout << "Volume Energy 1:" << energy << endl << endl;
+
 
 
 
@@ -1901,7 +1914,7 @@ double GKNPPlugin::CudaCalcGKNPForceKernel::executeGVolSA(ContextImpl &context, 
     cu.executeKernel(reduceSelfVolumesKernel_buffer, reduceSelfVolumesKernel_bufferArgs, ov_work_group_size * num_compute_units, ov_work_group_size);}
 
     //Execute updateSelfVolumesForces
-    {if (verbose_level > 1) cout << "Executing updateSelfVolumesForces" << endl;
+    {if (verbose_level > 1) cout << "Executing updateSelfVolumesForces" << endl << endl;
     int update_energy = 1;
     void *updateSelfVolumesForcesKernelArgs[] ={&update_energy,
                                                &numAtoms,
@@ -1913,39 +1926,31 @@ double GKNPPlugin::CudaCalcGKNPForceKernel::executeGVolSA(ContextImpl &context, 
                                                &cu.getEnergyBuffer().getDevicePointer()};
     cu.executeKernel(updateSelfVolumesForcesKernel, updateSelfVolumesForcesKernelArgs, ov_work_group_size * num_compute_units, ov_work_group_size);}
 
+    double volume2;
     if (verbose_level > 1) {
         //print self volumes
         vector<float> self_volumes(cu.getPaddedNumAtoms());
         selfVolume->download(self_volumes);
         for (int i = 0; i < numParticles; i++) {
-            printf("self_volume: %6.6f atom: %d\n", self_volumes[i], i);
+            //printf("self_volume: %6.6f atom: %d\n", self_volumes[i], i);
+            volume2+=self_volumes[i];
         }
     }
 
-
-    if (verbose_level > 1) {
-        vector<int> atom_pointer;
-        vector<float> vol_energies;
-        vector<float> ovSelfVolumes;
-        vector<int> ovChildrenStartIndexes;
-        vector<int> ovChildrenCounts;
-        gtree->ovAtomTreePointer->download(atom_pointer);
-        gtree->ovVolEnergy->download(vol_energies);
-        gtree->ovSelfVolume->download(ovSelfVolumes);
-        gtree->ovChildrenStartIndex->download(ovChildrenStartIndexes);
-        gtree->ovChildrenCount->download(ovChildrenCounts);
-        double energy = 0;
-        for (int i = 0; i < numParticles; i++) {
-            int slot = atom_pointer[i];
-            energy += vol_energies[slot];
-            cout <<"vol_energies[" << slot <<"]: " << vol_energies[slot] << endl;
-            cout <<"ovSelfVolume["<<slot<<"]: "<<ovSelfVolumes[slot] << endl;
-            cout <<"ovChildrenStartIndex["<< slot << "]: "<< ovChildrenStartIndexes[slot] << endl;
-            cout <<"ovChildrenCounts["<< slot << "]: "<< ovChildrenCounts[slot] << endl << endl;
-        }
-        cout << "Volume Energy 2:" << energy << endl << endl;
+    gtree->ovAtomTreePointer->download(atom_pointer);
+    gtree->ovVolEnergy->download(vol_energies);
+    energy = 0;
+    for (int i = 0; i < numParticles; i++) {
+        int slot = atom_pointer[i];
+        energy += vol_energies[slot];
+        //cout <<"vol_energies[" << slot <<"]: " << vol_energies[slot] << endl;
     }
+    //cout << "Volume 2: " << volume2/ANG3 << endl;
+    //cout << "Volume Energy 2:" << energy << endl << endl;
 
+    double surfaceAreaOffsetVdwToSASA = 46.111;
+    double surfaceArea=(volume1-volume2)/(roffset*ANG2)+surfaceAreaOffsetVdwToSASA;
+    cout << std::setw(25) << std::left << "Surface Area(GVol): " << std::fixed << surfaceArea << " (Ang^2)" << endl;
 
     if (verbose_level > 1) cout << "Done with GVolSA" << endl;
 

@@ -102,7 +102,7 @@ void testForce() {
     double surfaceArea = (energy1/kcalmol2kjmol)/surfaceTension + surfaceAreaOffsetVdwToSASA;
     double surfaceAreaEnergy=surfaceArea*surfaceTension;
     cout << endl;
-    cout << std::setw(25) << std::left << "Surface Area: " << std::fixed << surfaceArea << " (Ang^2)" << endl;
+    cout << std::setw(25) << std::left << "Surface Area(Test): " << std::fixed << surfaceArea << " (Ang^2)" << endl;
     cout << std::setw(25) << std::left << "Surface Area Energy: " << surfaceAreaEnergy << " (kcal/mol)" << endl << endl;
 
     cout << "Forces: " << endl;

@@ -12,6 +12,7 @@
 
 //use nm and kj
 #define ANG (0.1f)
+#define ANG2 (.01f)
 #define ANG3 (0.001f)
 
 //volume cutoffs for MS spheres
