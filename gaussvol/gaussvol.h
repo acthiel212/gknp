@@ -52,7 +52,7 @@ using namespace OpenMM;
 #define MIN_GVOL (FLT_MIN)
 
 // maximum overlap level
-#define MAX_ORDER (8)
+#define MAX_ORDER (16)
 
 //use nm and kj
 #define ANG (0.1f)
