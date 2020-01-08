@@ -390,7 +390,7 @@ int GKNPPlugin::CudaCalcGKNPForceKernel::CudaOverlapTree::copy_tree_to_device(vo
 }
 
 void GKNPPlugin::CudaCalcGKNPForceKernel::initialize(const System &system, const GKNPForce &force) {
-    verbose_level = 2;
+    verbose_level = 0;
 
     roffset = GKNP_RADIUS_INCREMENT;
 
@@ -1948,9 +1948,10 @@ double GKNPPlugin::CudaCalcGKNPForceKernel::executeGVolSA(ContextImpl &context, 
     //cout << "Volume 2: " << volume2/ANG3 << endl;
     //cout << "Volume Energy 2:" << energy << endl << endl;
 
-    double surfaceAreaOffsetVdwToSASA = 46.111;
-    double surfaceArea=(volume1-volume2)/(roffset*ANG2)+surfaceAreaOffsetVdwToSASA;
-    cout << std::setw(25) << std::left << "Surface Area(GVol): " << std::fixed << surfaceArea << " (Ang^2)" << endl;
+    //**OUTDATED
+    //double surfaceAreaOffsetVdwToSASA = 46.111;
+    //double surfaceArea=(volume1-volume2)/(roffset*ANG2)+surfaceAreaOffsetVdwToSASA;
+    //cout << std::setw(25) << std::left << "Surface Area(GVol): " << std::fixed << surfaceArea << " (Ang^2)" << endl;
 
     if (verbose_level > 1) cout << "Done with GVolSA" << endl;
 

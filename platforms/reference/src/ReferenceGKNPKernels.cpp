@@ -113,7 +113,7 @@ double ReferenceCalcGKNPForceKernel::executeGVolSA(ContextImpl& context, bool in
     vector<RealVec>& pos = extractPositions(context);
     vector<RealVec>& force = extractForces(context);
     RealOpenMM energy = 0.0;
-    int verbose_level = 1;
+    int verbose_level = 0;
     int init = 0; 
 
     vector<RealOpenMM> nu(numParticles);
