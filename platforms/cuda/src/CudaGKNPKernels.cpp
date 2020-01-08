@@ -447,7 +447,7 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::initialize(const System &system, const
 
         // for surface-area energy use gamma/radius_offset
         // gamma = 1 for self volume calculation.
-        double g = ishydrogen ? 0 : gamma / roffset;
+        double g = ishydrogen ? 0 : gamma / roffset; //TODO: Possible cause of math discrepancy
         gammaVector1[i] = (float) g;
         gammaVector2[i] = (float) -g;
         alphaVector[i] = (float) alpha;
@@ -554,24 +554,25 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
         for (int i = 0; i < numParticles; i++) {
             volumes[i] = 4. * M_PI * pow(radii[i], 3) / 3.;
         }
-        gvol->setRadii(radii);
-        gvol->setVolumes(volumes);
-        gvol->setGammas(gammas);
-        gvol->compute_tree(positions);
-        gvol->compute_volume(positions, volume, vol_energy, vol_force, vol_dv, free_volume, self_volume);
-        vector<int> noverlaps(cu.getPaddedNumAtoms());
-        for (int i = 0; i < cu.getPaddedNumAtoms(); i++) noverlaps[i] = 0;
-        gvol->getstat(noverlaps);
-        //gvol->print_tree();
+        /*{
+            gvol->setRadii(radii);
+            gvol->setVolumes(volumes);
+            gvol->setGammas(gammas);
+            gvol->compute_tree(positions);
+            gvol->compute_volume(positions, volume, vol_energy, vol_force, vol_dv, free_volume, self_volume);
+            vector<int> noverlaps(cu.getPaddedNumAtoms());
+            for (int i = 0; i < cu.getPaddedNumAtoms(); i++) noverlaps[i] = 0;
+            gvol->getstat(noverlaps);
+            //gvol->print_tree();
 
 
-        int nn = 0;
-        for (int i = 0; i < noverlaps.size(); i++) {
-            nn += noverlaps[i];
-        }
+            int nn = 0;
+            for (int i = 0; i < noverlaps.size(); i++) {
+                nn += noverlaps[i];
+            }
 
-        if (verbose_level > 0) cout << "Number of overlaps: " << nn << endl;
-
+            if (verbose_level > 0) cout << "Number of overlaps: " << nn << endl;
+        }*/
         //TODO: Query device properties in Cuda?
 //      if(verbose_level > 0){
 //	cout << "Device: " << cu.getDevice().getInfo<CL_DEVICE_NAME>()  << endl;
@@ -586,7 +587,8 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
 
         //creates overlap tree
         int pad_modulo = ov_work_group_size;
-        gtree->init_tree_size(cu.getNumAtoms(), cu.getPaddedNumAtoms(), num_compute_units, pad_modulo, noverlaps);
+        //gtree->init_tree_size(cu.getNumAtoms(), cu.getPaddedNumAtoms(), num_compute_units, pad_modulo, noverlaps);
+        gtree->init_tree_size(cu.getNumAtoms(), cu.getPaddedNumAtoms(), num_compute_units, pad_modulo);
         //allocates or re-allocates tree buffers
         gtree->resize_tree_buffers(cu, ov_work_group_size);
         //copy overlap tree buffers to device
