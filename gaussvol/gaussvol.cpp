@@ -583,7 +583,7 @@ void GOverlap_Tree::print_tree(void){
 
 void GaussVol::compute_tree(vector<RealVec> &positions){
   tree->compute_overlap_tree_r(positions, radii, volumes, gammas, ishydrogen);
-  tree->print_tree();
+  //tree->print_tree();
 }
 
 
