@@ -556,7 +556,6 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
             volumes[i] = 4. * M_PI * pow(radii[i], 3) / 3.;
         }
         //CPU GaussVol really necessary?
-        {
             gvol->setRadii(radii);
             gvol->setVolumes(volumes);
             gvol->setGammas(gammas);
@@ -574,7 +573,7 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
             }
 
             cout << "Number of overlaps: " << nn << endl;
-        }
+
         //TODO: Query device properties in Cuda?
 //      if(verbose_level > 0){
 //	cout << "Device: " << cu.getDevice().getInfo<CL_DEVICE_NAME>()  << endl;
@@ -589,8 +588,8 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
 
         //creates overlap tree
         int pad_modulo = ov_work_group_size;
-        //gtree->init_tree_size(cu.getNumAtoms(), cu.getPaddedNumAtoms(), num_compute_units, pad_modulo, noverlaps);
-        gtree->init_tree_size(cu.getNumAtoms(), cu.getPaddedNumAtoms(), num_compute_units, pad_modulo);
+        gtree->init_tree_size(cu.getNumAtoms(), cu.getPaddedNumAtoms(), num_compute_units, pad_modulo, noverlaps);
+        //gtree->init_tree_size(cu.getNumAtoms(), cu.getPaddedNumAtoms(), num_compute_units, pad_modulo);
         //allocates or re-allocates tree buffers
         gtree->resize_tree_buffers(cu, ov_work_group_size);
         //copy overlap tree buffers to device
