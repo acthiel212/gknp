@@ -29,8 +29,8 @@
 //volume cutoffs in switching function
 //#define MIN_GVOL (FLT_MIN)
 #define VOLMIN0 (0.009f*ANG3)
-//#define VOLMINA (0.01f*ANG3)
-//#define VOLMINB (0.1f*ANG3)
+#define VOLMINA (0.01f*ANG3)
+#define VOLMINB (0.1f*ANG3)
 
 #ifndef PI
 #define PI (3.14159265359)
