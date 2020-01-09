@@ -534,7 +534,8 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
         vol_force.resize(numParticles);
         vol_dv.resize(numParticles);
 
-        double energy_density_param = 4.184 * 1000.0 / 27; //about 1 kcal/mol for each water volume
+        //double energy_density_param = 4.184 * 1000.0 / 27; //about 1 kcal/mol for each water volume
+        double energy_density_param = 4.184 /(0.1 * 0.1);
         for (int i = 0; i < numParticles; i++) {
             double r, g, alpha, q;
             bool h;
@@ -555,7 +556,7 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
             volumes[i] = 4. * M_PI * pow(radii[i], 3) / 3.;
         }
         //CPU GaussVol really necessary?
-        /*{
+        {
             gvol->setRadii(radii);
             gvol->setVolumes(volumes);
             gvol->setGammas(gammas);
@@ -573,7 +574,7 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
             }
 
             cout << "Number of overlaps: " << nn << endl;
-        }*/
+        }
         //TODO: Query device properties in Cuda?
 //      if(verbose_level > 0){
 //	cout << "Device: " << cu.getDevice().getInfo<CL_DEVICE_NAME>()  << endl;
