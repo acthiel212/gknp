@@ -554,6 +554,7 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
         for (int i = 0; i < numParticles; i++) {
             volumes[i] = 4. * M_PI * pow(radii[i], 3) / 3.;
         }
+        //CPU GaussVol really necessary?
         /*{
             gvol->setRadii(radii);
             gvol->setVolumes(volumes);
@@ -571,7 +572,7 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
                 nn += noverlaps[i];
             }
 
-            if (verbose_level > 0) cout << "Number of overlaps: " << nn << endl;
+            cout << "Number of overlaps: " << nn << endl;
         }*/
         //TODO: Query device properties in Cuda?
 //      if(verbose_level > 0){

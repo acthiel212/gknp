@@ -59,8 +59,11 @@ using namespace OpenMM;
 #define ANG3 (0.001f)
 
 //volume cutoffs in switching function
-#define VOLMINA (0.01f*ANG3)
-#define VOLMINB (0.1f*ANG3)
+//#define VOLMINA (0.01f*ANG3)
+//#define VOLMINB (0.1f*ANG3)
+#define VOLMINA (0.01f) //TODO: Unit correction?
+#define VOLMINB (0.1f)
+
 
 /* 3D Gaussian, V,c,a representation */
 class GaussianVca {
