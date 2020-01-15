@@ -381,6 +381,7 @@ int GOverlap_Tree::compute_andadd_children_r(int root){
     int start_slot = add_children(root, children_overlaps);
     for (int ichild=start_slot; ichild < start_slot + noverlaps ; ichild++){
       compute_andadd_children_r(ichild);
+      totalNumberOfOverlaps++;
     }
   }
   return 1;
@@ -392,6 +393,7 @@ int GOverlap_Tree::compute_overlap_tree_r(vector<RealVec> &pos, vector<RealOpenM
   init_overlap_tree(pos, radius, volume, gamma, ishydrogen);
   for(int slot = 1; slot <= natoms ; slot++){
     compute_andadd_children_r(slot);
+    totalNumberOfOverlaps++;
   }
   return 1;
 }
