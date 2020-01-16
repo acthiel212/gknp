@@ -113,7 +113,7 @@ double ReferenceCalcGKNPForceKernel::executeGVolSA(ContextImpl& context, bool in
     vector<RealVec>& pos = extractPositions(context);
     vector<RealVec>& force = extractForces(context);
     RealOpenMM energy = 0.0;
-    int verbose_level = 0;
+    int verbose_level = 1;
     int init = 0; 
 
     vector<RealOpenMM> nu(numParticles);
@@ -219,7 +219,7 @@ double ReferenceCalcGKNPForceKernel::executeGVolSA(ContextImpl& context, bool in
     if(verbose_level > 0){
       cout << "Volume energy 2: " << vol_energy2 << endl;
       cout << "Surface area energy: " << vol_energy1 + vol_energy2 << endl;
-      cout << "TOTAL NUMBER OF OVERLAPS: " << gvol->getTotalNumberOfOverplaps() << endl;
+      cout << "TOTAL NUMBER OF OVERLAPS: " << gvol->getTotalNumberOfOverlaps() << endl;
     }
     
     //returns energy

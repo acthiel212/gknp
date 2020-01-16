@@ -572,7 +572,7 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
                 nn += noverlaps[i];
             }
 
-            cout << "Number of overlaps: " << gvol->getTotalNumberOfOverplaps() << endl;
+            cout << "Number of overlaps: " << gvol->getTotalNumberOfOverlaps() << endl;
 
         //TODO: Query device properties in Cuda?
 //      if(verbose_level > 0){

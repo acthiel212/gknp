@@ -304,7 +304,7 @@ class GaussVol {
     tree->print_tree();
   }
 
-  int getTotalNumberOfOverplaps() {return tree->getTotalNumberOfOverlaps();}
+  int getTotalNumberOfOverlaps() {return tree->getTotalNumberOfOverlaps();}
   
  private:
   GOverlap_Tree *tree;
