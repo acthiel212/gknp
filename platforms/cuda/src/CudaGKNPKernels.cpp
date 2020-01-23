@@ -511,7 +511,7 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
     maxTiles = (nb.getUseCutoff() ? nb.getInteractingTiles().getSize() : 0);
 
     //run CPU version once to estimate sizes
-    {
+    {/*
         GaussVol *gvol;
         std::vector<RealVec> positions;
         std::vector<int> ishydrogen;
@@ -541,7 +541,7 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
             bool h;
             gvol_force->getParticleParameters(i, r, g, alpha, q, h);
             radii[i] = r + roffset;
-            gammas[i] = energy_density_param;
+            gammas[i] = g; //energy_density_param;
             if (h) gammas[i] = 0.0;
             ishydrogen[i] = h ? 1 : 0;
         }
@@ -572,7 +572,7 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
                 nn += noverlaps[i];
             }
 
-            cout << "Number of overlaps: " << gvol->getTotalNumberOfOverlaps() << endl;
+            cout << "Total number of overlaps: " << gvol->getTotalNumberOfOverlaps() << endl;*/
 
         //TODO: Query device properties in Cuda?
 //      if(verbose_level > 0){
@@ -588,7 +588,7 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
 
         //creates overlap tree
         int pad_modulo = ov_work_group_size;
-        gtree->init_tree_size(cu.getNumAtoms(), cu.getPaddedNumAtoms(), num_compute_units, pad_modulo, noverlaps);
+        gtree->init_tree_size(cu.getNumAtoms(), cu.getPaddedNumAtoms(), num_compute_units, pad_modulo);
         //gtree->init_tree_size(cu.getNumAtoms(), cu.getPaddedNumAtoms(), num_compute_units, pad_modulo);
         //allocates or re-allocates tree buffers
         gtree->resize_tree_buffers(cu, ov_work_group_size);
@@ -637,7 +637,7 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
         }
 
 
-        delete gvol; //no longer needed
+        //delete gvol; //no longer needed
 
         //Sets up buffers
         //TODO: Panic Button?
@@ -1951,10 +1951,6 @@ double GKNPPlugin::CudaCalcGKNPForceKernel::executeGVolSA(ContextImpl &context, 
     //cout << "Volume 2: " << volume2/ANG3 << endl;
     //cout << "Volume Energy 2:" << energy << endl << endl;
 
-    //**OUTDATED
-    //double surfaceAreaOffsetVdwToSASA = 46.111;
-    //double surfaceArea=(volume1-volume2)/(roffset*ANG2)+surfaceAreaOffsetVdwToSASA;
-    //cout << std::setw(25) << std::left << "Surface Area(GVol): " << std::fixed << surfaceArea << " (Ang^2)" << endl;
 
     if (verbose_level > 1) cout << "Done with GVolSA" << endl;
 

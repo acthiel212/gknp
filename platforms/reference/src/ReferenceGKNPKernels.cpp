@@ -60,7 +60,6 @@ void ReferenceCalcGKNPForceKernel::initialize(const System& system, const GKNPFo
     vol_dv.resize(numParticles);
 
     vector<double> vdwrad(numParticles);
-    //roffset = 0.00005;
     roffset = GKNP_RADIUS_INCREMENT;
     common_gamma = -1;
     for (int i = 0; i < numParticles; i++){
@@ -145,7 +144,7 @@ double ReferenceCalcGKNPForceKernel::executeGVolSA(ContextImpl& context, bool in
     
     gvol->compute_tree(pos);
     gvol->compute_volume(pos, volume1, vol_energy1, vol_force, vol_dv, free_volume, self_volume);
-    cout << "Gauss Volume: " << volume1 << endl;
+    //cout << "Gauss Volume: " << volume1 << endl;
       
     //returns energy and gradients from volume energy function
     for(int i = 0; i < numParticles; i++){
@@ -153,7 +152,7 @@ double ReferenceCalcGKNPForceKernel::executeGVolSA(ContextImpl& context, bool in
     }
     energy += vol_energy1 * w_evol;
     if(verbose_level > 0){
-      cout << "Volume energy 1: " << vol_energy1 << endl;
+      //cout << "Volume energy 1: " << vol_energy1 << endl;
     }
 
 #ifdef NOTNOW
@@ -217,8 +216,8 @@ double ReferenceCalcGKNPForceKernel::executeGVolSA(ContextImpl& context, bool in
     }
     energy += vol_energy2 * w_evol;
     if(verbose_level > 0){
-      cout << "Volume energy 2: " << vol_energy2 << endl;
-      cout << "Surface area energy: " << vol_energy1 + vol_energy2 << endl;
+      //cout << "Volume energy 2: " << vol_energy2 << endl;
+      cout << "Surface area energy(kcal): " << (vol_energy1 + vol_energy2)/4.184 << endl;
       cout << "TOTAL NUMBER OF OVERLAPS: " << gvol->getTotalNumberOfOverlaps() << endl;
     }
     
