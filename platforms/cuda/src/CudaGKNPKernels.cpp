@@ -511,7 +511,7 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
     maxTiles = (nb.getUseCutoff() ? nb.getInteractingTiles().getSize() : 0);
 
     //run CPU version once to estimate sizes
-    {/*
+    {
         GaussVol *gvol;
         std::vector<RealVec> positions;
         std::vector<int> ishydrogen;
@@ -572,7 +572,7 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
                 nn += noverlaps[i];
             }
 
-            cout << "Total number of overlaps: " << gvol->getTotalNumberOfOverlaps() << endl;*/
+            cout << "Total number of overlaps in tree: " << gvol->getTotalNumberOfOverlaps() << endl;
 
         //TODO: Query device properties in Cuda?
 //      if(verbose_level > 0){
@@ -588,7 +588,7 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
 
         //creates overlap tree
         int pad_modulo = ov_work_group_size;
-        gtree->init_tree_size(cu.getNumAtoms(), cu.getPaddedNumAtoms(), num_compute_units, pad_modulo);
+        gtree->init_tree_size(cu.getNumAtoms(), cu.getPaddedNumAtoms(), num_compute_units, pad_modulo, noverlaps);
         //gtree->init_tree_size(cu.getNumAtoms(), cu.getPaddedNumAtoms(), num_compute_units, pad_modulo);
         //allocates or re-allocates tree buffers
         gtree->resize_tree_buffers(cu, ov_work_group_size);

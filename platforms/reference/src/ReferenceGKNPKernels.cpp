@@ -218,7 +218,7 @@ double ReferenceCalcGKNPForceKernel::executeGVolSA(ContextImpl& context, bool in
     if(verbose_level > 0){
       //cout << "Volume energy 2: " << vol_energy2 << endl;
       cout << "Surface area energy(kcal): " << (vol_energy1 + vol_energy2)/4.184 << endl;
-      cout << "TOTAL NUMBER OF OVERLAPS: " << gvol->getTotalNumberOfOverlaps() << endl;
+      cout << "Total number of overlaps in tree: " << gvol->getTotalNumberOfOverlaps() << endl;
     }
     
     //returns energy
