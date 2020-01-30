@@ -51,10 +51,6 @@ public:
 
 
         //i4_lut = NULL;
-        i4YValues = NULL;
-        i4Y2Values = NULL;
-        testF = NULL;
-        testDerF = NULL;
 
         PanicButton = NULL;
         //pinnedPanicButtonBuffer = NULL;
