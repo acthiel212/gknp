@@ -337,19 +337,6 @@ private:
     CUfunction InitOverlapTreeKernel_1body_2;
 
     CUfunction InitOverlapTreeCountKernel;
-    int InitOverlapTreeCountKernel_first_nbarg;
-
-    int reduceSelfVolumesSVArgIndex;
-    int InitOverlapTreeKernel_1body_1_GaArgIndex;
-    int InitOverlapTreeKernel_1body_1_GvArgIndex;
-    int InitOverlapTreeCountKernelGaArgIndex;
-    int InitOverlapTreeCountKernelGvArgIndex;
-    int InitOverlapTreeKernelGaArgIndex;
-    int InitOverlapTreeKernelGvArgIndex;
-    int ComputeOverlapTree_1passGaArgIndex;
-    int ComputeOverlapTree_1passGvArgIndex;
-    int computeSelfVolumesGaArgIndex;
-
 
     CUfunction reduceovCountBufferKernel;
 
@@ -387,42 +374,6 @@ private:
     vector<int> atom_ishydrogen;
 
     int niterations;
-
-
-    //Born radii and such
-    int ntypes_screener;
-    //GKNPI42DLookupTable *i4_lut;
-    int i4_table_size; //x grid
-    float i4_rmin, i4_rmax;  //x grid
-    vector<float> y_i4; //function values
-    vector<float> y2_i4; //derivatives
-    OpenMM::CudaArray *i4YValues;
-    OpenMM::CudaArray *i4Y2Values;
-    OpenMM::CudaArray *testF;
-    OpenMM::CudaArray *testDerF;
-
-    CUfunction testHashKernel;
-    CUfunction testLookupKernel;
-    CUfunction initBornRadiiKernel;
-
-    CUfunction inverseBornRadiiKernel;
-    int inverseBornRadiiKernel_first_nbarg;
-
-    CUfunction reduceBornRadiiKernel;
-    CUfunction VdWEnergyKernel;
-    CUfunction initVdWGBDerBornKernel;
-
-    CUfunction VdWGBDerBornKernel;
-    int VdWGBDerBornKernel_first_nbarg;
-
-    CUfunction reduceVdWGBDerBornKernel;
-    CUfunction initGBEnergyKernel;
-
-    CUfunction GBPairEnergyKernel;
-    int GBPairEnergyKernel_first_nbarg;
-
-    CUfunction reduceGBEnergyKernel;
-
 
     int verbose_level;
 

@@ -390,7 +390,7 @@ int GKNPPlugin::CudaCalcGKNPForceKernel::CudaOverlapTree::copy_tree_to_device(vo
 }
 
 void GKNPPlugin::CudaCalcGKNPForceKernel::initialize(const System &system, const GKNPForce &force) {
-    verbose_level = 0;
+    verbose_level = 5;
 
     roffset = GKNP_RADIUS_INCREMENT;
 
@@ -432,7 +432,6 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::initialize(const System &system, const
     alphaVector.resize(cu.getPaddedNumAtoms());
     ishydrogenVector.resize(cu.getPaddedNumAtoms());
     atom_ishydrogen.resize(cu.getPaddedNumAtoms());
-    vector<double> vdwrad(numParticles);
     common_gamma = -1;
     for (int i = 0; i < numParticles; i++) {
         double radius, gamma, alpha, charge;
@@ -440,7 +439,6 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::initialize(const System &system, const
         force.getParticleParameters(i, radius, gamma, alpha, charge, ishydrogen);
         radiusVector1[i] = (float) radius + roffset;
         radiusVector2[i] = (float) radius;
-        vdwrad[i] = radius; //double version for lookup table below
 
         atom_ishydrogen[i] = ishydrogen ? 1 : 0;
         ishydrogenVector[i] = ishydrogen ? 1 : 0;
@@ -487,9 +485,6 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::initialize(const System &system, const
     niterations = 0;
     hasInitializedKernels = false;
     hasCreatedKernels = false;
-
-    solvent_radius = force.getSolventRadius();
-
 }
 
 double GKNPPlugin::CudaCalcGKNPForceKernel::execute(ContextImpl &context, bool includeForces, bool includeEnergy) {
@@ -535,7 +530,7 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
         vol_dv.resize(numParticles);
 
         //double energy_density_param = 4.184 * 1000.0 / 27; //about 1 kcal/mol for each water volume
-        double energy_density_param = .08 * 4.184 /(0.1 * 0.1);
+        //double energy_density_param = .08 * 4.184 /(0.1 * 0.1);
         for (int i = 0; i < numParticles; i++) {
             double r, g, alpha, q;
             bool h;
@@ -560,11 +555,11 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
             gvol->setVolumes(volumes);
             gvol->setGammas(gammas);
             gvol->compute_tree(positions);
-            gvol->compute_volume(positions, volume, vol_energy, vol_force, vol_dv, free_volume, self_volume);
+            //gvol->compute_volume(positions, volume, vol_energy, vol_force, vol_dv, free_volume, self_volume);
             vector<int> noverlaps(cu.getPaddedNumAtoms());
             for (int i = 0; i < cu.getPaddedNumAtoms(); i++) noverlaps[i] = 0;
             gvol->getstat(noverlaps);
-            //gvol->print_tree();
+            gvol->print_tree();
 
 
             int nn = 0;
@@ -572,7 +567,7 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
                 nn += noverlaps[i];
             }
 
-            cout << "Total number of overlaps in tree: " << gvol->getTotalNumberOfOverlaps() << endl;
+        if (verbose_level > 0) cout << "Total number of overlaps in tree: " << nn << endl;
 
         //TODO: Query device properties in Cuda?
 //      if(verbose_level > 0){
@@ -637,7 +632,7 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
         }
 
 
-        //delete gvol; //no longer needed
+        delete gvol; //no longer needed
 
         //Sets up buffers
         //TODO: Panic Button?
