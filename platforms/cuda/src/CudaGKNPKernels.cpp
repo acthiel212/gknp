@@ -1391,7 +1391,7 @@ double GKNPPlugin::CudaCalcGKNPForceKernel::executeGVolSA(ContextImpl &context, 
                                              &gtree->ovChildrenCountBottom->getDevicePointer(),
                                              &PanicButton->getDevicePointer()};
     cu.executeKernel(reduceovCountBufferKernel, reduceovCountBufferKernelArgs, ov_work_group_size * num_compute_units, ov_work_group_size);}
-/*
+
     if (verbose_level > 4) {
         float self_volume = 0.0;
         vector<float> self_volumes(gtree->total_tree_size);
@@ -1461,7 +1461,7 @@ double GKNPPlugin::CudaCalcGKNPForceKernel::executeGVolSA(ContextImpl &context, 
         }
         //std::cout << "Volume (from self volumes):" << self_volume <<std::endl;
     }
-*/
+
     //Execute InitOverlapTreeKernel
     {if (verbose_level > 1) cout << "Executing InitOverlapTreeKernel" << endl;
 //    if (nb_reassign) {
@@ -1736,7 +1736,8 @@ double GKNPPlugin::CudaCalcGKNPForceKernel::executeGVolSA(ContextImpl &context, 
     for (int i = 0; i < numParticles; i++) {
         int slot = atom_pointer[i];
         energy += vol_energies[slot];
-        cout <<"vol_energies[" << slot <<"]: " << vol_energies[slot] << endl;
+        printf("vol_energies[%d]: %6.6f\n", slot, vol_energies[slot]);
+
     }
     //cout << "Volume 1: " << volume1/ANG3 << endl;
     //cout << "Volume Energy 1:" << energy << endl << endl;
@@ -1941,7 +1942,7 @@ double GKNPPlugin::CudaCalcGKNPForceKernel::executeGVolSA(ContextImpl &context, 
     for (int i = 0; i < numParticles; i++) {
         int slot = atom_pointer[i];
         energy += vol_energies[slot];
-        cout <<"vol_energies[" << slot <<"]: " << vol_energies[slot] << endl;
+        printf("vol_energies[%d]: %6.6f\n", slot, vol_energies[slot]);
     }
     //cout << "Volume 2: " << volume2/ANG3 << endl;
     //cout << "Volume Energy 2:" << energy << endl << endl;
