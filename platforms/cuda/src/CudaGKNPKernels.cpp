@@ -1736,7 +1736,7 @@ double GKNPPlugin::CudaCalcGKNPForceKernel::executeGVolSA(ContextImpl &context, 
     for (int i = 0; i < numParticles; i++) {
         int slot = atom_pointer[i];
         energy += vol_energies[slot];
-        //cout <<"vol_energies[" << slot <<"]: " << vol_energies[slot] << endl;
+        cout <<"vol_energies[" << slot <<"]: " << vol_energies[slot] << endl;
     }
     //cout << "Volume 1: " << volume1/ANG3 << endl;
     //cout << "Volume Energy 1:" << energy << endl << endl;
@@ -1941,7 +1941,7 @@ double GKNPPlugin::CudaCalcGKNPForceKernel::executeGVolSA(ContextImpl &context, 
     for (int i = 0; i < numParticles; i++) {
         int slot = atom_pointer[i];
         energy += vol_energies[slot];
-        //cout <<"vol_energies[" << slot <<"]: " << vol_energies[slot] << endl;
+        cout <<"vol_energies[" << slot <<"]: " << vol_energies[slot] << endl;
     }
     //cout << "Volume 2: " << volume2/ANG3 << endl;
     //cout << "Volume Energy 2:" << energy << endl << endl;
