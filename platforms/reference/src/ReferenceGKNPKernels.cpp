@@ -191,7 +191,7 @@ double ReferenceCalcGKNPForceKernel::executeGVolSA(ContextImpl& context, bool in
 
     gvol->rescan_tree_volumes(pos);
     gvol->compute_volume(pos, volume2, vol_energy2, vol_force, vol_dv, free_volume, self_volume);
-
+    gvol->print_tree();
 
  #ifdef NOTNOW
     //test of vol_dv

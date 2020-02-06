@@ -536,7 +536,7 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
             bool h;
             gvol_force->getParticleParameters(i, r, g, alpha, q, h);
             radii[i] = r + roffset;
-            gammas[i] = g; //energy_density_param;
+            gammas[i] = g / roffset; //energy_density_param;
             if (h) gammas[i] = 0.0;
             ishydrogen[i] = h ? 1 : 0;
         }
@@ -1721,7 +1721,7 @@ double GKNPPlugin::CudaCalcGKNPForceKernel::executeGVolSA(ContextImpl &context, 
         vector<float> self_volumes(cu.getPaddedNumAtoms());
         selfVolume->download(self_volumes);
         for (int i = 0; i < numParticles; i++) {
-            //printf("self_volume: %6.6f atom: %d\n", self_volumes[i], i);
+            printf("self_volume: %6.6f atom: %d\n", self_volumes[i], i);
             volume1+=self_volumes[i];
         }
     }
@@ -1930,7 +1930,7 @@ double GKNPPlugin::CudaCalcGKNPForceKernel::executeGVolSA(ContextImpl &context, 
         vector<float> self_volumes(cu.getPaddedNumAtoms());
         selfVolume->download(self_volumes);
         for (int i = 0; i < numParticles; i++) {
-            //printf("self_volume: %6.6f atom: %d\n", self_volumes[i], i);
+            printf("self_volume: %6.6f atom: %d\n", self_volumes[i], i);
             volume2+=self_volumes[i];
         }
     }

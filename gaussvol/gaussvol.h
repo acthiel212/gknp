@@ -203,7 +203,7 @@ class GOverlap_Tree {
   int getTotalNumberOfOverlaps() {return totalNumberOfOverlaps;}
 
   int natoms;
-  int totalNumberOfOverlaps;
+  int totalNumberOfOverlaps=0;
   vector<GOverlap> overlaps; //the root is at index 0, atoms are at 1..natoms+1
 };
 
@@ -310,7 +310,6 @@ class GaussVol {
   GOverlap_Tree *tree;
 
   int natoms;
-  int totalNumberOfOverlaps = 0;
   vector<RealOpenMM> radii;
   vector<RealOpenMM> volumes;
   vector<RealOpenMM> gammas;
