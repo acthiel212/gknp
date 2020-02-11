@@ -139,6 +139,8 @@ extern "C" __global__ void computeSelfVolumes(const int ntrees,
 
                     //stores energy
                     ovVolEnergy[slot] = energy;
+                    printf("ovVolEnergy: %u slot: %u \n", ovVolEnergy[slot], slot);
+                    printf("slot: %u\n", slot);
 
                     //
                     // Recursive rules for derivatives:
@@ -207,6 +209,7 @@ extern "C" __global__ void computeSelfVolumes(const int ntrees,
                 atomicAddLong(&gradBuffers_long[atom + 3 * padded_num_atoms], (dv2.w * 0x100000000));
 
                 atomicAddLong( &selfVolumeBuffer_long[atom], (ovSelfVolume[slot] * 0x100000000));
+                printf("selfBuffer2: %d atom: %d\n", selfVolumeBuffer_long[atom], atom);
                 // nothing to do here for the volume energy,
                 // it is automatically stored in ovVolEnergy at the 1-body level
             }

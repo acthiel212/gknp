@@ -1392,7 +1392,7 @@ double GKNPPlugin::CudaCalcGKNPForceKernel::executeGVolSA(ContextImpl &context, 
                                              &PanicButton->getDevicePointer()};
     cu.executeKernel(reduceovCountBufferKernel, reduceovCountBufferKernelArgs, ov_work_group_size * num_compute_units, ov_work_group_size);}
 
-    if (verbose_level > 4) {
+    /*if (verbose_level > 4) {
         float self_volume = 0.0;
         vector<float> self_volumes(gtree->total_tree_size);
         vector<float> volumes(gtree->total_tree_size);
@@ -1460,7 +1460,7 @@ double GKNPPlugin::CudaCalcGKNPForceKernel::executeGVolSA(ContextImpl &context, 
             }
         }
         //std::cout << "Volume (from self volumes):" << self_volume <<std::endl;
-    }
+    }*/
 
     //Execute InitOverlapTreeKernel
     {if (verbose_level > 1) cout << "Executing InitOverlapTreeKernel" << endl;
@@ -1924,6 +1924,76 @@ double GKNPPlugin::CudaCalcGKNPForceKernel::executeGVolSA(ContextImpl &context, 
                                                &cu.getForce().getDevicePointer(),
                                                &cu.getEnergyBuffer().getDevicePointer()};
     cu.executeKernel(updateSelfVolumesForcesKernel, updateSelfVolumesForcesKernelArgs, ov_work_group_size * num_compute_units, ov_work_group_size);}
+
+    if (verbose_level > 4) {
+        float self_volume = 0.0;
+        vector<float> self_volumes(gtree->total_tree_size);
+        vector<float> volumes(gtree->total_tree_size);
+        vector<float> energies(gtree->total_tree_size);
+        vector<float> gammas(gtree->total_tree_size);
+        vector<int> last_atom(gtree->total_tree_size);
+        vector<int> level(gtree->total_tree_size);
+        vector<int> parent(gtree->total_tree_size);
+        vector<int> children_start_index(gtree->total_tree_size);
+        vector<int> children_count(gtree->total_tree_size);
+        vector<int> children_reported(gtree->total_tree_size);
+        vector<float4> g(gtree->total_tree_size);
+        vector<float4> dv2(gtree->total_tree_size);
+        vector<float4> dv1(gtree->total_tree_size);
+        vector<float> sfp(gtree->total_tree_size);
+        vector<int> size(gtree->num_sections);
+        vector<int> tree_pointer_t(gtree->num_sections);
+        vector<int> processed(gtree->total_tree_size);
+        vector<int> oktoprocess(gtree->total_tree_size);
+
+
+        gtree->ovSelfVolume->download(self_volumes);
+        gtree->ovVolume->download(volumes);
+        gtree->ovVolEnergy->download(energies);
+        gtree->ovLevel->download(level);
+        gtree->ovLastAtom->download(last_atom);
+        gtree->ovRootIndex->download(parent);
+        gtree->ovChildrenStartIndex->download(children_start_index);
+        gtree->ovChildrenCount->download(children_count);
+        gtree->ovChildrenReported->download(children_reported);
+        gtree->ovG->download(g);
+        gtree->ovGamma1i->download(gammas);
+        gtree->ovDV1->download(dv1);
+        gtree->ovDV2->download(dv2);
+        gtree->ovVSfp->download(sfp);
+        gtree->ovAtomTreeSize->download(size);
+        gtree->ovTreePointer->download(tree_pointer_t);
+        gtree->ovProcessedFlag->download(processed);
+        gtree->ovOKtoProcessFlag->download(oktoprocess);
+
+
+        std::cout << "Tree:" << std::endl;
+        for (int section = 0; section < gtree->num_sections; section++) {
+            std::cout << "Tree for sections: " << section << " " << " size= " << size[section] << std::endl;
+            int pp = tree_pointer_t[section];
+            int np = gtree->padded_tree_size[section];
+            //self_volume += self_volumes[pp];
+            std::cout
+                    << "slot level LastAtom parent ChStart ChCount SelfV V gamma Energy a x y z dedx dedy dedz sfp processed ok2process children_reported"
+                    << endl;
+            for (int i = pp; i < pp + np; i++) {
+                int maxprint = pp + 1024;
+                if (i < maxprint) {
+                    std::cout << std::setprecision(4) << std::setw(6) << i << " " << std::setw(7) << (int) level[i]
+                              << " " << std::setw(7) << (int) last_atom[i] << " " << std::setw(7) << (int) parent[i]
+                              << " " << std::setw(7) << (int) children_start_index[i] << " " << std::setw(7)
+                              << (int) children_count[i] << " " << std::setw(15) << (float) self_volumes[i] << " "
+                              << std::setw(10) << (float) volumes[i] << " " << std::setw(10) << (float) gammas[i] << " "
+                              << std::setw(10) << (float) energies[i] << " " << std::setw(10) << g[i].w << " "
+                              << std::setw(10) << g[i].x << " " << std::setw(10) << g[i].y << " " << std::setw(10)
+                              << g[i].z << " " << std::setw(10) << dv2[i].x << " " << std::setw(10) << dv2[i].y << " "
+                              << std::setw(10) << dv2[i].z << " " << std::setw(10) << sfp[i] << " " << processed[i]
+                              << " " << oktoprocess[i] << " " << children_reported[i] << std::endl;
+                }
+            }
+        }
+        //std::cout << "Volume (from self volumes):" << self_volume <<std::endl;
+    }
 
     double volume2;
     if (verbose_level > 1) {
