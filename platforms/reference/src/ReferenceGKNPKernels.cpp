@@ -113,7 +113,6 @@ double ReferenceCalcGKNPForceKernel::executeGVolSA(ContextImpl& context, bool in
     vector<RealVec>& force = extractForces(context);
     RealOpenMM energy = 0.0;
     int verbose_level = 5;
-    int init = 0; 
 
     vector<RealOpenMM> nu(numParticles);
 
@@ -150,6 +149,8 @@ double ReferenceCalcGKNPForceKernel::executeGVolSA(ContextImpl& context, bool in
     //returns energy and gradients from volume energy function
     for(int i = 0; i < numParticles; i++){
       force[i] += vol_force[i] * w_evol;
+      printf("self_volume: %6.6f atom: %d\n", self_volume[i], i);
+      printf("vol_energies[%d]: %6.6f\n", i, self_volume[i]*nu[i]);
     }
     energy += vol_energy1 * w_evol;
     if(verbose_level > 0){
@@ -214,6 +215,8 @@ double ReferenceCalcGKNPForceKernel::executeGVolSA(ContextImpl& context, bool in
     
     for(int i = 0; i < numParticles; i++){
       force[i] += vol_force[i] * w_evol;
+      printf("self_volume: %6.6f atom: %d\n", self_volume[i], i);
+      printf("vol_energies[%d]: %6.6f\n", i, self_volume[i]*nu[i]);
     }
     energy += vol_energy2 * w_evol;
     if(verbose_level > 0){
