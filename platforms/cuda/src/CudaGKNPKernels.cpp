@@ -537,7 +537,7 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
             gvol_force->getParticleParameters(i, r, g, alpha, q, h);
             radii[i] = r + roffset;
             gammas[i] = g / roffset; //energy_density_param;
-            if(i==0) inputGamma = g/roffset;
+            if(i==0) inputGamma = g;
             if (h) gammas[i] = 0.0;
             ishydrogen[i] = h ? 1 : 0;
         }
