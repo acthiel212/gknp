@@ -2005,8 +2005,9 @@ double GKNPPlugin::CudaCalcGKNPForceKernel::executeGVolSA(ContextImpl &context, 
             printf("self_volume: %6.6f atom: %d\n", self_volumes[i], i);
             volume2+=self_volumes[i];
         }
-        double totalEnergy= inputGamma / roffset * (volume1-volume2);
-        printf("Energy from self volumes: %6.6f",totalEnergy);
+        printf("inputGamma: %6.6f\nRoffset: 6.6f\nVolume1: %6.6f\nVolume2: %6.6f\n", inputGamma, roffset, volume1, volume2);
+        double totalEnergy= inputGamma / roffset * (volume1)- inputGamma / roffset *(volume2);
+        printf("Energy from self volumes: %6.6f\n",totalEnergy);
     }
 
     gtree->ovAtomTreePointer->download(atom_pointer);
