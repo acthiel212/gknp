@@ -537,7 +537,7 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
             gvol_force->getParticleParameters(i, r, g, alpha, q, h);
             radii[i] = r + roffset;
             gammas[i] = g / roffset; //energy_density_param;
-            inputGamma = g/roffset;
+            if(i==0) inputGamma = g/roffset;
             if (h) gammas[i] = 0.0;
             ishydrogen[i] = h ? 1 : 0;
         }
@@ -2005,9 +2005,9 @@ double GKNPPlugin::CudaCalcGKNPForceKernel::executeGVolSA(ContextImpl &context, 
             printf("self_volume: %6.6f atom: %d\n", self_volumes[i], i);
             volume2+=self_volumes[i];
         }
-        printf("inputGamma: %6.6f\nRoffset: 6.6f\nVolume1: %6.6f\nVolume2: %6.6f\n", inputGamma, roffset, volume1, volume2);
-        double totalEnergy= inputGamma / roffset * (volume1)- inputGamma / roffset *(volume2);
-        printf("Energy from self volumes: %6.6f\n",totalEnergy);
+        printf("inputGamma: %6.9f\nRoffset: %6.9f\nVolume1: %6.9f\nVolume2: %6.9f\n", inputGamma, roffset, volume1, volume2);
+        double totalEnergy= (inputGamma / roffset * (volume1)- inputGamma / roffset *(volume2))*.4184;
+        printf("Energy from self volumes: %6.9f\n",totalEnergy);
     }
 
     gtree->ovAtomTreePointer->download(atom_pointer);

@@ -369,7 +369,7 @@ private:
     OpenMM::CudaArray *AtomicGamma;
 
     /*Set gamma input to GKNP*/
-    float inputGamma;
+    double inputGamma;
 
     vector<int> atom_ishydrogen;
 
