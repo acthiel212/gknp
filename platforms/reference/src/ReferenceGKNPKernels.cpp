@@ -211,12 +211,9 @@ double ReferenceCalcGKNPForceKernel::executeGVolSA(ContextImpl& context, bool in
     }
 #endif
 
-
-    volume2=0;
     for(int i = 0; i < numParticles; i++){
       force[i] += vol_force[i] * w_evol;
       printf("self_volume: %6.6f atom: %d\n", self_volume[i], i);
-      volume2=+self_volume[i];
       printf("vol_energies[%d]: %6.6f\n", i, self_volume[i]*nu[i]);
     }
 
@@ -227,7 +224,7 @@ double ReferenceCalcGKNPForceKernel::executeGVolSA(ContextImpl& context, bool in
     energy += vol_energy2 * w_evol;
     if(verbose_level > 0){
       //cout << "Volume energy 2: " << vol_energy2 << endl;
-      cout << "Surface area energy(kcal): " << (vol_energy1 + vol_energy2)/4.184 << endl;
+      //cout << "Surface area energy(kcal): " << (vol_energy1 + vol_energy2)/4.184 << endl;
       cout << "Total number of overlaps in tree: " << gvol->getTotalNumberOfOverlaps() << endl;
     }
     
