@@ -212,12 +212,18 @@ double ReferenceCalcGKNPForceKernel::executeGVolSA(ContextImpl& context, bool in
 #endif
 
 
-    
+
     for(int i = 0; i < numParticles; i++){
       force[i] += vol_force[i] * w_evol;
       printf("self_volume: %6.6f atom: %d\n", self_volume[i], i);
+      volume2=+self_volume[i];
       printf("vol_energies[%d]: %6.6f\n", i, self_volume[i]*nu[i]);
     }
+    
+    printf("inputGamma: %6.9f\nRoffset: %6.9f\nVolume1: %6.9f\nVolume2: %6.9f\n", gammas[0], roffset, volume1, volume2);
+    double totalEnergy= (gammas[0] / roffset * (volume1)- gammas[0] / roffset *(volume2))*.4184;
+    printf("Energy from self volumes: %6.9f\n",totalEnergy);
+
     energy += vol_energy2 * w_evol;
     if(verbose_level > 0){
       //cout << "Volume energy 2: " << vol_energy2 << endl;
