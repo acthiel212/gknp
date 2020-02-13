@@ -50,6 +50,7 @@ public:
         grad = NULL;
 
 
+
         //i4_lut = NULL;
 
         PanicButton = NULL;
@@ -366,6 +367,9 @@ private:
     /* gamma parameters */
     vector<float> atomic_gamma;
     OpenMM::CudaArray *AtomicGamma;
+
+    /*Set gamma input to GKNP*/
+    float inputGamma;
 
     vector<int> atom_ishydrogen;
 
