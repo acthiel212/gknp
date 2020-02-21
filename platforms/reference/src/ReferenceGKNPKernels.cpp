@@ -112,7 +112,7 @@ double ReferenceCalcGKNPForceKernel::executeGVolSA(ContextImpl& context, bool in
     vector<RealVec>& pos = extractPositions(context);
     vector<RealVec>& force = extractForces(context);
     RealOpenMM energy = 0.0;
-    int verbose_level = 5;
+    int verbose_level = 0;
 
     vector<RealOpenMM> nu(numParticles);
 
@@ -132,7 +132,6 @@ double ReferenceCalcGKNPForceKernel::executeGVolSA(ContextImpl& context, bool in
     vector<RealOpenMM> volumes_large(numParticles);
     for(int i = 0; i < numParticles; i++){
       volumes_large[i] = ishydrogen[i]>0 ? 0.0 : 4.*M_PI*pow(radii_large[i],3)/3.;
-      //cout << "Volumes_large: " << volumes_large[i] << endl;
     }
     gvol->setVolumes(volumes_large);
     
@@ -143,19 +142,15 @@ double ReferenceCalcGKNPForceKernel::executeGVolSA(ContextImpl& context, bool in
     
     gvol->compute_tree(pos);
     gvol->compute_volume(pos, volume1, vol_energy1, vol_force, vol_dv, free_volume, self_volume);
-    gvol->print_tree();
-    //cout << "Gauss Volume: " << volume1 << endl;
+    if(verbose_level > 2) gvol->print_tree();
       
     //returns energy and gradients from volume energy function
     for(int i = 0; i < numParticles; i++){
       force[i] += vol_force[i] * w_evol;
-      printf("self_volume: %6.6f atom: %d\n", self_volume[i], i);
-      printf("vol_energies[%d]: %6.6f\n", i, self_volume[i]*nu[i]);
+      if(verbose_level > 1) printf("self_volume: %6.6f atom: %d\n", self_volume[i], i);
+      if(verbose_level > 1) printf("vol_energies[%d]: %6.6f\n", i, self_volume[i]*nu[i]);
     }
     energy += vol_energy1 * w_evol;
-    if(verbose_level > 0){
-      //cout << "Volume energy 1: " << vol_energy1 << endl;
-    }
 
 #ifdef NOTNOW
     //test of vol_dv
@@ -192,7 +187,7 @@ double ReferenceCalcGKNPForceKernel::executeGVolSA(ContextImpl& context, bool in
 
     gvol->rescan_tree_volumes(pos);
     gvol->compute_volume(pos, volume2, vol_energy2, vol_force, vol_dv, free_volume, self_volume);
-    gvol->print_tree();
+    if(verbose_level > 2) gvol->print_tree();
 
  #ifdef NOTNOW
     //test of vol_dv
@@ -213,18 +208,12 @@ double ReferenceCalcGKNPForceKernel::executeGVolSA(ContextImpl& context, bool in
 
     for(int i = 0; i < numParticles; i++){
       force[i] += vol_force[i] * w_evol;
-      printf("self_volume: %6.6f atom: %d\n", self_volume[i], i);
-      printf("vol_energies[%d]: %6.6f\n", i, self_volume[i]*nu[i]);
+        if(verbose_level > 1) printf("self_volume: %6.6f atom: %d\n", self_volume[i], i);
+        if(verbose_level > 1) printf("vol_energies[%d]: %6.6f\n", i, self_volume[i]*nu[i]);
     }
-
-    printf("inputGamma: %6.9f\nRoffset: %6.9f\nVolume1: %6.9f\nVolume2: %6.9f\n", gammas[0], roffset, volume1, volume2);
-    double totalEnergy= (gammas[0] / roffset * (volume1)- gammas[0] / roffset *(volume2))*.4184;
-    printf("Energy from self volumes: %6.9f\n",totalEnergy);
 
     energy += vol_energy2 * w_evol;
     if(verbose_level > 0){
-      //cout << "Volume energy 2: " << vol_energy2 << endl;
-      //cout << "Surface area energy(kcal): " << (vol_energy1 + vol_energy2)/4.184 << endl;
       cout << "Total number of overlaps in tree: " << gvol->getTotalNumberOfOverlaps() << endl;
     }
     

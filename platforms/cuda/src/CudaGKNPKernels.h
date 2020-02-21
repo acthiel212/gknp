@@ -364,17 +364,13 @@ private:
     OpenMM::CudaArray *GaussianVolume;
     OpenMM::CudaArray *GaussianExponentLargeR;
     OpenMM::CudaArray *GaussianVolumeLargeR;
+
     /* gamma parameters */
     vector<float> atomic_gamma;
     OpenMM::CudaArray *AtomicGamma;
-
-    /*Set gamma input to GKNP*/
-    double inputGamma;
-
     vector<int> atom_ishydrogen;
 
     int niterations;
-
     int verbose_level;
 
     void executeInitKernels(OpenMM::ContextImpl &context, bool includeForces, bool includeEnergy);

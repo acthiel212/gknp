@@ -119,7 +119,6 @@ extern "C" __global__ void computeSelfVolumes(const int ntrees,
                     //dv1.xyz is (P)1..i in the paper
                     //dv1.w   is (F)1..i in the paper
                     //in relation to the gradient of the volume energy function
-                    //real4 dv1 = (real4)(0,0,0,volcoeffp*ovVSfp[slot]*ovGamma1i[slot]);
                     real4 dv1 = make_real4(0, 0, 0, volcoeffp * ovVSfp[slot] * ovGamma1i[slot]);
                     int start = ovChildrenStartIndex[slot];
                     int count = ovChildrenCount[slot];
@@ -149,14 +148,11 @@ extern "C" __global__ void computeSelfVolumes(const int ntrees,
                     real a1i = ovG[slot].w;
                     real a1 = a1i - an;
                     real dvvc = dv1.w;//this is (F)1..i
-                    //ovDV2[slot].xyz = -ovDV1[slot].xyz * dvvc  + (an/a1i)*dv1.xyz; //this gets accumulated later
-                    //ovDV2[slot].w = ovVolume[slot] *  dvvc;//for derivative wrt volumei, gets divided by volumei later
                     ovDV2[slot] = make_real4(-ovDV1[slot].x * dvvc + (an / a1i) * dv1.x,
                                              -ovDV1[slot].y * dvvc + (an / a1i) * dv1.y,
-                                             -ovDV1[slot].z * dvvc + (an / a1i) * dv1.z,
-                                             ovVolume[slot] * dvvc);
-                    //ovPF[slot].xyz =  ovDV1[slot].xyz * dvvc  + (a1/a1i)*dv1.xyz;
-                    //ovPF[slot].w   =  ovDV1[slot].w   * dvvc;
+                                             -ovDV1[slot].z * dvvc + (an / a1i) * dv1.z, //this gets accumulated later
+                                             ovVolume[slot] * dvvc); //for derivative wrt volumei, gets divided by volumei later
+
                     ovPF[slot] = make_real4(ovDV1[slot].x * dvvc + (a1 / a1i) * dv1.x,
                                             ovDV1[slot].y * dvvc + (a1 / a1i) * dv1.y,
                                             ovDV1[slot].z * dvvc + (a1 / a1i) * dv1.z,
@@ -165,7 +161,6 @@ extern "C" __global__ void computeSelfVolumes(const int ntrees,
                     //mark parent ok to process counter
                     int parent_index = ovRootIndex[slot];
                     if (parent_index >= 0) {
-                        //atomic_inc(&(ovChildrenReported[parent_index]));
                         atomicAdd(&ovChildrenReported[parent_index], 1);
                     }
                     ovProcessedFlag[slot] = 1; //mark as processed
@@ -195,11 +190,6 @@ extern "C" __global__ void computeSelfVolumes(const int ntrees,
                 atom_add(&forceBuffers[atom+2*padded_num_atoms], (long) (dv2.z*0x100000000));
                 atom_add(&gradVBuffer_long[atom], (long) (-dv2.w*0x100000000));
                 */
-//	atom_add(&gradBuffers_long[atom                   ], (long) (dv2.x*0x100000000));
-//	atom_add(&gradBuffers_long[atom+  padded_num_atoms], (long) (dv2.y*0x100000000));
-//	atom_add(&gradBuffers_long[atom+2*padded_num_atoms], (long) (dv2.z*0x100000000));
-//	atom_add(&gradBuffers_long[atom+3*padded_num_atoms], (long) (dv2.w*0x100000000));
-//	atom_add(&selfVolumeBuffer_long[atom], (long) (ovSelfVolume[slot]*0x100000000));
                 atomicAddLong(&gradBuffers_long[atom], (dv2.x * 0x100000000));
 
                 atomicAddLong(&gradBuffers_long[atom + padded_num_atoms], (dv2.y * 0x100000000));
@@ -213,23 +203,7 @@ extern "C" __global__ void computeSelfVolumes(const int ntrees,
                 // nothing to do here for the volume energy,
                 // it is automatically stored in ovVolEnergy at the 1-body level
             }
-//#else
-//      //
-//      //without atomics can not accumulate in parallel due to "atom" collisions
-//      //
-//      if(id==0){
-//	unsigned int tree_offset =  offset + isection*gsize;
-//	for(unsigned int is = tree_offset ; is < tree_offset + gsize ; is++){ //loop over slots in section
-//	  int at = ovLastAtom[is];
-//	  if(at >= 0){
-//	    // nothing to do here for the volume energy,
-//	    // it is automatically stored in ovVolEnergy at the 1-body level
-//	    ovAtomBuffer[buffer_offset + at] += ovDV2[is];//xyz is position gradient, w is volume gradient
-//	    selfVolumeBuffer[buffer_offset + at] += ovSelfVolume[is];
-//	  }
-//	}
-//      }
-//#endif
+
 //TODOLater: Global memory fence needed or syncthreads sufficient?
             __syncthreads();
         }

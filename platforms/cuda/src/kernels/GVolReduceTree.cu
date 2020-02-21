@@ -80,22 +80,12 @@ extern "C" __global__ void updateSelfVolumesForces(int update_energy,
       //alternative to the above, should give the same answer
       //energyBuffer[atom] += wen*global_atomic_gamma[atom]*selfVolume[atom];
     }
+    
     //printf("ovVolEnergy: %d atom: %d\n", ovVolEnergy[atom], atom);
-//#ifdef SUPPORTS_64_BIT_ATOMICS
-//    atom_add(&forceBuffers[atom                     ], (long)(-grad[atom].x*0x100000000));
-//    atom_add(&forceBuffers[atom +   padded_num_atoms], (long)(-grad[atom].y*0x100000000));
-//    atom_add(&forceBuffers[atom + 2*padded_num_atoms], (long)(-grad[atom].z*0x100000000));
       atomicAddLong(&forceBuffers[atom                     ], (-grad[atom].x*0x100000000));
       atomicAddLong(&forceBuffers[atom +   padded_num_atoms], (-grad[atom].y*0x100000000));
       atomicAddLong(&forceBuffers[atom + 2*padded_num_atoms], (-grad[atom].z*0x100000000));
-//#else
-//    //forceBuffers[atom].xyz -= grad[atom].xyz;
-//    forceBuffers[atom].xyz = make_real4(forceBuffers[atom].x - grad[atom].x,
-//                                        forceBuffers[atom].y - grad[atom].y,
-//                                        forceBuffers[atom].z - grad[atom].z,
-//                                        forceBuffers[atom].w);
-//
-//#endif
+      
     atom += blockDim.x*gridDim.x;
  }
   //TODOLater: Global memory fence needed or syncthreads sufficient?
