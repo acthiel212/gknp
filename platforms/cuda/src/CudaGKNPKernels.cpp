@@ -390,7 +390,7 @@ int GKNPPlugin::CudaCalcGKNPForceKernel::CudaOverlapTree::copy_tree_to_device(vo
 }
 
 void GKNPPlugin::CudaCalcGKNPForceKernel::initialize(const System &system, const GKNPForce &force) {
-    verbose_level = 0;
+    verbose_level = 5;
 
     roffset = GKNP_RADIUS_INCREMENT;
 
@@ -559,7 +559,6 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
             vector<int> noverlaps(cu.getPaddedNumAtoms());
             for (int i = 0; i < cu.getPaddedNumAtoms(); i++) noverlaps[i] = 0;
             gvol->getstat(noverlaps);
-            gvol->print_tree();
 
 
             int nn = 0;
@@ -567,7 +566,7 @@ void GKNPPlugin::CudaCalcGKNPForceKernel::executeInitKernels(ContextImpl &contex
                 nn += noverlaps[i];
             }
 
-        if (verbose_level > 0) cout << "Total number of overlaps in tree: " << nn << endl;
+        cout << "Total number of overlaps in tree: " << nn << endl;
 
         //TODO: Query device properties in Cuda?
 //      if(verbose_level > 0){
