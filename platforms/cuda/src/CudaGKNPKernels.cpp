@@ -69,10 +69,6 @@ GKNPPlugin::CudaCalcGKNPForceKernel::~CudaCalcGKNPForceKernel() {
     if (gtree != NULL) delete gtree;
 }
 
-
-static int _nov_ = 0;
-
-
 //version based on number of overlaps for each atom
 void GKNPPlugin::CudaCalcGKNPForceKernel::CudaOverlapTree::init_tree_size(int num_atoms,
                                                               int padded_num_atoms,
@@ -1513,6 +1509,8 @@ double GKNPPlugin::CudaCalcGKNPForceKernel::executeGVolSA(ContextImpl &context, 
     //trigger non-blocking read of PanicButton, read it after next kernel below
 //    cu.getQueue().enqueueReadBuffer(PanicButton->getDeviceBuffer(), CL_TRUE, 0, 2 * sizeof(int), &panic_button[0], NULL,
 //                                    &downloadPanicButtonEvent);
+    PanicButton->download(pinnedPanicButtonBuffer, false);
+    cuEventRecord(downloadPanicButtonEvent, cu.getCurrentStream());
 
     //------------------------------------------------------------------------------------------------------------
 
@@ -1538,29 +1536,29 @@ double GKNPPlugin::CudaCalcGKNPForceKernel::executeGVolSA(ContextImpl &context, 
 
     //TODO: Panic Button?
     //check the result of the non-blocking read of PanicButton above
-//    downloadPanicButtonEvent.wait();
-//    if (panic_button[0] > 0) {
-//        if (verbose) cout << "Error: Tree size exceeded(2)!" << endl;
-//        hasInitializedKernels = false; //forces reinitialization
-//        cu.setForcesValid(false); //invalidate forces
-//
-//        if (panic_button[1] > 0) {
-//            if (verbose) cout << "Error: Temp Buffer exceeded(2)!" << endl;
-//            gtree->hasExceededTempBuffer = true;//forces resizing of temp buffers
-//        }
-//
-//        if (verbose) {
-//            cout << "Tree sizes:" << endl;
-//            vector<int> size(gtree->num_sections);
-//            gtree->ovAtomTreeSize->download(size);
-//            for (int section = 0; section < gtree->num_sections; section++) {
-//                cout << size[section] << " ";
-//            }
-//            cout << endl;
-//        }
-//
-//        return 0.0;
-//    }
+    cuEventSynchronize(downloadPanicButtonEvent);
+    if (panic_button[0] > 0) {
+        if (verbose) cout << "Error: Tree size exceeded(2)!" << endl;
+        hasInitializedKernels = false; //forces reinitialization
+        cu.setForcesValid(false); //invalidate forces
+
+        if (panic_button[1] > 0) {
+            if (verbose) cout << "Error: Temp Buffer exceeded(2)!" << endl;
+            gtree->hasExceededTempBuffer = true;//forces resizing of temp buffers
+        }
+
+        if (verbose) {
+            cout << "Tree sizes:" << endl;
+            vector<int> size(gtree->num_sections);
+            gtree->ovAtomTreeSize->download(size);
+            for (int section = 0; section < gtree->num_sections; section++) {
+                cout << size[section] << " ";
+            }
+            cout << endl;
+        }
+
+        return 0.0;
+    }
 
     //Execute computeSelfVolumesKernel
     {if (verbose_level > 1) cout << "Executing computeSelfVolumesKernel" << endl;

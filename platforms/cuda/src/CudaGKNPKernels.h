@@ -54,8 +54,7 @@ public:
         //i4_lut = NULL;
 
         PanicButton = NULL;
-        //pinnedPanicButtonBuffer = NULL;
-        //pinnedPanicButtonMemory = NULL;
+        pinnedPanicButtonBuffer = NULL;
     }
 
     ~CudaCalcGKNPForceKernel();
@@ -381,8 +380,7 @@ private:
     //flag to give up
     OpenMM::CudaArray *PanicButton;
     vector<int> panic_button;
-    //buffer *pinnedPanicButtonBuffer;
-    int *pinnedPanicButtonMemory;
+    int *pinnedPanicButtonBuffer;
     CUevent downloadPanicButtonEvent;
 };
 
