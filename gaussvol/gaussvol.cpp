@@ -381,7 +381,6 @@ int GOverlap_Tree::compute_andadd_children_r(int root){
     int start_slot = add_children(root, children_overlaps);
     for (int ichild=start_slot; ichild < start_slot + noverlaps ; ichild++){
       compute_andadd_children_r(ichild);
-      totalNumberOfOverlaps++;
     }
   }
   return 1;
@@ -393,7 +392,6 @@ int GOverlap_Tree::compute_overlap_tree_r(vector<RealVec> &pos, vector<RealOpenM
   init_overlap_tree(pos, radius, volume, gamma, ishydrogen);
   for(int slot = 1; slot <= natoms ; slot++){
     compute_andadd_children_r(slot);
-    totalNumberOfOverlaps++;
   }
   return 1;
 }
@@ -569,7 +567,7 @@ void GOverlap::print_overlap(void){
 
 void GOverlap_Tree::print_tree_r(int slot){
   GOverlap &ov = overlaps[slot];
-  std::cout << slot << " ";
+  std::cout << "tg: " << std::setw(6) << slot << " ";
   ov.print_overlap();
   for(int i=ov.children_startindex ; i < ov.children_startindex+ ov.children_count; i++){
     print_tree_r(i);
@@ -585,7 +583,6 @@ void GOverlap_Tree::print_tree(void){
 
 void GaussVol::compute_tree(vector<RealVec> &positions){
   tree->compute_overlap_tree_r(positions, radii, volumes, gammas, ishydrogen);
-  //tree->print_tree();
 }
 
 

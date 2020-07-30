@@ -52,7 +52,7 @@ using namespace OpenMM;
 #define MIN_GVOL (FLT_MIN)
 
 // maximum overlap level
-#define MAX_ORDER (16)
+#define MAX_ORDER (8)
 
 //use nm and kj
 #define ANG (0.1f)
@@ -61,8 +61,6 @@ using namespace OpenMM;
 //volume cutoffs in switching function
 #define VOLMINA (0.01f*ANG3)
 #define VOLMINB (0.1f*ANG3)
-
-
 
 /* 3D Gaussian, V,c,a representation */
 class GaussianVca {
@@ -200,10 +198,7 @@ class GOverlap_Tree {
   //counts number of overlaps under the one given
   int nchildren_under_slot_r(int slot);
 
-  int getTotalNumberOfOverlaps() {return totalNumberOfOverlaps;}
-
   int natoms;
-  int totalNumberOfOverlaps=0;
   vector<GOverlap> overlaps; //the root is at index 0, atoms are at 1..natoms+1
 };
 
@@ -275,8 +270,6 @@ class GaussVol {
       return -1;
     }
   }
-
-
   
   //constructs the tree
   void compute_tree(vector<RealVec> &positions);
@@ -304,7 +297,7 @@ class GaussVol {
     tree->print_tree();
   }
 
-  int getTotalNumberOfOverlaps() {return tree->getTotalNumberOfOverlaps();}
+
   
  private:
   GOverlap_Tree *tree;
